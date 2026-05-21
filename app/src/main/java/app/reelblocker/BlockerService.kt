@@ -46,15 +46,15 @@ class BlockerService : AccessibilityService() {
             "direct_composer"
         )
 
-        // Hints en event.className (solo TYPE_WINDOW_STATE_CHANGED). Aqui
-        // si podemos pasar el flag a false. Usamos cadenas compuestas para
-        // evitar matchear "Thread" o "Inbox" sueltos que aparecen tambien
-        // en otras partes de IG.
+        // Hints en event.className (solo TYPE_WINDOW_STATE_CHANGED). Usamos
+        // cadenas compuestas para evitar matchear "Thread" o "Inbox" sueltos
+        // que aparecen tambien en otras partes de IG. Importante: NO incluir
+        // "DirectShare" porque suele aparecer en el className del propio
+        // visor de reels recibido por DM y mantendria el flag en true.
         private val INSTAGRAM_DM_CLASSNAME_HINTS = listOf(
             "DirectThread",
             "DirectInbox",
-            "DirectMessage",
-            "DirectShare"
+            "DirectMessage"
         )
 
         private val YOUTUBE_SHORTS_HINTS = listOf(
@@ -67,10 +67,9 @@ class BlockerService : AccessibilityService() {
         private const val MIN_INTERVAL_MS = 600L
         private const val POST_EXIT_GRACE_MS = 1500L
         private const val FULLSCREEN_FRACTION = 0.6
-        // Despues de detectar que veniamos de DM, dejamos pasar lo que aparezca
-        // en esta ventana sin volver a comprobar (cubre la transicion del DM
-        // al reel viewer, en la que el arbol ya no muestra el DM).
-        private const val DM_GRACE_MS = 5000L
+        // Tras consumir un bypass DM, ignorar matches durante este intervalo
+        // para no contar dos veces el mismo reel por eventos de contenido.
+        private const val DM_CONSUMED_GRACE_MS = 2000L
     }
 
     private var lastActionTime = 0L
@@ -79,9 +78,13 @@ class BlockerService : AccessibilityService() {
     private var displayWidth = 0
     private var displayHeight = 0
 
-    // Estado para la excepcion de DM.
-    private var lastIgScreenIsDm = false
-    private var dmGraceUntil = 0L
+    // Modelo "armado/consumido": cada vez que detectamos al usuario en una
+    // pantalla DM, armamos el bypass. Cuando se consume (al permitir un reel),
+    // se desarma. Para otro reel hay que volver a pasar por el DM. Asi un
+    // unico reel compartido por amigo se ve, pero el feed de Reels normal
+    // sigue bloqueandose.
+    private var dmBypassArmed = false
+    private var dmConsumedUntil = 0L
 
     override fun onServiceConnected() {
         super.onServiceConnected()
@@ -111,38 +114,23 @@ class BlockerService : AccessibilityService() {
             return
         }
 
-        // Actualizar el flag de DM solo para Instagram.
-        // Regla: className (en STATE_CHANGED) es la unica fuente que puede
-        // BAJAR el flag a false. Hints del arbol solo lo SUBEN a true.
+        // Armar el bypass DM cuando detectamos una pantalla de mensajes
+        // directos. Solo lo armamos; el reset ocurre al consumirlo (en
+        // handleReelsDetected) — no dependemos de detectar la "salida" del
+        // DM, que es lo que estaba dando problemas.
         if (pkg == PKG_INSTAGRAM) {
             val isStateChange = event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
             val cls = event.className?.toString().orEmpty()
             val classMatch = isStateChange && INSTAGRAM_DM_CLASSNAME_HINTS.any {
                 cls.contains(it, ignoreCase = true)
             }
-
-            if (isStateChange) {
-                // Cambio de pantalla: la verdad la dicta el className.
-                val previous = lastIgScreenIsDm
-                lastIgScreenIsDm = classMatch
-                if (previous != classMatch) {
-                    Log.d(TAG, "lastIgScreenIsDm[state]: $previous -> $classMatch  className=$cls")
-                    if (previous && !classMatch) {
-                        // Saliendo de DM. Abrir grace por si lo siguiente es
-                        // el visor de reels (la transicion puede ser inmediata).
-                        dmGraceUntil = SystemClock.elapsedRealtime() + DM_GRACE_MS
-                        Log.d(TAG, "  abro ventana de gracia DM")
-                    }
-                    if (classMatch) dumpDmCandidates(root)
+            val treeMatch = !classMatch && containsAnyHint(root, INSTAGRAM_DM_HINTS)
+            if (classMatch || treeMatch) {
+                if (!dmBypassArmed) {
+                    Log.d(TAG, "DM detectado, bypass armado (clase=$classMatch tree=$treeMatch className=$cls)")
+                    if (classMatch || treeMatch) dumpDmCandidates(root)
                 }
-            } else if (!lastIgScreenIsDm) {
-                // Evento de contenido y no estabamos en DM: comprobar si
-                // algun hint estrictamente DM aparece en el arbol.
-                if (containsAnyHint(root, INSTAGRAM_DM_HINTS)) {
-                    lastIgScreenIsDm = true
-                    Log.d(TAG, "lastIgScreenIsDm[tree]: false -> true (hint encontrado)")
-                    dumpDmCandidates(root)
-                }
+                dmBypassArmed = true
             }
         }
 
@@ -165,15 +153,16 @@ class BlockerService : AccessibilityService() {
 
         // Excepcion DM (solo Instagram, y solo si esta activada en preferencias).
         val dmAllowed = pkg == PKG_INSTAGRAM && Stats.isDmReelsAllowed(this)
-        if (dmAllowed && (lastIgScreenIsDm || now < dmGraceUntil)) {
-            if (now >= dmGraceUntil) {
-                Log.d(TAG, "Reel desde DM, permitido (id=$matchedId)")
-            } else {
-                Log.v(TAG, "Reel dentro de ventana de gracia DM, permitido")
-            }
-            dmGraceUntil = now + DM_GRACE_MS
-            // Marcamos lastReelsPackage para no repetir comprobaciones mientras
-            // sigue el reel del DM en pantalla.
+        if (dmAllowed && now < dmConsumedUntil) {
+            // Eventos de contenido del MISMO reel que acabamos de permitir.
+            Log.v(TAG, "Match dentro de la ventana post-consumo DM, ignorado")
+            lastReelsPackage = pkg
+            return
+        }
+        if (dmAllowed && dmBypassArmed) {
+            Log.d(TAG, "Reel desde DM, permitido y bypass consumido (id=$matchedId)")
+            dmBypassArmed = false
+            dmConsumedUntil = now + DM_CONSUMED_GRACE_MS
             lastReelsPackage = pkg
             return
         }

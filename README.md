@@ -1,8 +1,14 @@
-# ReelBlocker
+# Basta — Reel Blocker
+
+> Basta de Reels infinitos. Recupera tu atención.
 
 App Android que detecta cuando entras en **Reels de Instagram** o **Shorts de
 YouTube** y te saca automaticamente con el boton atras. No bloquea Instagram ni
 YouTube enteros: solo la seccion de videos cortos.
+
+El nombre interno del proyecto y el repositorio siguen siendo `ReelBlocker`
+(no se cambia para no romper historial). La marca pública y user-facing es
+`Basta — Reel Blocker` desde la versión 1.0.
 
 ## Como funciona
 

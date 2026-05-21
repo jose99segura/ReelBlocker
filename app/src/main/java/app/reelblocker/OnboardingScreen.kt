@@ -76,7 +76,7 @@ fun OnboardingScreen(
 
     val pages = listOf(
         OnboardingPage(
-            title = "Bienvenido a ReelBlocker",
+            title = "Bienvenido a Basta",
             body = "Esta app vigila cuando entras en Reels de Instagram o Shorts de " +
                 "YouTube y te saca antes de que pierdas el tiempo. No envia nada " +
                 "fuera del dispositivo."

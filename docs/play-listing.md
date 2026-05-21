@@ -1,63 +1,62 @@
 # Textos para la ficha de Google Play
 
-Copia/pega estos textos en Play Console cuando crees la ficha. Si necesitas
-afinarlos al carácter exacto, Play Console te avisa al pegar.
+Marca: **Basta** (con descriptor "Reel Blocker"). Copia/pega cuando crees la
+ficha en Play Console.
 
 ---
 
 ## Título de la app (max 30 caracteres)
 
 ```
-ReelBlocker
+Basta — Reel Blocker
 ```
 
-Alternativa más descriptiva (29 chars):
-```
-ReelBlocker — Sin Reels y Shorts
-```
+(20 caracteres con em dash, entra de sobra.)
 
 ---
 
 ## Descripción corta (max 80 caracteres)
 
 ```
-Bloquea Reels de Instagram y Shorts de YouTube. Recupera tu atención.
+Basta de Reels y Shorts. Recupera tu atención.
 ```
 
-(67 caracteres — entra.)
+(46 caracteres.)
 
 ---
 
 ## Descripción larga (max 4000 caracteres)
 
 ```
-ReelBlocker te saca automáticamente de los Reels de Instagram y los Shorts
-de YouTube cuando entras en ellos. Si te has dado cuenta de que pierdes horas
-en vídeos cortos sin darte cuenta, esta app es un freno simple y honesto.
+Basta es la app que dice "basta" por ti. Cada vez que entras en Reels de
+Instagram o en Shorts de YouTube, la app te saca con el botón atrás del
+sistema. Si has descubierto que pierdes horas en vídeos cortos sin darte
+cuenta, esto es un freno simple y honesto.
 
 CÓMO FUNCIONA
-La app vigila en segundo plano cuándo abres el visor de Reels o de Shorts
-y ejecuta el botón "atrás" del sistema para devolverte al feed normal.
-No bloquea Instagram ni YouTube entero — solo la sección de vídeos cortos.
+La app vigila en segundo plano cuándo se abre el visor de Reels o de
+Shorts y ejecuta el botón "atrás" para devolverte al feed normal. No
+bloquea Instagram ni YouTube enteros — solo la sección de vídeos cortos.
 
 QUÉ INCLUYE
 • Bloqueo de Reels de Instagram
 • Bloqueo de Shorts de YouTube
 • Switch para activar o desactivar el bloqueo en cada app
-• Estadísticas locales: cuántos has bloqueado hoy y en los últimos 7 días
-• Permitir Reels que te mandan amigos por DM (opcional)
-• Bloquear Historias de Instagram (opcional, por defecto desactivado)
+• Estadísticas locales: cuántos has bloqueado hoy y los últimos 7 días
+• Detecta si Instagram o YouTube están instalados (oculta lo que no aplica)
+• Permitir Reels que te mandan amigos por DM (opcional, activado por defecto)
+• Bloquear Historias de Instagram (opcional, desactivado por defecto)
 • Tema claro y oscuro automáticos
 
 PRIVACIDAD
-ReelBlocker funciona 100 % en tu dispositivo. No envía ni recoge ningún
-dato fuera de tu móvil. No tiene cuentas, no tiene publicidad, no tiene
+Basta funciona 100 % en tu dispositivo. No envía ni recoge ningún dato
+fuera de tu móvil. No tiene cuentas, no tiene publicidad, no tiene
 analítica. El código fuente está disponible en GitHub para que puedas
 verificarlo.
 
 POR QUÉ NECESITA PERMISO DE ACCESIBILIDAD
 Es la única API en Android que permite detectar qué pantalla concreta de
-otra app estás viendo. La app la usa exclusivamente para reconocer el
+otra app estás viendo. Basta la usa exclusivamente para reconocer el
 visor de Reels o Shorts (por los identificadores internos de la pantalla)
 y ejecutar la acción "atrás" del sistema. No lee el contenido de
 mensajes, posts, imágenes ni ninguna información personal.
@@ -77,6 +76,8 @@ no la maten en segundo plano.
 CONTACTO Y CÓDIGO ABIERTO
 Si encuentras un fallo o quieres sugerir algo: [CORREO_CONTACTO]
 Código fuente: github.com/jose99segura/ReelBlocker
+
+Basta. Recupera tu atención.
 ```
 
 ---
@@ -84,16 +85,16 @@ Código fuente: github.com/jose99segura/ReelBlocker
 ## Categorización
 
 - Categoría primaria: **Productividad**
-- Categoría secundaria (si la pide): **Estilo de vida** o **Herramientas**
-- Rating: PEGI 3 / Todos los públicos. Marca "No contiene": violencia, lenguaje
-  fuerte, etc. (es una app de utilidad pura).
+- Categoría secundaria: **Estilo de vida** o **Herramientas**
+- Rating: PEGI 3 / Todos los públicos. No contiene violencia, lenguaje
+  fuerte, etc.
 
 ---
 
-## Etiquetas / tags (las que Play Console te deje)
+## Etiquetas / keywords sugeridas
 
-reels, shorts, focus, productividad, anti-distracción, bloqueador, instagram,
-youtube, screen time, atención
+basta, reels, shorts, focus, productividad, anti-distracción, bloqueador,
+instagram, youtube, screen time, atención, dopamina
 
 ---
 
@@ -109,68 +110,57 @@ https://jose99segura.github.io/ReelBlocker/privacy.html
 
 ## Justificación del uso de Accessibility Service (formulario "Permitted Uses")
 
-Play Console pide que justifiques por qué necesitas el permiso. Esta es la
-respuesta a meter:
-
 ```
-ReelBlocker uses the AccessibilityService API for a single, clearly-disclosed
-user-facing feature: detecting when the user has navigated into the Instagram
-Reels viewer or the YouTube Shorts viewer, so the app can trigger the system
-back action and return the user to a less addictive surface. This is the
-only Android API that exposes which specific in-app screen is visible, which
-is necessary to distinguish "Reels viewer" from the normal Instagram feed
-or YouTube watch screen. The app reads only resource-ids of UI containers
-(e.g. clips_viewer_view_pager) and the active Activity/Fragment class name.
-It never reads message content, post content, images, or any personal data.
-No information is transmitted off-device; the app makes no network requests.
-Source code is publicly available for audit.
+Basta uses the AccessibilityService API for a single, clearly-disclosed
+user-facing feature: detecting when the user has navigated into the
+Instagram Reels viewer or the YouTube Shorts viewer, so the app can
+trigger the system back action and return the user to a less addictive
+surface. This is the only Android API that exposes which specific
+in-app screen is visible, which is necessary to distinguish "Reels
+viewer" from the normal Instagram feed or YouTube watch screen. The
+app reads only resource-ids of UI containers (e.g.
+clips_viewer_view_pager) and the active Activity/Fragment class name.
+It never reads message content, post content, images, or any personal
+data. No information is transmitted off-device; the app makes no
+network requests. Source code is publicly available for audit.
 ```
 
 ---
 
-## Capturas (necesitas 4-8)
+## Capturas (4-8 necesarias)
 
-Cuando reinstales la app y la abras tras el rediseño, sugeridas:
-
-1. Pantalla home con el bloque de stats grande y el chart semanal.
-2. Card de "Apps a bloquear" con los logos de Instagram y YouTube.
-3. Sub-opciones de Instagram (DM, Historias) abiertas.
-4. Toast "ReelBlocker: bloqueado" capturado al entrar en Reels (puedes
-   forzar el toast modificando temporalmente el código para que aparezca
-   en la home).
-5. Onboarding paso 1 (Bienvenida).
+1. Home con stats grandes y chart semanal.
+2. Card de "Apps a bloquear" con los iconos reales de Instagram/YouTube.
+3. Sub-opciones de Instagram (DM, Historias) visibles.
+4. Toast "¡Basta!" capturado al entrar en Reels (puedes forzarlo
+   trasteando temporalmente para que se muestre en la home).
+5. Onboarding paso 1 ("Bienvenido a Basta").
 6. Onboarding paso 2 (Activar accesibilidad).
 
-Formato Play Store:
-- Teléfono: 1080×1920 (portrait) o 1920×1080 (landscape)
-- 16:9 o 9:16
-
-Cómo capturar en el móvil: bloquea volumen + encender (Pixel/Stock) o
-Power + Volumen abajo (Samsung). En el dispositivo `57021FDCR0014N` lo
-sabrás según el fabricante.
+Formato: 1080×1920 (portrait) o 1920×1080 (landscape).
 
 ---
 
-## Feature graphic
+## Feature graphic (1024 × 500 px, obligatorio)
 
-1024×500 px, requerido. Sin texto crítico (Play Console añade el título
-encima en algunas pantallas). Sugerencia visual: fondo índigo (#1A1A2E)
-con el icono grande a la izquierda y a la derecha un mockup del móvil
-mostrando la home de la app.
+Sugerencia visual:
+- Fondo: índigo oscuro #1A1A2E
+- Wordmark "Basta." con el punto en rojo #DC2626 (acento "stop")
+- Subtítulo "REEL BLOCKER" pequeño, letterspacing amplio, en gris claro
+- A la derecha, mockup del móvil con la home de la app
+- Sin más adornos. Confianza minimalista.
 
-Si no quieres diseñarlo a mano: cualquier herramienta como Canva tiene
-plantilla "Feature graphic Play Store" lista.
+Herramientas: Canva o Figma tienen plantillas "Feature graphic Play Store".
 
 ---
 
-## Notas de la versión (release notes) para la primera publicación
+## Notas de la versión inicial
 
 ```
-Versión 1.0 — lanzamiento inicial.
+Versión 1.0 — Basta nace.
 • Bloqueo automático de Reels de Instagram y Shorts de YouTube.
 • Switches por app, estadísticas locales, permitir Reels desde DM,
   opción para bloquear Historias.
+• Detección automática de apps instaladas.
 • 100 % offline, sin analítica, código abierto.
 ```
-
-(Si tu Play Console te limita longitud, recórtalo.)

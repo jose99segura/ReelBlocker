@@ -3,28 +3,40 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ReelBlocker</title>
+<title>Basta — Reel Blocker</title>
 <style>
+  :root {
+    --bg: #1a1a2e;
+    --bg-soft: #fafafa;
+    --ink: #1a1a2e;
+    --accent: #dc2626;
+    --muted: #666;
+  }
   body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
          max-width: 640px; margin: 4rem auto; padding: 0 1rem; line-height: 1.55;
-         color: #1a1a2e; background: #fafafa; text-align: center; }
-  .logo { width: 96px; height: 96px; background: #1A1A2E;
+         color: var(--ink); background: var(--bg-soft); text-align: center; }
+  .logo { width: 96px; height: 96px; background: var(--bg);
           display: inline-flex; align-items: center; justify-content: center;
           border-radius: 22px; margin-bottom: 1.5rem; }
   .logo svg { width: 60%; height: 60%; }
-  h1 { font-size: 2rem; margin: 0; }
-  .tagline { color: #555; margin-top: 0.4rem; }
+  .wordmark { font-size: 3rem; font-weight: 900; letter-spacing: -0.04em;
+              margin: 0; line-height: 1; }
+  .wordmark .stop { color: var(--accent); }
+  .descriptor { font-size: 0.95rem; letter-spacing: 0.3em; text-transform: uppercase;
+                color: var(--muted); margin-top: 0.5rem; }
+  .tagline { color: #333; margin-top: 1.5rem; font-size: 1.1rem; max-width: 28ch;
+             margin-left: auto; margin-right: auto; }
   .links { margin-top: 2.5rem; }
   .links a { display: inline-block; margin: 0 0.4rem 0.6rem;
              color: #4338ca; text-decoration: none;
-             border: 1px solid #c7d2fe; padding: 0.5rem 1rem; border-radius: 8px; }
+             border: 1px solid #c7d2fe; padding: 0.5rem 1rem; border-radius: 8px;
+             font-size: 0.95rem; }
   .links a:hover { background: #eef2ff; }
   footer { margin-top: 4rem; color: #888; font-size: 0.85rem; }
 </style>
 </head>
 <body>
 <div class="logo">
-  <!-- vector inline simplificado del icono -->
   <svg viewBox="0 0 108 108" xmlns="http://www.w3.org/2000/svg">
     <path fill="#FFFFFF"
       d="M 47 28 L 61 28 A 5 5 0 0 1 66 33 L 66 75 A 5 5 0 0 1 61 80 L 47 80 A 5 5 0 0 1 42 75 L 42 33 A 5 5 0 0 1 47 28 Z"/>
@@ -32,9 +44,9 @@
       d="M 40 54 L 50 44 L 50 49 L 64 49 L 64 59 L 50 59 L 50 64 Z"/>
   </svg>
 </div>
-<h1>ReelBlocker</h1>
-<p class="tagline">Bloquea Reels de Instagram y Shorts de YouTube.<br>
-Recupera tu atención.</p>
+<h1 class="wordmark">Basta<span class="stop">.</span></h1>
+<div class="descriptor">Reel Blocker</div>
+<p class="tagline">Basta de Reels infinitos. Recupera tu atención.</p>
 
 <div class="links">
   <a href="privacy.html">Política de privacidad</a>
@@ -42,7 +54,7 @@ Recupera tu atención.</p>
 </div>
 
 <footer>
-  &copy; 2026 · Hecha con cariño contra el scroll infinito.
+  &copy; 2026 · Hecha contra el scroll infinito.
 </footer>
 </body>
 </html>

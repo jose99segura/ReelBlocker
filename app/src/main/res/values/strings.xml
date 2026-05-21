@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">ReelBlocker</string>
-    <string name="service_label">ReelBlocker</string>
+    <string name="app_name">Basta</string>
+    <string name="app_tagline">Reel Blocker</string>
+    <string name="service_label">Basta — Reel Blocker</string>
     <string name="service_description">Te ayuda a no caer en Reels de Instagram y Shorts de YouTube. Cuando detecta que entras, cierra esa sección para que sigas con lo que estabas haciendo. No envía nada fuera del dispositivo.</string>
-    <string name="toast_blocked">ReelBlocker: bloqueado</string>
+    <string name="toast_blocked">¡Basta!</string>
     <string name="stats_format">Hoy: %1$d bloqueados   (Instagram: %2$d  ·  YouTube: %3$d)</string>
     <string name="battery_state_optimized">Bateria: el sistema puede matar el servicio ⚠</string>
     <string name="battery_state_excluded">Bateria: exenta ✅</string>
     <string name="battery_action">Excluir de la optimizacion de bateria</string>
-    <string name="oem_hint">En tu movil (%1$s), ademas de la exencion de bateria entra en Ajustes → Apps → ReelBlocker → Autoarranque y activalo. Si no, el sistema cerrara el servicio en segundo plano.</string>
+    <string name="oem_hint">En tu movil (%1$s), ademas de la exencion de bateria entra en Ajustes → Apps → Basta → Autoarranque y activalo. Si no, el sistema cerrara el servicio en segundo plano.</string>
 </resources>

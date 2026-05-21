@@ -140,7 +140,20 @@ private fun HomeScreen() {
 
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(title = { Text("ReelBlocker") })
+            CenterAlignedTopAppBar(title = {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = "Basta",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Black
+                    )
+                    Text(
+                        text = "Reel Blocker",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            })
         }
     ) { padding ->
         Column(

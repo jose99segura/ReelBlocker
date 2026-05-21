@@ -14,6 +14,9 @@ local.properties
 *.apk
 *.aab
 
+# Debug logs
+log*.txt
+
 # OS
 Thumbs.db
 

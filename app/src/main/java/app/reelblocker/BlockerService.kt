@@ -12,10 +12,14 @@ import android.widget.Toast
  * Servicio principal. Recibe eventos de Instagram y YouTube, decide si estamos
  * en Reels/Shorts a pantalla completa y, si es asi, nos saca con el boton atras.
  *
+ * Excepcion: si el reel viene de un DM (mensaje directo) de Instagram, no
+ * bloqueamos — la heuristica es mirar si la pantalla anterior contenia hints
+ * de DM.
+ *
  * Logs: adb logcat -s ReelBlocker
  *
- * Las listas de pistas dependen de los resource-id internos de cada app y pueden
- * romperse con actualizaciones de Instagram o YouTube.
+ * Las listas de pistas dependen de los resource-id internos de cada app y
+ * pueden romperse con actualizaciones de Instagram o YouTube.
  */
 class BlockerService : AccessibilityService() {
 
@@ -31,6 +35,16 @@ class BlockerService : AccessibilityService() {
             "clips_swipe_refresh"
         )
 
+        // Pistas de pantalla "estoy en un DM/mensaje directo". Si las vemos
+        // justo antes de un match de reels, permitimos el reel.
+        private val INSTAGRAM_DM_HINTS = listOf(
+            "direct_thread",
+            "direct_inbox",
+            "thread_view",
+            "direct_chat",
+            "row_message"
+        )
+
         private val YOUTUBE_SHORTS_HINTS = listOf(
             "reel_watch_player",
             "reel_watch_fragment_root",
@@ -39,12 +53,12 @@ class BlockerService : AccessibilityService() {
         )
 
         private const val MIN_INTERVAL_MS = 600L
-        // Tras salir de Reels, ventana de gracia para no encadenar otro back
-        // si Instagram deja un fragmento residual que aun matchea.
         private const val POST_EXIT_GRACE_MS = 1500L
-        // Un nodo solo cuenta como "Reels a pantalla completa" si ocupa al
-        // menos este porcentaje del ancho y alto de la pantalla.
         private const val FULLSCREEN_FRACTION = 0.6
+        // Despues de detectar que veniamos de DM, dejamos pasar lo que aparezca
+        // en esta ventana sin volver a comprobar (cubre la transicion del DM
+        // al reel viewer, en la que el arbol ya no muestra el DM).
+        private const val DM_GRACE_MS = 5000L
     }
 
     private var lastActionTime = 0L
@@ -52,6 +66,10 @@ class BlockerService : AccessibilityService() {
     private var lastReelsExitTime = 0L
     private var displayWidth = 0
     private var displayHeight = 0
+
+    // Estado para la excepcion de DM.
+    private var lastIgScreenIsDm = false
+    private var dmGraceUntil = 0L
 
     override fun onServiceConnected() {
         super.onServiceConnected()
@@ -69,10 +87,25 @@ class BlockerService : AccessibilityService() {
 
         if (pkg != PKG_INSTAGRAM && pkg != PKG_YOUTUBE) return
 
+        // Gate por preferencias del usuario.
+        if (!Stats.isAppEnabled(this, pkg)) {
+            Log.v(TAG, "Bloqueo desactivado por el usuario en $pkg")
+            return
+        }
+
         val root = rootInActiveWindow
         if (root == null) {
             Log.w(TAG, "rootInActiveWindow NULL para $pkg")
             return
+        }
+
+        // Actualizar el flag de DM solo para Instagram, antes del scan de reels.
+        if (pkg == PKG_INSTAGRAM) {
+            val inDm = containsAnyHint(root, INSTAGRAM_DM_HINTS)
+            if (inDm != lastIgScreenIsDm) {
+                Log.v(TAG, "lastIgScreenIsDm: $lastIgScreenIsDm -> $inDm")
+            }
+            lastIgScreenIsDm = inDm
         }
 
         val hints = when (pkg) {
@@ -92,14 +125,25 @@ class BlockerService : AccessibilityService() {
     private fun handleReelsDetected(pkg: String, matchedId: String) {
         val now = SystemClock.elapsedRealtime()
 
-        // Ventana de gracia justo despues de un back: ignoramos el match para
-        // no encadenar otro back que acabe cerrando la app.
-        if (now - lastReelsExitTime < POST_EXIT_GRACE_MS) {
-            Log.v(TAG, "En ventana de gracia post-salida, ignoro match en $pkg ($matchedId)")
+        // Excepcion DM (solo Instagram).
+        if (pkg == PKG_INSTAGRAM && (lastIgScreenIsDm || now < dmGraceUntil)) {
+            if (now >= dmGraceUntil) {
+                Log.d(TAG, "Reel desde DM, permitido (id=$matchedId)")
+            } else {
+                Log.v(TAG, "Reel dentro de ventana de gracia DM, permitido")
+            }
+            dmGraceUntil = now + DM_GRACE_MS
+            // Marcamos lastReelsPackage para no repetir comprobaciones mientras
+            // sigue el reel del DM en pantalla.
+            lastReelsPackage = pkg
             return
         }
 
-        // Si ya estabamos dentro de Reels de este paquete, no volvemos a pulsar back.
+        if (now - lastReelsExitTime < POST_EXIT_GRACE_MS) {
+            Log.v(TAG, "Ventana de gracia post-salida, ignoro match en $pkg ($matchedId)")
+            return
+        }
+
         if (lastReelsPackage == pkg) {
             Log.v(TAG, "Ya marcado dentro de Reels en $pkg, no repito back")
             return
@@ -119,9 +163,32 @@ class BlockerService : AccessibilityService() {
     }
 
     /**
-     * Busca un nodo cuyo viewIdResourceName contiene alguna pista Y que es
-     * visible Y ocupa la mayor parte de la pantalla. Devuelve el id o null.
+     * BFS rapido: devuelve true si encuentra algun nodo cuyo
+     * viewIdResourceName contiene alguna pista. No exige visibilidad ni
+     * tamano — basta con que el fragmento exista en el arbol.
      */
+    private fun containsAnyHint(
+        root: AccessibilityNodeInfo,
+        hints: List<String>
+    ): Boolean {
+        val queue = ArrayDeque<AccessibilityNodeInfo>()
+        queue.add(root)
+        var visited = 0
+        val maxNodes = 800
+        while (queue.isNotEmpty() && visited < maxNodes) {
+            val node = queue.removeFirst()
+            visited++
+            val id = node.viewIdResourceName
+            if (id != null && hints.any { id.contains(it, ignoreCase = true) }) {
+                return true
+            }
+            for (i in 0 until node.childCount) {
+                node.getChild(i)?.let { queue.add(it) }
+            }
+        }
+        return false
+    }
+
     private fun findFullscreenMatch(
         root: AccessibilityNodeInfo,
         hints: List<String>

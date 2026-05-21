@@ -14,10 +14,33 @@ import java.time.LocalDate
 object Stats {
     private const val PREFS = "reelblocker_prefs"
     private const val KEY_HISTORY = "history_json"
+    private const val KEY_ONBOARDING_DONE = "onboarding_done"
     private const val MAX_HISTORY_DAYS = 30L
+
+    fun isOnboardingDone(ctx: Context): Boolean =
+        prefs(ctx).getBoolean(KEY_ONBOARDING_DONE, false)
+
+    fun setOnboardingDone(ctx: Context) {
+        prefs(ctx).edit().putBoolean(KEY_ONBOARDING_DONE, true).apply()
+    }
 
     const val PKG_INSTAGRAM = "com.instagram.android"
     const val PKG_YOUTUBE = "com.google.android.youtube"
+
+    /** Apps que el usuario puede activar o desactivar desde la UI. */
+    val BLOCKABLE_APPS = listOf(
+        PKG_INSTAGRAM to "Instagram",
+        PKG_YOUTUBE to "YouTube"
+    )
+
+    private fun appEnabledKey(pkg: String) = "app_enabled_$pkg"
+
+    fun isAppEnabled(ctx: Context, pkg: String): Boolean =
+        prefs(ctx).getBoolean(appEnabledKey(pkg), true)
+
+    fun setAppEnabled(ctx: Context, pkg: String, enabled: Boolean) {
+        prefs(ctx).edit().putBoolean(appEnabledKey(pkg), enabled).apply()
+    }
 
     data class Counts(val total: Int, val instagram: Int, val youtube: Int) {
         companion object { val ZERO = Counts(0, 0, 0) }

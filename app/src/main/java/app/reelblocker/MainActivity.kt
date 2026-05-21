@@ -35,6 +35,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
@@ -42,6 +43,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -67,10 +69,38 @@ class MainActivity : ComponentActivity() {
         setContent {
             ReelBlockerTheme {
                 Surface(color = MaterialTheme.colorScheme.background) {
-                    HomeScreen()
+                    Root()
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun Root() {
+    val ctx = LocalContext.current
+    var onboardingDone by remember { mutableStateOf(Stats.isOnboardingDone(ctx)) }
+
+    if (!onboardingDone) {
+        val actions = remember {
+            object : OnboardingActions {
+                override fun openAccessibility() {
+                    ctx.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+                }
+                override fun requestBatteryExemption() {
+                    requestBatteryExemption(ctx)
+                }
+            }
+        }
+        OnboardingScreen(
+            actions = actions,
+            onFinish = {
+                Stats.setOnboardingDone(ctx)
+                onboardingDone = true
+            }
+        )
+    } else {
+        HomeScreen()
     }
 }
 
@@ -121,6 +151,7 @@ private fun HomeScreen() {
                 exempt = batteryExempt,
                 onAction = { requestBatteryExemption(ctx) }
             )
+            AppsCard(refreshKey) { refreshKey++ }
             StatsCard(today = today, history = history)
             HelpCard()
         }
@@ -169,6 +200,37 @@ private fun BatteryCard(exempt: Boolean, onAction: () -> Unit) {
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+        }
+    }
+}
+
+@Composable
+private fun AppsCard(refreshKey: Int, onChanged: () -> Unit) {
+    val ctx = LocalContext.current
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text("Apps a bloquear", style = MaterialTheme.typography.titleMedium)
+            Spacer(Modifier.height(8.dp))
+            Stats.BLOCKABLE_APPS.forEach { (pkg, label) ->
+                val enabled = remember(refreshKey, pkg) { Stats.isAppEnabled(ctx, pkg) }
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = label,
+                        modifier = Modifier.weight(1f),
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                    Switch(
+                        checked = enabled,
+                        onCheckedChange = { newValue ->
+                            Stats.setAppEnabled(ctx, pkg, newValue)
+                            onChanged()
+                        }
+                    )
+                }
+            }
         }
     }
 }

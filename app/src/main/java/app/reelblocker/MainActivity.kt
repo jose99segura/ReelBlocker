@@ -190,8 +190,8 @@ private fun HomeScreen() {
 
             // Contenido principal.
             StatsCard(today = today, history = history)
-            AppsCard(refreshKey) { refreshKey++ }
             TipCard()
+            AppsCard(refreshKey) { refreshKey++ }
             HelpCard()
 
             // Status pequeño al final.

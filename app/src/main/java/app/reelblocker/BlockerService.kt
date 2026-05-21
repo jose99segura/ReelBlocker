@@ -46,15 +46,23 @@ class BlockerService : AccessibilityService() {
             "direct_composer"
         )
 
-        // Hints en event.className (solo TYPE_WINDOW_STATE_CHANGED). Usamos
-        // cadenas compuestas para evitar matchear "Thread" o "Inbox" sueltos
-        // que aparecen tambien en otras partes de IG. Importante: NO incluir
-        // "DirectShare" porque suele aparecer en el className del propio
-        // visor de reels recibido por DM y mantendria el flag en true.
+        // Hints en event.className (solo TYPE_WINDOW_STATE_CHANGED). Mantener
+        // por si una version futura de IG usa estas clases — hoy no las usa
+        // (ver INSTAGRAM_EXIT_CLASSNAMES). Las pantallas DM hoy son
+        // ModalActivity, lo que no nos da informacion direccionable.
         private val INSTAGRAM_DM_CLASSNAME_HINTS = listOf(
             "DirectThread",
             "DirectInbox",
             "DirectMessage"
+        )
+
+        // Clases que indican SALIDA del contexto DM: solo cuando vemos una de
+        // estas reseteamos el estado de CONSUMED/ARMED a READY. ModalActivity
+        // y TransparentModalActivity NO cuentan: la primera hostea los DMs,
+        // la segunda hostea el visor de reels recibido por DM.
+        private val INSTAGRAM_EXIT_CLASSNAMES = listOf(
+            "InstagramMainActivity",
+            "MainTabActivity"
         )
 
         private val YOUTUBE_SHORTS_HINTS = listOf(
@@ -70,6 +78,10 @@ class BlockerService : AccessibilityService() {
         // Tras consumir un bypass DM, ignorar matches durante este intervalo
         // para no contar dos veces el mismo reel por eventos de contenido.
         private const val DM_CONSUMED_GRACE_MS = 2000L
+        // Presupuesto de visualizacion del reel desde DM. Pasado este tiempo
+        // dentro del visor, cualquier nuevo match dispara BACK (para que el
+        // usuario no pueda hacer swipe a reels infinitos).
+        private const val DM_VIEW_BUDGET_MS = 30_000L
     }
 
     private var lastActionTime = 0L
@@ -88,6 +100,10 @@ class BlockerService : AccessibilityService() {
     private enum class DmState { READY, ARMED, CONSUMED }
     private var dmState = DmState.READY
     private var dmConsumedUntil = 0L
+    // Cuando se permite un reel desde DM, fijamos este timestamp. Si el
+    // usuario sigue en el visor pasados DM_VIEW_BUDGET_MS, dejamos de ignorar
+    // matches y disparamos BACK.
+    private var dmAllowanceStarted = 0L
 
     override fun onServiceConnected() {
         super.onServiceConnected()
@@ -145,10 +161,12 @@ class BlockerService : AccessibilityService() {
         val isStateChange = event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
         val cls = event.className?.toString().orEmpty()
         val classDm = INSTAGRAM_DM_CLASSNAME_HINTS.any { cls.contains(it, ignoreCase = true) }
-        val classNonDm = isStateChange && cls.isNotEmpty() && !classDm
-        // Hints del arbol solo se consideran si seguimos en estado READY:
-        // sirven de fallback si el className no llega, pero nunca rearman
-        // tras CONSUMED — esa es la regla que evita el bug de reels infinitos.
+        // SOLO las clases listadas como exit cuentan como "salida del DM".
+        // ModalActivity (DM thread) y TransparentModalActivity (visor del
+        // reel desde DM) NO son exit: el usuario sigue en contexto DM.
+        val classExit = isStateChange && INSTAGRAM_EXIT_CLASSNAMES.any {
+            cls.contains(it, ignoreCase = true)
+        }
         val treeDm = dmState == DmState.READY && containsAnyHint(root, INSTAGRAM_DM_HINTS)
 
         val previous = dmState
@@ -159,16 +177,16 @@ class BlockerService : AccessibilityService() {
                 else -> DmState.READY
             }
             DmState.ARMED -> when {
-                classNonDm -> DmState.READY  // El usuario salio del DM sin tocar reel.
+                classExit -> DmState.READY  // Usuario salio del DM sin tocar reel.
                 else -> DmState.ARMED
             }
             DmState.CONSUMED -> when {
-                classNonDm -> DmState.READY  // Volvemos a una pantalla no-DM. Lista para rearmarse.
+                classExit -> DmState.READY  // Usuario salio del contexto DM. Listo para rearmar.
                 else -> DmState.CONSUMED
             }
         }
         if (dmState != previous) {
-            Log.d(TAG, "DM state: $previous -> $dmState  (cls=$cls classDm=$classDm classNonDm=$classNonDm treeDm=$treeDm)")
+            Log.d(TAG, "DM state: $previous -> $dmState  (cls=$cls classDm=$classDm classExit=$classExit treeDm=$treeDm)")
             if (dmState == DmState.ARMED) dumpDmCandidates(root)
         }
     }
@@ -187,8 +205,16 @@ class BlockerService : AccessibilityService() {
             Log.d(TAG, "Reel desde DM, permitido (id=$matchedId). Bypass consumido.")
             dmState = DmState.CONSUMED
             dmConsumedUntil = now + DM_CONSUMED_GRACE_MS
+            dmAllowanceStarted = now
             lastReelsPackage = pkg
             return
+        }
+        // Si veniamos de un bypass DM y se agoto el presupuesto de
+        // visualizacion, dejar de ignorar este match y caer en fire BACK.
+        if (dmAllowanceStarted > 0 && now - dmAllowanceStarted >= DM_VIEW_BUDGET_MS) {
+            Log.d(TAG, "Budget DM agotado (${(now - dmAllowanceStarted) / 1000}s). Reanudo bloqueo.")
+            dmAllowanceStarted = 0L
+            lastReelsPackage = null
         }
 
         if (now - lastReelsExitTime < POST_EXIT_GRACE_MS) {
@@ -211,6 +237,7 @@ class BlockerService : AccessibilityService() {
             Log.v(TAG, "Salimos de Reels en $pkg, abro ventana de gracia")
             lastReelsPackage = null
             lastReelsExitTime = SystemClock.elapsedRealtime()
+            dmAllowanceStarted = 0L
         }
     }
 

@@ -12,6 +12,10 @@ import android.provider.Settings
 import android.text.TextUtils
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -44,11 +48,13 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.delay
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -185,6 +191,7 @@ private fun HomeScreen() {
             // Contenido principal.
             StatsCard(today = today, history = history)
             AppsCard(refreshKey) { refreshKey++ }
+            TipCard()
             HelpCard()
 
             // Status pequeño al final.
@@ -525,6 +532,47 @@ private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawRoundedBar(
         size = size,
         cornerRadius = androidx.compose.ui.geometry.CornerRadius(8f, 8f)
     )
+}
+
+@Composable
+private fun TipCard() {
+    // Tip rotativo cada 8 segundos con fade transition.
+    var tip by remember { mutableStateOf(Tips.random()) }
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(8000)
+            // Forzar uno nuevo distinto al actual.
+            var next: String
+            do { next = Tips.random() } while (next == tip)
+            tip = next
+        }
+    }
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.tertiaryContainer
+        )
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = "💡 ¿Sabias que…",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.7f)
+            )
+            Spacer(Modifier.height(6.dp))
+            AnimatedContent(
+                targetState = tip,
+                transitionSpec = { fadeIn() togetherWith fadeOut() },
+                label = "tip"
+            ) { currentTip ->
+                Text(
+                    text = currentTip,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onTertiaryContainer
+                )
+            }
+        }
+    }
 }
 
 @Composable

@@ -1,6 +1,6 @@
 # Textos para la ficha de Google Play
 
-Marca: **Basta** (con descriptor "Reel Blocker"). Copia/pega cuando crees la
+Marca: **Basta!** (con descriptor "Reel Blocker"). Copia/pega cuando crees la
 ficha en Play Console.
 
 ---
@@ -8,7 +8,7 @@ ficha en Play Console.
 ## Título de la app (max 30 caracteres)
 
 ```
-Basta — Reel Blocker
+Basta! — Reel Blocker
 ```
 
 (20 caracteres con em dash, entra de sobra.)
@@ -18,7 +18,7 @@ Basta — Reel Blocker
 ## Descripción corta (max 80 caracteres)
 
 ```
-Basta de Reels y Shorts. Recupera tu atención.
+Basta! de Reels y Shorts. Recupera tu atención.
 ```
 
 (46 caracteres.)
@@ -28,7 +28,7 @@ Basta de Reels y Shorts. Recupera tu atención.
 ## Descripción larga (max 4000 caracteres)
 
 ```
-Basta es la app que dice "basta" por ti. Cada vez que entras en Reels de
+Basta! es la app que dice "Basta!" por ti. Cada vez que entras en Reels de
 Instagram o en Shorts de YouTube, la app te saca con el botón atrás del
 sistema. Si has descubierto que pierdes horas en vídeos cortos sin darte
 cuenta, esto es un freno simple y honesto.
@@ -49,14 +49,14 @@ QUÉ INCLUYE
 • Tema claro y oscuro automáticos
 
 PRIVACIDAD
-Basta funciona 100 % en tu dispositivo. No envía ni recoge ningún dato
+Basta! funciona 100 % en tu dispositivo. No envía ni recoge ningún dato
 fuera de tu móvil. No tiene cuentas, no tiene publicidad, no tiene
 analítica. El código fuente está disponible en GitHub para que puedas
 verificarlo.
 
 POR QUÉ NECESITA PERMISO DE ACCESIBILIDAD
 Es la única API en Android que permite detectar qué pantalla concreta de
-otra app estás viendo. Basta la usa exclusivamente para reconocer el
+otra app estás viendo. Basta! la usa exclusivamente para reconocer el
 visor de Reels o Shorts (por los identificadores internos de la pantalla)
 y ejecutar la acción "atrás" del sistema. No lee el contenido de
 mensajes, posts, imágenes ni ninguna información personal.
@@ -77,7 +77,7 @@ CONTACTO Y CÓDIGO ABIERTO
 Si encuentras un fallo o quieres sugerir algo: [CORREO_CONTACTO]
 Código fuente: github.com/jose99segura/ReelBlocker
 
-Basta. Recupera tu atención.
+Basta! Recupera tu atención.
 ```
 
 ---
@@ -93,7 +93,7 @@ Basta. Recupera tu atención.
 
 ## Etiquetas / keywords sugeridas
 
-basta, reels, shorts, focus, productividad, anti-distracción, bloqueador,
+Basta!, reels, shorts, focus, productividad, anti-distracción, bloqueador,
 instagram, youtube, screen time, atención, dopamina
 
 ---
@@ -111,7 +111,7 @@ https://jose99segura.github.io/ReelBlocker/privacy.html
 ## Justificación del uso de Accessibility Service (formulario "Permitted Uses")
 
 ```
-Basta uses the AccessibilityService API for a single, clearly-disclosed
+Basta! uses the AccessibilityService API for a single, clearly-disclosed
 user-facing feature: detecting when the user has navigated into the
 Instagram Reels viewer or the YouTube Shorts viewer, so the app can
 trigger the system back action and return the user to a less addictive
@@ -134,7 +134,7 @@ network requests. Source code is publicly available for audit.
 3. Sub-opciones de Instagram (DM, Historias) visibles.
 4. Toast "¡Basta!" capturado al entrar en Reels (puedes forzarlo
    trasteando temporalmente para que se muestre en la home).
-5. Onboarding paso 1 ("Bienvenido a Basta").
+5. Onboarding paso 1 ("Bienvenido a Basta!").
 6. Onboarding paso 2 (Activar accesibilidad).
 
 Formato: 1080×1920 (portrait) o 1920×1080 (landscape).
@@ -145,7 +145,7 @@ Formato: 1080×1920 (portrait) o 1920×1080 (landscape).
 
 Sugerencia visual:
 - Fondo: índigo oscuro #1A1A2E
-- Wordmark "Basta." con el punto en rojo #DC2626 (acento "stop")
+- Wordmark "Basta!" con el "!" en rojo #DC2626 (acento "stop")
 - Subtítulo "REEL BLOCKER" pequeño, letterspacing amplio, en gris claro
 - A la derecha, mockup del móvil con la home de la app
 - Sin más adornos. Confianza minimalista.
@@ -157,7 +157,7 @@ Herramientas: Canva o Figma tienen plantillas "Feature graphic Play Store".
 ## Notas de la versión inicial
 
 ```
-Versión 1.0 — Basta nace.
+Versión 1.0 — Basta! nace.
 • Bloqueo automático de Reels de Instagram y Shorts de YouTube.
 • Switches por app, estadísticas locales, permitir Reels desde DM,
   opción para bloquear Historias.

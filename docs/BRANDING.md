@@ -1,4 +1,4 @@
-# Basta — Sistema de marca
+# Basta! — Sistema de marca
 
 Guía rápida para mantener coherencia visual y de voz en toda la
 comunicación de la app (capturas, redes, web, futuras versiones).
@@ -7,15 +7,15 @@ comunicación de la app (capturas, redes, web, futuras versiones).
 
 ## Nombre y lockup
 
-- **Nombre principal:** `Basta`
+- **Nombre principal:** `Basta!`
 - **Descriptor:** `Reel Blocker`
-- **Lockup completo:** `Basta — Reel Blocker` (em dash `—`, no guion)
-- **Lanzador móvil:** solo `Basta` (entra en una línea, máximo 6 letras)
-- **Wordmark estilizado:** `Basta.` con el punto en rojo de acento
+- **Lockup completo:** `Basta! — Reel Blocker` (em dash `—`, no guion)
+- **Lanzador móvil:** solo `Basta!` (entra en una línea, máximo 6 letras)
+- **Wordmark estilizado:** `Basta!` con el "!" en rojo de acento
 
 El nombre funciona en español, italiano y francés. Una sola palabra,
 fácil de recordar, fácil de pronunciar en voz alta. Sintetiza la
-intención del usuario: "basta, no más Reels".
+intención del usuario: "Basta!, no más Reels".
 
 ---
 
@@ -26,7 +26,7 @@ Sistema (no hace falta cargar fuentes para una v1):
 - **Android:** Roboto / Google Sans
 - **Web:** `-apple-system, BlinkMacSystemFont, "Segoe UI", system-ui`
 
-Para el wordmark "Basta" en marketing usa peso **Black** (900) y
+Para el wordmark "Basta!" en marketing usa peso **Black** (900) y
 tracking ligeramente negativo (`-0.04em`). Para el descriptor
 "REEL BLOCKER" usa peso regular en mayúsculas con `letter-spacing`
 amplio (`0.3em`).
@@ -39,11 +39,11 @@ amplio (`0.3em`).
 |---|---|---|
 | `--ink` | `#1A1A2E` | Fondo del icono, texto principal sobre claro |
 | `--bg-soft` | `#FAFAFA` | Fondo de la web |
-| `--accent` | `#DC2626` | "Basta" energy. Punto del wordmark, alertas críticas |
+| `--accent` | `#DC2626` | "Basta!" energy. Punto del wordmark, alertas críticas |
 | `--ok` | `#2E7D32` | Estados positivos (servicio activo, batería exenta) |
 | `--muted` | `#666666` | Texto secundario |
 
-En la app Android se usa la paleta dinámica de Material 3 (`dynamicLightColorScheme`/`darkColorScheme`) para integrarse con el tema del usuario. Los acentos hardcoded (#DC2626 rojo de "basta") aparecen en marketing/landing y, opcionalmente, en estados destacados de la UI.
+En la app Android se usa la paleta dinámica de Material 3 (`dynamicLightColorScheme`/`darkColorScheme`) para integrarse con el tema del usuario. Los acentos hardcoded (#DC2626 rojo de "Basta!") aparecen en marketing/landing y, opcionalmente, en estados destacados de la UI.
 
 ---
 
@@ -53,7 +53,7 @@ Vector minimalista en `app/src/main/res/drawable/ic_launcher_foreground.xml`:
 rectángulo blanco vertical (formato "móvil/reel") con flecha back recortada
 en color del fondo (#1A1A2E). El cutout es la marca visual — no se cambia.
 
-No incluir el nombre "Basta" dentro del icono. El nombre vive en el
+No incluir el nombre "Basta!" dentro del icono. El nombre vive en el
 sistema (lanzador) y en marketing.
 
 ---
@@ -63,16 +63,16 @@ sistema (lanzador) y en marketing.
 - **Directa.** "Te saca", no "te ofrece la opción de salir".
 - **Sin moralina.** No le decimos al usuario "te ayudamos a estar
   presente" — somos un freno, no un coach.
-- **Ligeramente irreverente.** "Basta" es la palabra del usuario,
+- **Ligeramente irreverente.** "Basta!" es la palabra del usuario,
   no nuestra. Devolvemos la decisión.
 - **Honesta sobre los límites.** Si Instagram cambia mañana,
   decimos que puede romperse. Sin promesas heroicas.
 
 ### Tagline corto
-`Basta de Reels. Recupera tu atención.`
+`Basta! de Reels. Recupera tu atención.`
 
 ### Variantes para marketing
-- `Basta de scrolls infinitos.`
+- `Basta! de scrolls infinitos.`
 - `Cuando entras en Reels, te saca. Eso es todo.`
 - `No bloquea Instagram. Solo los Reels.`
 - `Cierra los Reels. No tu vida social.`
@@ -89,7 +89,7 @@ sistema (lanzador) y en marketing.
 
 ### Pantalla home (app)
 Top bar centrado:
-- `Basta` en titleLarge, FontWeight.Black
+- `Basta!` en titleLarge, FontWeight.Black
 - `Reel Blocker` debajo en labelSmall, color `onSurfaceVariant`
 
 ### Toast al bloquear
@@ -97,7 +97,7 @@ Top bar centrado:
 
 ### Feature graphic Play Store (1024×500)
 - Fondo `#1A1A2E`
-- Izquierda: wordmark `Basta.` (punto rojo) + `REEL BLOCKER` debajo
+- Izquierda: wordmark `Basta!` (! en rojo) + `REEL BLOCKER` debajo
 - Derecha: mockup del móvil con la home
 - Sin texto extra. Confianza minimalista.
 
@@ -115,11 +115,11 @@ Top bar centrado:
 
 | Antes | Ahora |
 |---|---|
-| Nombre app: `ReelBlocker` | `Basta` |
+| Nombre app: `ReelBlocker` | `Basta!` |
 | Toast: `ReelBlocker: bloqueado` | `¡Basta!` |
-| Service label: `ReelBlocker` | `Basta — Reel Blocker` |
-| Top bar app: `ReelBlocker` | `Basta` + `Reel Blocker` |
-| Onboarding paso 1: `Bienvenido a ReelBlocker` | `Bienvenido a Basta` |
+| Service label: `ReelBlocker` | `Basta! — Reel Blocker` |
+| Top bar app: `ReelBlocker` | `Basta!` + `Reel Blocker` |
+| Onboarding paso 1: `Bienvenido a ReelBlocker` | `Bienvenido a Basta!` |
 
 Identificadores técnicos NO cambian (mantienen historial y compatibilidad):
 - Package: `app.reelblocker`

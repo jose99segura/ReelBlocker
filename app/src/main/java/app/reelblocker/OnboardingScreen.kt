@@ -47,9 +47,20 @@ interface OnboardingActions {
     fun isBatteryExempt(): Boolean
 }
 
+/**
+ * Una página del onboarding. Tres tipos via campos opcionales:
+ *  - StatPage: si bigNumber != null → muestra dato grande + frase debajo.
+ *  - WordmarkPage: si isWordmark == true → muestra "Basta!" gigante.
+ *  - ActionPage: si statusContent != null → CTA + estado del permiso.
+ *  - Plain: solo title + body (no usado actualmente).
+ */
 private data class OnboardingPage(
     val title: String,
     val body: String,
+    val bigNumber: String? = null,
+    val bigNumberLabel: String? = null,
+    val source: String? = null,
+    val isWordmark: Boolean = false,
     val statusContent: (@Composable (OnboardingActions, Boolean) -> Unit)? = null,
     val isGranted: ((OnboardingActions) -> Boolean)? = null
 )
@@ -60,7 +71,6 @@ fun OnboardingScreen(
     actions: OnboardingActions,
     onFinish: () -> Unit
 ) {
-    // Refrescar cuando volvemos del Settings.
     val lifecycleOwner = LocalLifecycleOwner.current
     var refreshKey by remember { mutableIntStateOf(0) }
     DisposableEffect(lifecycleOwner) {
@@ -76,38 +86,42 @@ fun OnboardingScreen(
 
     val pages = listOf(
         OnboardingPage(
-            title = "Bienvenido a Basta",
-            body = "Esta app vigila cuando entras en Reels de Instagram o Shorts de " +
-                "YouTube y te saca antes de que pierdas el tiempo. No envia nada " +
-                "fuera del dispositivo."
+            title = "Mira esto.",
+            bigNumber = "95",
+            bigNumberLabel = "min al dia",
+            body = "Es el tiempo medio que gastamos en Reels y Shorts. Casi hora y media. Cada dia. ¿Te suena familiar?",
+            source = "Data.ai 2024"
         ),
         OnboardingPage(
-            title = "Activa el servicio de accesibilidad",
-            body = "Es la unica forma en Android de detectar Reels. Solo lee " +
-                "identificadores de pantalla de Instagram y YouTube para saber " +
-                "cuando pulsar atras.",
+            title = "Y esto duele mas:",
+            bigNumber = "23",
+            bigNumberLabel = "min",
+            body = "Lo que tarda tu cerebro en volver a concentrarse despues de cada distraccion. Un scroll cuesta media hora de atencion.",
+            source = "Gloria Mark, UC Irvine"
+        ),
+        OnboardingPage(
+            title = "Basta!",
+            body = "Cuando entras en Reels o Shorts, esta app te saca. Sin coaches motivacionales. Sin sermones. Sin notificaciones diciendote que hacer.\n\nTu sigues con tu vida.",
+            isWordmark = true
+        ),
+        OnboardingPage(
+            title = "Activa el servicio",
+            body = "Es la unica forma que tiene Android de detectar Reels. Solo lee identificadores de pantalla, nunca el contenido de tus mensajes.",
             statusContent = { acts, granted ->
-                if (granted) {
-                    GrantedBadge("Servicio activado")
-                } else {
-                    Button(onClick = { acts.openAccessibility() }) {
-                        Text("Abrir ajustes de accesibilidad")
-                    }
+                if (granted) GrantedBadge("Servicio activado")
+                else Button(onClick = { acts.openAccessibility() }) {
+                    Text("Abrir ajustes de accesibilidad")
                 }
             },
             isGranted = { it.isAccessibilityEnabled() }
         ),
         OnboardingPage(
-            title = "Excluye de la optimizacion de bateria",
-            body = "Sin esto, el sistema puede matar el servicio al cabo de unas " +
-                "horas y el bloqueo dejaria de funcionar.",
+            title = "Y dile a la bateria que no nos mate",
+            body = "Sin esto, el sistema cierra el servicio en horas y aqui ya no habria Basta!",
             statusContent = { acts, granted ->
-                if (granted) {
-                    GrantedBadge("Bateria: exenta")
-                } else {
-                    Button(onClick = { acts.requestBatteryExemption() }) {
-                        Text("Excluir de la bateria")
-                    }
+                if (granted) GrantedBadge("Bateria: exenta")
+                else Button(onClick = { acts.requestBatteryExemption() }) {
+                    Text("Excluir de la bateria")
                 }
             },
             isGranted = { it.isBatteryExempt() }
@@ -118,10 +132,9 @@ fun OnboardingScreen(
     val scope = rememberCoroutineScope()
     val isLast = pagerState.currentPage == pages.lastIndex
 
-    // Auto-avanzar al conceder un permiso (excepto en la ultima pagina).
     LaunchedEffect(accessibilityOn, batteryOk) {
-        val currentPage = pages.getOrNull(pagerState.currentPage) ?: return@LaunchedEffect
-        val granted = currentPage.isGranted?.invoke(actions) == true
+        val current = pages.getOrNull(pagerState.currentPage) ?: return@LaunchedEffect
+        val granted = current.isGranted?.invoke(actions) == true
         if (granted && pagerState.currentPage < pages.lastIndex) {
             pagerState.animateScrollToPage(pagerState.currentPage + 1)
         }
@@ -146,20 +159,65 @@ fun OnboardingScreen(
             ) {
                 Text(
                     text = page.title,
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center
+                    fontSize = if (page.isWordmark) 56.sp else 22.sp,
+                    fontWeight = if (page.isWordmark) FontWeight.Black else FontWeight.SemiBold,
+                    textAlign = TextAlign.Center,
+                    color = if (page.isWordmark) MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.padding(bottom = if (page.isWordmark) 8.dp else 0.dp)
                 )
-                Spacer(Modifier.height(16.dp))
+
+                if (page.bigNumber != null) {
+                    Spacer(Modifier.height(24.dp))
+                    Row(
+                        verticalAlignment = Alignment.Bottom,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = page.bigNumber,
+                            fontSize = 96.sp,
+                            fontWeight = FontWeight.Black,
+                            color = Color(0xFFDC2626),
+                            lineHeight = 96.sp
+                        )
+                        if (page.bigNumberLabel != null) {
+                            Spacer(Modifier.size(8.dp))
+                            Text(
+                                text = page.bigNumberLabel,
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(bottom = 14.dp)
+                            )
+                        }
+                    }
+                    Spacer(Modifier.height(20.dp))
+                } else if (page.isWordmark) {
+                    // El wordmark ya esta arriba en titulo grande. Solo separador.
+                    Spacer(Modifier.height(8.dp))
+                } else {
+                    Spacer(Modifier.height(16.dp))
+                }
+
                 Text(
                     text = page.body,
                     style = MaterialTheme.typography.bodyLarge,
                     textAlign = TextAlign.Center,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+
+                if (page.source != null) {
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        text = "Fuente: ${page.source}",
+                        style = MaterialTheme.typography.labelSmall,
+                        textAlign = TextAlign.Center,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                    )
+                }
+
                 if (page.statusContent != null) {
                     Spacer(Modifier.height(32.dp))
-                    // Forzamos recomposicion en refreshKey/granted
                     @Suppress("UNUSED_EXPRESSION") refreshKey
                     page.statusContent.invoke(actions, granted)
                 }
@@ -189,14 +247,11 @@ fun OnboardingScreen(
         Button(
             modifier = Modifier.fillMaxWidth(),
             onClick = {
-                if (isLast) {
-                    onFinish()
-                } else {
-                    scope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) }
-                }
+                if (isLast) onFinish()
+                else scope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) }
             }
         ) {
-            Text(if (isLast) "Comenzar" else "Siguiente")
+            Text(if (isLast) "Empezar" else "Siguiente")
         }
     }
 }

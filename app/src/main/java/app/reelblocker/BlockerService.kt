@@ -78,12 +78,15 @@ class BlockerService : AccessibilityService() {
     private var displayWidth = 0
     private var displayHeight = 0
 
-    // Modelo "armado/consumido": cada vez que detectamos al usuario en una
-    // pantalla DM, armamos el bypass. Cuando se consume (al permitir un reel),
-    // se desarma. Para otro reel hay que volver a pasar por el DM. Asi un
-    // unico reel compartido por amigo se ve, pero el feed de Reels normal
-    // sigue bloqueandose.
-    private var dmBypassArmed = false
+    // Maquina de estados del bypass DM:
+    //  READY    - sin DM detectado; al ver pantalla DM pasa a ARMED.
+    //  ARMED    - DM detectado; el proximo reel se permite y pasa a CONSUMED.
+    //  CONSUMED - bypass usado; para volver a ARMED hace falta primero salir
+    //             del contexto DM (transicion a className NO-DM) y volver a
+    //             entrar. Asi el visor de reels que cuelga del DirectThread-
+    //             Activity no rearma el bypass por si solo.
+    private enum class DmState { READY, ARMED, CONSUMED }
+    private var dmState = DmState.READY
     private var dmConsumedUntil = 0L
 
     override fun onServiceConnected() {
@@ -114,24 +117,9 @@ class BlockerService : AccessibilityService() {
             return
         }
 
-        // Armar el bypass DM cuando detectamos una pantalla de mensajes
-        // directos. Solo lo armamos; el reset ocurre al consumirlo (en
-        // handleReelsDetected) — no dependemos de detectar la "salida" del
-        // DM, que es lo que estaba dando problemas.
+        // Actualizar el estado del bypass DM para Instagram.
         if (pkg == PKG_INSTAGRAM) {
-            val isStateChange = event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
-            val cls = event.className?.toString().orEmpty()
-            val classMatch = isStateChange && INSTAGRAM_DM_CLASSNAME_HINTS.any {
-                cls.contains(it, ignoreCase = true)
-            }
-            val treeMatch = !classMatch && containsAnyHint(root, INSTAGRAM_DM_HINTS)
-            if (classMatch || treeMatch) {
-                if (!dmBypassArmed) {
-                    Log.d(TAG, "DM detectado, bypass armado (clase=$classMatch tree=$treeMatch className=$cls)")
-                    if (classMatch || treeMatch) dumpDmCandidates(root)
-                }
-                dmBypassArmed = true
-            }
+            updateDmState(event, root)
         }
 
         val hints = when (pkg) {
@@ -148,20 +136,56 @@ class BlockerService : AccessibilityService() {
         }
     }
 
+    /**
+     * Actualiza la maquina de estados del bypass DM en funcion del evento.
+     * Solo se hacen transiciones validas; el bypass solo puede rearmarse
+     * tras una transicion explicita READY (que requiere haber salido del DM).
+     */
+    private fun updateDmState(event: AccessibilityEvent, root: AccessibilityNodeInfo) {
+        val isStateChange = event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
+        val cls = event.className?.toString().orEmpty()
+        val classDm = INSTAGRAM_DM_CLASSNAME_HINTS.any { cls.contains(it, ignoreCase = true) }
+        val classNonDm = isStateChange && cls.isNotEmpty() && !classDm
+        // Hints del arbol solo se consideran si seguimos en estado READY:
+        // sirven de fallback si el className no llega, pero nunca rearman
+        // tras CONSUMED — esa es la regla que evita el bug de reels infinitos.
+        val treeDm = dmState == DmState.READY && containsAnyHint(root, INSTAGRAM_DM_HINTS)
+
+        val previous = dmState
+        dmState = when (dmState) {
+            DmState.READY -> when {
+                isStateChange && classDm -> DmState.ARMED
+                treeDm -> DmState.ARMED
+                else -> DmState.READY
+            }
+            DmState.ARMED -> when {
+                classNonDm -> DmState.READY  // El usuario salio del DM sin tocar reel.
+                else -> DmState.ARMED
+            }
+            DmState.CONSUMED -> when {
+                classNonDm -> DmState.READY  // Volvemos a una pantalla no-DM. Lista para rearmarse.
+                else -> DmState.CONSUMED
+            }
+        }
+        if (dmState != previous) {
+            Log.d(TAG, "DM state: $previous -> $dmState  (cls=$cls classDm=$classDm classNonDm=$classNonDm treeDm=$treeDm)")
+            if (dmState == DmState.ARMED) dumpDmCandidates(root)
+        }
+    }
+
     private fun handleReelsDetected(pkg: String, matchedId: String) {
         val now = SystemClock.elapsedRealtime()
 
-        // Excepcion DM (solo Instagram, y solo si esta activada en preferencias).
         val dmAllowed = pkg == PKG_INSTAGRAM && Stats.isDmReelsAllowed(this)
         if (dmAllowed && now < dmConsumedUntil) {
-            // Eventos de contenido del MISMO reel que acabamos de permitir.
+            // Eventos de contenido del MISMO reel recien permitido.
             Log.v(TAG, "Match dentro de la ventana post-consumo DM, ignorado")
             lastReelsPackage = pkg
             return
         }
-        if (dmAllowed && dmBypassArmed) {
-            Log.d(TAG, "Reel desde DM, permitido y bypass consumido (id=$matchedId)")
-            dmBypassArmed = false
+        if (dmAllowed && dmState == DmState.ARMED) {
+            Log.d(TAG, "Reel desde DM, permitido (id=$matchedId). Bypass consumido.")
+            dmState = DmState.CONSUMED
             dmConsumedUntil = now + DM_CONSUMED_GRACE_MS
             lastReelsPackage = pkg
             return

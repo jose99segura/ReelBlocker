@@ -80,8 +80,9 @@ class BlockerService : AccessibilityService() {
         private const val DM_CONSUMED_GRACE_MS = 2000L
         // Presupuesto de visualizacion del reel desde DM. Pasado este tiempo
         // dentro del visor, cualquier nuevo match dispara BACK (para que el
-        // usuario no pueda hacer swipe a reels infinitos).
-        private const val DM_VIEW_BUDGET_MS = 30_000L
+        // usuario no pueda hacer swipe a reels infinitos). 10 s cubre un
+        // reel corto tipico; despues lo cerramos.
+        private const val DM_VIEW_BUDGET_MS = 10_000L
     }
 
     private var lastActionTime = 0L
@@ -188,6 +189,14 @@ class BlockerService : AccessibilityService() {
         if (dmState != previous) {
             Log.d(TAG, "DM state: $previous -> $dmState  (cls=$cls classDm=$classDm classExit=$classExit treeDm=$treeDm)")
             if (dmState == DmState.ARMED) dumpDmCandidates(root)
+            // Al volver a READY tras una sesion DM, limpiar cualquier residuo
+            // que pudiera mantener el bypass activo en el siguiente match.
+            if (dmState == DmState.READY && previous == DmState.CONSUMED) {
+                lastReelsPackage = null
+                dmAllowanceStarted = 0L
+                dmConsumedUntil = 0L
+                Log.d(TAG, "  reset post-DM: limpiando lastReelsPackage y budget")
+            }
         }
     }
 

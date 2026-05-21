@@ -31,10 +31,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -86,22 +95,8 @@ fun OnboardingScreen(
 
     val pages = listOf(
         OnboardingPage(
-            title = "Mira esto.",
-            bigNumber = "95",
-            bigNumberLabel = "min al dia",
-            body = "Es el tiempo medio que gastamos en Reels y Shorts. Casi hora y media. Cada dia. ¿Te suena familiar?",
-            source = "Data.ai 2024"
-        ),
-        OnboardingPage(
-            title = "Y esto duele mas:",
-            bigNumber = "23",
-            bigNumberLabel = "min",
-            body = "Lo que tarda tu cerebro en volver a concentrarse despues de cada distraccion. Un scroll cuesta media hora de atencion.",
-            source = "Gloria Mark, UC Irvine"
-        ),
-        OnboardingPage(
             title = "Basta!",
-            body = "Cuando entras en Reels o Shorts, esta app te saca. Sin coaches motivacionales. Sin sermones. Sin notificaciones diciendote que hacer.\n\nTu sigues con tu vida.",
+            body = "95 min/dia. Es lo que perdemos de media en Reels y Shorts. Casi hora y media. Cada dia.\n\nCuando entras, esta app te saca. Sin coaches motivacionales, sin sermones.",
             isWordmark = true
         ),
         OnboardingPage(
@@ -157,50 +152,38 @@ fun OnboardingScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
+                if (page.isWordmark) {
+                    // Icono de la marca, grande y centrado.
+                    BastaIconBadge(size = 96.dp)
+                    Spacer(Modifier.height(24.dp))
+                }
+
                 Text(
                     text = page.title,
-                    fontSize = if (page.isWordmark) 56.sp else 22.sp,
+                    fontSize = if (page.isWordmark) 80.sp else 22.sp,
                     fontWeight = if (page.isWordmark) FontWeight.Black else FontWeight.SemiBold,
                     textAlign = TextAlign.Center,
                     color = if (page.isWordmark) MaterialTheme.colorScheme.primary
                             else MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.padding(bottom = if (page.isWordmark) 8.dp else 0.dp)
+                    lineHeight = if (page.isWordmark) 80.sp else androidx.compose.ui.unit.TextUnit.Unspecified
                 )
 
-                if (page.bigNumber != null) {
-                    Spacer(Modifier.height(24.dp))
-                    Row(
-                        verticalAlignment = Alignment.Bottom,
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Text(
-                            text = page.bigNumber,
-                            fontSize = 96.sp,
-                            fontWeight = FontWeight.Black,
-                            color = Color(0xFFDC2626),
-                            lineHeight = 96.sp
-                        )
-                        if (page.bigNumberLabel != null) {
-                            Spacer(Modifier.size(8.dp))
-                            Text(
-                                text = page.bigNumberLabel,
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.padding(bottom = 14.dp)
-                            )
-                        }
-                    }
-                    Spacer(Modifier.height(20.dp))
-                } else if (page.isWordmark) {
-                    // El wordmark ya esta arriba en titulo grande. Solo separador.
-                    Spacer(Modifier.height(8.dp))
+                if (page.isWordmark) {
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        text = "REEL BLOCKER",
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Medium,
+                        letterSpacing = 0.3.em,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(Modifier.height(28.dp))
                 } else {
                     Spacer(Modifier.height(16.dp))
                 }
 
                 Text(
-                    text = page.body,
+                    text = if (page.isWordmark) highlightStats(page.body) else buildAnnotatedString { append(page.body) },
                     style = MaterialTheme.typography.bodyLarge,
                     textAlign = TextAlign.Center,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -253,6 +236,38 @@ fun OnboardingScreen(
         ) {
             Text(if (isLast) "Empezar" else "Siguiente")
         }
+    }
+}
+
+@Composable
+private fun BastaIconBadge(size: Dp) {
+    Image(
+        painter = painterResource(R.mipmap.ic_launcher),
+        contentDescription = null,
+        modifier = Modifier
+            .size(size)
+            .clip(RoundedCornerShape(size * 0.22f))
+    )
+}
+
+/** Resalta digitos + "min" en rojo para impacto visual. */
+private fun highlightStats(text: String): AnnotatedString {
+    val regex = Regex("""\d+\s*min(?:/dia)?""")
+    return androidx.compose.ui.text.buildAnnotatedString {
+        var lastEnd = 0
+        regex.findAll(text).forEach { match ->
+            append(text.substring(lastEnd, match.range.first))
+            withStyle(
+                SpanStyle(
+                    color = Color(0xFFDC2626),
+                    fontWeight = FontWeight.Bold
+                )
+            ) {
+                append(match.value)
+            }
+            lastEnd = match.range.last + 1
+        }
+        append(text.substring(lastEnd))
     }
 }
 

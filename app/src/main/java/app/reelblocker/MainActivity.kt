@@ -90,6 +90,10 @@ private fun Root() {
                 override fun requestBatteryExemption() {
                     requestBatteryExemption(ctx)
                 }
+                override fun isAccessibilityEnabled(): Boolean =
+                    isAccessibilityEnabled(ctx)
+                override fun isBatteryExempt(): Boolean =
+                    isBatteryExempt(ctx)
             }
         }
         OnboardingScreen(

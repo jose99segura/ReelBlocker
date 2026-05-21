@@ -8,166 +8,346 @@ import android.os.Bundle
 import android.os.PowerManager
 import android.provider.Settings
 import android.text.TextUtils
-import android.view.Gravity
-import android.view.View
-import android.view.ViewGroup
-import android.widget.Button
-import android.widget.LinearLayout
-import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
-/**
- * Interfaz minima. No usamos XML de layout para mantener el proyecto ligero:
- * construimos la pantalla por codigo. Su unica funcion es decirte si el
- * servicio esta activo y llevarte a los ajustes para activarlo.
- */
-class MainActivity : AppCompatActivity() {
-
-    private lateinit var statusText: TextView
-    private lateinit var statsText: TextView
-    private lateinit var batteryText: TextView
-    private lateinit var batteryButton: Button
-    private lateinit var oemHint: TextView
-
+class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        val root = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            gravity = Gravity.CENTER
-            setPadding(48, 48, 48, 48)
-            layoutParams = ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
-            )
-        }
-
-        val title = TextView(this).apply {
-            text = "ReelBlocker"
-            textSize = 26f
-            gravity = Gravity.CENTER
-        }
-
-        statusText = TextView(this).apply {
-            textSize = 16f
-            gravity = Gravity.CENTER
-            setPadding(0, 48, 0, 48)
-        }
-
-        val button = Button(this).apply {
-            text = "Abrir ajustes de accesibilidad"
-            setOnClickListener {
-                startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+        setContent {
+            ReelBlockerTheme {
+                Surface(color = MaterialTheme.colorScheme.background) {
+                    HomeScreen()
+                }
             }
         }
+    }
+}
 
-        statsText = TextView(this).apply {
-            textSize = 15f
-            gravity = Gravity.CENTER
-            setPadding(0, 48, 0, 16)
+@Composable
+private fun ReelBlockerTheme(content: @Composable () -> Unit) {
+    val colors = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()
+    MaterialTheme(colorScheme = colors, content = content)
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun HomeScreen() {
+    val ctx = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    // refreshKey cambia en cada ON_RESUME → recalcular estados.
+    var refreshKey by remember { mutableIntStateOf(0) }
+    DisposableEffect(lifecycleOwner) {
+        val obs = LifecycleEventObserver { _, e ->
+            if (e == Lifecycle.Event.ON_RESUME) refreshKey++
         }
-
-        batteryText = TextView(this).apply {
-            textSize = 14f
-            gravity = Gravity.CENTER
-            setPadding(0, 32, 0, 8)
-        }
-
-        batteryButton = Button(this).apply {
-            text = getString(R.string.battery_action)
-            setOnClickListener { requestBatteryExemption() }
-        }
-
-        oemHint = TextView(this).apply {
-            textSize = 12f
-            gravity = Gravity.CENTER
-            setPadding(0, 16, 0, 0)
-        }
-
-        val help = TextView(this).apply {
-            text = "Activa \"ReelBlocker\" en la lista de servicios de " +
-                "accesibilidad. Una vez activo, te sacara automaticamente de " +
-                "los Reels de Instagram y los Shorts de YouTube."
-            textSize = 13f
-            gravity = Gravity.CENTER
-            setPadding(0, 48, 0, 0)
-        }
-
-        root.addView(title)
-        root.addView(statusText)
-        root.addView(button)
-        root.addView(statsText)
-        root.addView(batteryText)
-        root.addView(batteryButton)
-        root.addView(oemHint)
-        root.addView(help)
-        setContentView(root)
+        lifecycleOwner.lifecycle.addObserver(obs)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(obs) }
     }
 
-    override fun onResume() {
-        super.onResume()
-        statusText.text = if (isServiceEnabled())
-            "Estado: ACTIVO ✅"
-        else
-            "Estado: inactivo ❌\nToca el boton para activarlo."
-        refreshStats()
-        refreshBattery()
-    }
+    val serviceEnabled = remember(refreshKey) { isAccessibilityEnabled(ctx) }
+    val batteryExempt = remember(refreshKey) { isBatteryExempt(ctx) }
+    val today = remember(refreshKey) { Stats.read(ctx) }
+    val history = remember(refreshKey) { Stats.readLastDays(ctx, 7) }
 
-    private fun refreshStats() {
-        val c = Stats.read(this)
-        statsText.text = getString(R.string.stats_format, c.total, c.instagram, c.youtube)
-    }
-
-    private fun isIgnoringBatteryOptimizations(): Boolean {
-        val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
-        return pm.isIgnoringBatteryOptimizations(packageName)
-    }
-
-    private fun refreshBattery() {
-        val excluded = isIgnoringBatteryOptimizations()
-        batteryText.text = getString(
-            if (excluded) R.string.battery_state_excluded
-            else R.string.battery_state_optimized
-        )
-        batteryButton.visibility = if (excluded) View.GONE else View.VISIBLE
-
-        val needsOemNote = !excluded && Build.MANUFACTURER.lowercase() in setOf(
-            "xiaomi", "redmi", "poco", "huawei", "honor", "samsung", "oppo", "vivo", "realme"
-        )
-        if (needsOemNote) {
-            oemHint.text = getString(R.string.oem_hint, Build.MANUFACTURER)
-            oemHint.visibility = View.VISIBLE
-        } else {
-            oemHint.visibility = View.GONE
+    Scaffold(
+        topBar = {
+            CenterAlignedTopAppBar(title = { Text("ReelBlocker") })
         }
-    }
-
-    @Suppress("BatteryLife")
-    private fun requestBatteryExemption() {
-        try {
-            startActivity(
-                Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
-                    .setData(Uri.parse("package:$packageName"))
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .padding(padding)
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            StatusCard(
+                enabled = serviceEnabled,
+                onAction = { ctx.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)) }
             )
-        } catch (_: Exception) {
-            // Fallback: abrir la pantalla general si el intent directo no esta permitido.
-            startActivity(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
+            BatteryCard(
+                exempt = batteryExempt,
+                onAction = { requestBatteryExemption(ctx) }
+            )
+            StatsCard(today = today, history = history)
+            HelpCard()
         }
     }
+}
 
-    private fun isServiceEnabled(): Boolean {
-        val expected = "$packageName/${BlockerService::class.java.name}"
-        val enabled = Settings.Secure.getString(
-            contentResolver,
-            Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
-        ) ?: return false
-
-        val splitter = TextUtils.SimpleStringSplitter(':')
-        splitter.setString(enabled)
-        while (splitter.hasNext()) {
-            if (splitter.next().equals(expected, ignoreCase = true)) return true
+@Composable
+private fun StatusCard(enabled: Boolean, onAction: () -> Unit) {
+    SectionCard(
+        title = "Servicio de accesibilidad",
+        statusText = if (enabled) "Activo" else "Inactivo",
+        statusOk = enabled
+    ) {
+        if (!enabled) {
+            Spacer(Modifier.height(8.dp))
+            Button(onClick = onAction, modifier = Modifier.fillMaxWidth()) {
+                Text("Abrir ajustes de accesibilidad")
+            }
         }
-        return false
+    }
+}
+
+@Composable
+private fun BatteryCard(exempt: Boolean, onAction: () -> Unit) {
+    val ctx = LocalContext.current
+    val oem = Build.MANUFACTURER.lowercase()
+    val showOemHint = !exempt && oem in setOf(
+        "xiaomi", "redmi", "poco", "huawei", "honor", "samsung", "oppo", "vivo", "realme"
+    )
+
+    SectionCard(
+        title = "Optimizacion de bateria",
+        statusText = if (exempt) "Exenta" else "El sistema puede matar el servicio",
+        statusOk = exempt
+    ) {
+        if (!exempt) {
+            Spacer(Modifier.height(8.dp))
+            Button(onClick = onAction, modifier = Modifier.fillMaxWidth()) {
+                Text("Excluir de la optimizacion")
+            }
+        }
+        if (showOemHint) {
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = ctx.getString(R.string.oem_hint, Build.MANUFACTURER),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
+private fun StatsCard(today: Stats.Counts, history: List<Stats.DayCounts>) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text("Hoy", style = MaterialTheme.typography.titleMedium)
+            Spacer(Modifier.height(4.dp))
+            Text(
+                text = today.total.toString(),
+                fontSize = 48.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = "Instagram: ${today.instagram}  ·  YouTube: ${today.youtube}",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Spacer(Modifier.height(16.dp))
+            Text("Ultimos 7 dias", style = MaterialTheme.typography.titleSmall)
+            Spacer(Modifier.height(8.dp))
+            WeeklyChart(history)
+        }
+    }
+}
+
+@Composable
+private fun WeeklyChart(history: List<Stats.DayCounts>) {
+    val barColor = MaterialTheme.colorScheme.primary
+    val labelColor = MaterialTheme.colorScheme.onSurfaceVariant
+    val maxValue = (history.maxOfOrNull { it.counts.total } ?: 0).coerceAtLeast(1)
+    val dayFmt = remember { DateTimeFormatter.ofPattern("EEE", Locale("es")) }
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(120.dp),
+            verticalAlignment = Alignment.Bottom,
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            history.forEach { day ->
+                val fraction = day.counts.total / maxValue.toFloat()
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Bottom,
+                    modifier = Modifier.width(32.dp)
+                ) {
+                    Text(
+                        text = day.counts.total.toString(),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = labelColor
+                    )
+                    Spacer(Modifier.height(2.dp))
+                    Canvas(
+                        modifier = Modifier
+                            .width(20.dp)
+                            .height((100.dp.value * fraction).coerceAtLeast(2f).dp)
+                    ) {
+                        drawRoundedBar(size, barColor)
+                    }
+                }
+            }
+        }
+        Spacer(Modifier.height(4.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            history.forEach { day ->
+                Box(
+                    modifier = Modifier.width(32.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = day.date.format(dayFmt).take(3),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = labelColor
+                    )
+                }
+            }
+        }
+    }
+}
+
+private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawRoundedBar(
+    size: Size,
+    color: Color
+) {
+    drawRoundRect(
+        color = color,
+        topLeft = Offset.Zero,
+        size = size,
+        cornerRadius = androidx.compose.ui.geometry.CornerRadius(8f, 8f)
+    )
+}
+
+@Composable
+private fun HelpCard() {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+    ) {
+        Text(
+            text = "Una vez activo, cada vez que entres en Reels de Instagram o " +
+                "Shorts de YouTube te sacara con el boton atras. No envia nada " +
+                "fuera del dispositivo.",
+            style = MaterialTheme.typography.bodySmall,
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+}
+
+@Composable
+private fun SectionCard(
+    title: String,
+    statusText: String,
+    statusOk: Boolean,
+    content: @Composable () -> Unit
+) {
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(title, style = MaterialTheme.typography.titleMedium)
+            Spacer(Modifier.height(4.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(10.dp)
+                        .clip(CircleShape)
+                        .background(
+                            if (statusOk) Color(0xFF2E7D32) else Color(0xFFC62828)
+                        )
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    text = statusText,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+            content()
+        }
+    }
+}
+
+// ---- helpers fuera de Compose ----
+
+private fun isAccessibilityEnabled(ctx: Context): Boolean {
+    val expected = "${ctx.packageName}/${BlockerService::class.java.name}"
+    val enabled = Settings.Secure.getString(
+        ctx.contentResolver,
+        Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
+    ) ?: return false
+    val splitter = TextUtils.SimpleStringSplitter(':')
+    splitter.setString(enabled)
+    while (splitter.hasNext()) {
+        if (splitter.next().equals(expected, ignoreCase = true)) return true
+    }
+    return false
+}
+
+private fun isBatteryExempt(ctx: Context): Boolean {
+    val pm = ctx.getSystemService(Context.POWER_SERVICE) as PowerManager
+    return pm.isIgnoringBatteryOptimizations(ctx.packageName)
+}
+
+@Suppress("BatteryLife")
+private fun requestBatteryExemption(ctx: Context) {
+    try {
+        ctx.startActivity(
+            Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
+                .setData(Uri.parse("package:${ctx.packageName}"))
+        )
+    } catch (_: Exception) {
+        ctx.startActivity(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
     }
 }

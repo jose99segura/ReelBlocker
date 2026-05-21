@@ -51,6 +51,15 @@ object Stats {
         prefs(ctx).edit().putBoolean(KEY_ALLOW_IG_DM, allowed).apply()
     }
 
+    private const val KEY_BLOCK_IG_STORIES = "block_ig_stories"
+
+    fun isStoriesBlocked(ctx: Context): Boolean =
+        prefs(ctx).getBoolean(KEY_BLOCK_IG_STORIES, false)
+
+    fun setStoriesBlocked(ctx: Context, blocked: Boolean) {
+        prefs(ctx).edit().putBoolean(KEY_BLOCK_IG_STORIES, blocked).apply()
+    }
+
     data class Counts(val total: Int, val instagram: Int, val youtube: Int) {
         companion object { val ZERO = Counts(0, 0, 0) }
     }

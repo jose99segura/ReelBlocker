@@ -29,10 +29,17 @@ class BlockerService : AccessibilityService() {
         private const val PKG_INSTAGRAM = "com.instagram.android"
         private const val PKG_YOUTUBE = "com.google.android.youtube"
 
-        private val INSTAGRAM_REEL_HINTS = listOf(
+        // Reels publicos (TikTok-like). Bloquear siempre si IG esta activo.
+        private val INSTAGRAM_REELS_HINTS = listOf(
             "clips_viewer",
-            "reel_viewer",
             "clips_swipe_refresh"
+        )
+
+        // HISTORIAS. Instagram las llama "reel" internamente (legacy 2016).
+        // Bloquear solo si el usuario activa el sub-switch.
+        private val INSTAGRAM_STORIES_HINTS = listOf(
+            "reel_viewer",
+            "story_viewer"
         )
 
         // Hints en el ARBOL: solo se usan para elevar el flag a true en
@@ -83,6 +90,10 @@ class BlockerService : AccessibilityService() {
         // este tiempo cualquier nuevo match dispara BACK. 5 min es de
         // sobra para ver un reel pero corta una sesion olvidada.
         private const val DM_VIEW_BUDGET_MS = 300_000L
+        // Si vimos hints DM hace menos de esta ventana, asumimos que el
+        // reel que se acaba de detectar viene de un DM. Cubre la transicion
+        // DM thread -> reel viewer (< 500 ms tipicamente).
+        private const val DM_RECENCY_MS = 2500L
     }
 
     private var lastActionTime = 0L
@@ -97,6 +108,9 @@ class BlockerService : AccessibilityService() {
     // hacer scroll, al salir del visor, o al expirar el watchdog.
     private var watchingDmReel = false
     private var watchingDmReelStart = 0L
+    // Timestamp del ultimo evento donde vimos hints DM en el arbol. Sirve
+    // para decidir si un reel recien detectado viene de un DM.
+    private var lastSeenDmTimestamp = 0L
 
     override fun onServiceConnected() {
         super.onServiceConnected()
@@ -138,8 +152,20 @@ class BlockerService : AccessibilityService() {
             return
         }
 
+        // Actualizar marca de "vimos DM" si el arbol tiene hints DM AHORA.
+        // Esto se evalua en cada evento, asi capturamos la ultima vez que
+        // el usuario estuvo en una pantalla con thread de DM en el arbol.
+        if (pkg == PKG_INSTAGRAM && containsAnyHint(root, INSTAGRAM_DM_HINTS)) {
+            lastSeenDmTimestamp = SystemClock.elapsedRealtime()
+        }
+
         val hints = when (pkg) {
-            PKG_INSTAGRAM -> INSTAGRAM_REEL_HINTS
+            PKG_INSTAGRAM -> {
+                val list = ArrayList<String>(4)
+                list.addAll(INSTAGRAM_REELS_HINTS)
+                if (Stats.isStoriesBlocked(this)) list.addAll(INSTAGRAM_STORIES_HINTS)
+                list
+            }
             PKG_YOUTUBE -> YOUTUBE_SHORTS_HINTS
             else -> return
         }
@@ -170,13 +196,17 @@ class BlockerService : AccessibilityService() {
             }
         }
 
-        // Punto critico: si DETECTAMOS un reel y EN ESTE MOMENTO el arbol
-        // contiene hints de DM (es decir, debajo del visor sigue el thread
-        // de mensajes), interpretamos que el usuario abrio el reel desde un
-        // DM y lo permitimos.
-        if (dmAllowed && !watchingDmReel && containsAnyHint(root, INSTAGRAM_DM_HINTS)) {
-            Log.d(TAG, "Reel autorizado: arbol con hints DM al detectar (id=$matchedId)")
-            dumpDmCandidates(root)
+        // Punto critico: si vimos hints DM hace muy poco (< DM_RECENCY_MS),
+        // interpretamos que el reel viene de un DM. La transicion DM thread
+        // -> reel viewer es < 500 ms, asi que 2.5 s cubre el caso con
+        // margen. Esto funciona aunque el visor del reel sustituya el
+        // thread en el arbol (que es lo que pasaba con el approach anterior).
+        val msSinceDm = now - lastSeenDmTimestamp
+        val cameFromDm = pkg == PKG_INSTAGRAM &&
+            lastSeenDmTimestamp > 0 &&
+            msSinceDm < DM_RECENCY_MS
+        if (dmAllowed && !watchingDmReel && cameFromDm) {
+            Log.d(TAG, "Reel autorizado: vimos DM hace ${msSinceDm}ms (id=$matchedId)")
             watchingDmReel = true
             watchingDmReelStart = now
             lastReelsPackage = pkg

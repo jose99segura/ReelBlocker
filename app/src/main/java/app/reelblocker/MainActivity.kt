@@ -263,6 +263,34 @@ private fun AppsCard(refreshKey: Int, onChanged: () -> Unit) {
                             }
                         )
                     }
+
+                    // Sub-opcion: bloquear tambien las Historias.
+                    val storiesBlocked = remember(refreshKey) { Stats.isStoriesBlocked(ctx) }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 16.dp, top = 4.dp, bottom = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Bloquear Historias",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                            Text(
+                                text = "Por defecto las stories no se bloquean. Activalo si tambien quieres bloquearlas.",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Switch(
+                            checked = storiesBlocked,
+                            onCheckedChange = { newValue ->
+                                Stats.setStoriesBlocked(ctx, newValue)
+                                onChanged()
+                            }
+                        )
+                    }
                 }
             }
         }

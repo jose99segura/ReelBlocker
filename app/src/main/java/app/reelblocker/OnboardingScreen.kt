@@ -37,13 +37,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Path
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -241,13 +245,41 @@ fun OnboardingScreen(
 
 @Composable
 private fun BastaIconBadge(size: Dp) {
-    Image(
-        painter = painterResource(R.mipmap.ic_launcher),
-        contentDescription = null,
+    Box(
         modifier = Modifier
             .size(size)
             .clip(RoundedCornerShape(size * 0.22f))
-    )
+            .background(Color(0xFF1A1A2E)),
+        contentAlignment = Alignment.Center
+    ) {
+        // Mismo path que ic_launcher_foreground.xml, dibujado directamente
+        // para no depender del adaptive-icon (que painterResource no soporta).
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val s = this.size.width // asumimos cuadrado
+            fun u(v: Float) = v / 108f * s  // viewport del XML es 108x108
+
+            // Rectangulo blanco vertical (el "movil/reel")
+            drawRoundRect(
+                color = Color.White,
+                topLeft = Offset(u(42f), u(28f)),
+                size = Size(u(66f - 42f), u(80f - 28f)),
+                cornerRadius = CornerRadius(u(5f), u(5f))
+            )
+
+            // Flecha back "recortada" en color del fondo
+            val arrow = Path().apply {
+                moveTo(u(40f), u(54f))
+                lineTo(u(50f), u(44f))
+                lineTo(u(50f), u(49f))
+                lineTo(u(64f), u(49f))
+                lineTo(u(64f), u(59f))
+                lineTo(u(50f), u(59f))
+                lineTo(u(50f), u(64f))
+                close()
+            }
+            drawPath(arrow, Color(0xFF1A1A2E))
+        }
+    }
 }
 
 /** Resalta digitos + "min" en rojo para impacto visual. */

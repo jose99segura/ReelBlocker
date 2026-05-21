@@ -20,8 +20,8 @@ object Stats {
     fun isOnboardingDone(ctx: Context): Boolean =
         prefs(ctx).getBoolean(KEY_ONBOARDING_DONE, false)
 
-    fun setOnboardingDone(ctx: Context) {
-        prefs(ctx).edit().putBoolean(KEY_ONBOARDING_DONE, true).apply()
+    fun setOnboardingDone(ctx: Context, done: Boolean = true) {
+        prefs(ctx).edit().putBoolean(KEY_ONBOARDING_DONE, done).apply()
     }
 
     const val PKG_INSTAGRAM = "com.instagram.android"

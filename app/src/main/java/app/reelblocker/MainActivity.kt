@@ -49,6 +49,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
@@ -119,7 +120,10 @@ private fun Root() {
             }
         )
     } else {
-        HomeScreen()
+        HomeScreen(onResetOnboarding = {
+            Stats.setOnboardingDone(ctx, done = false)
+            onboardingDone = false
+        })
     }
 }
 
@@ -131,7 +135,7 @@ private fun ReelBlockerTheme(content: @Composable () -> Unit) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun HomeScreen() {
+private fun HomeScreen(onResetOnboarding: () -> Unit = {}) {
     val ctx = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
 
@@ -242,6 +246,7 @@ private fun HomeScreen() {
                 ProUpsellCard(onClick = { showPaywall = true })
             }
             HelpCard()
+            AboutCard(onResetOnboarding = onResetOnboarding)
 
             // Status pequeño al final.
             Spacer(Modifier.height(4.dp))
@@ -522,6 +527,8 @@ private fun AppIconBadge(icon: Drawable?, fallbackLetter: String, enabled: Boole
 
 @Composable
 private fun StatsCard(today: Stats.Counts, history: List<Stats.DayCounts>) {
+    val hasAnyHistory = history.any { it.counts.total > 0 }
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
@@ -529,21 +536,47 @@ private fun StatsCard(today: Stats.Counts, history: List<Stats.DayCounts>) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text("Hoy", style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.height(4.dp))
-            Text(
-                text = today.total.toString(),
-                fontSize = 48.sp,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                text = "Instagram: ${today.instagram}  ·  YouTube: ${today.youtube}",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            if (today.total == 0) {
+                // Empty state amable cuando todavia no has caido hoy.
+                Text(
+                    text = "0",
+                    fontSize = 48.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                )
+                Text(
+                    text = "Sin caidas en Reels todavia. Bien.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            } else {
+                Text(
+                    text = today.total.toString(),
+                    fontSize = 48.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = "Instagram: ${today.instagram}  ·  YouTube: ${today.youtube}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
 
             Spacer(Modifier.height(16.dp))
             Text("Ultimos 7 dias", style = MaterialTheme.typography.titleSmall)
             Spacer(Modifier.height(8.dp))
-            WeeklyChart(history)
+            if (hasAnyHistory) {
+                WeeklyChart(history)
+            } else {
+                Text(
+                    text = "Aun no hay historial. Vuelve manana — los datos se acumulan.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 24.dp)
+                )
+            }
         }
     }
 }
@@ -655,6 +688,55 @@ private fun TipCard() {
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onTertiaryContainer
                 )
+            }
+        }
+    }
+}
+
+@Composable
+private fun AboutCard(onResetOnboarding: () -> Unit) {
+    val ctx = LocalContext.current
+    val versionName = remember {
+        try {
+            ctx.packageManager.getPackageInfo(ctx.packageName, 0).versionName ?: "1.0"
+        } catch (_: Exception) { "1.0" }
+    }
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+    ) {
+        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
+            Text(
+                text = "Acerca de",
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(Modifier.height(4.dp))
+            Text(
+                text = "Basta! Reel Blocker · v$versionName",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Spacer(Modifier.height(8.dp))
+            TextButton(
+                onClick = {
+                    ctx.startActivity(
+                        Intent(Intent.ACTION_VIEW, Uri.parse("https://jose99segura.github.io/ReelBlocker/privacy.html"))
+                    )
+                }
+            ) { Text("Politica de privacidad") }
+
+            TextButton(
+                onClick = {
+                    ctx.startActivity(
+                        Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/jose99segura/ReelBlocker"))
+                    )
+                }
+            ) { Text("Codigo fuente (GitHub)") }
+
+            TextButton(onClick = onResetOnboarding) {
+                Text("Volver a ver tutorial")
             }
         }
     }

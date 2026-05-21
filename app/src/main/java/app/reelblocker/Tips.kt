@@ -25,7 +25,11 @@ object Tips {
         "TikTok engancha en 8 min de uso. Mas rapido que el cafe.",
         "Una sesion media de Reels dura 24 min. Casi medio episodio de algo bueno.",
         "Cuanto mas joven el usuario, mas tiempo en short video. Cuesta verlo en abuelos.",
-        "Cada like que recibes en Reels no es tuyo. Es del algoritmo decidiendo por ti."
+        "Cada like que recibes en Reels no es tuyo. Es del algoritmo decidiendo por ti.",
+        "Adolescentes con +3h/dia en short video tienen 2x mas sintomas de ansiedad.",
+        "El 60% de la gente revisa el movil en los primeros 10 min al despertar.",
+        "Pasamos de media 3h 15min al dia con el movil. Eso son 49 dias enteros al ano.",
+        "La luz azul de la pantalla retrasa la liberacion de melatonina 1.5 horas."
     )
 
     private val alternatives = listOf(
@@ -40,7 +44,11 @@ object Tips {
         "20 sentadillas ahora te dan mas energia que 20 reels.",
         "Escribir un mensaje largo a alguien que te importa pega mas que cualquier scroll.",
         "Un cafe con alguien en persona vale por una semana de stories.",
-        "Si te aburres, mira por la ventana 30 segundos. En serio."
+        "Si te aburres, mira por la ventana 30 segundos. En serio.",
+        "Escucha una cancion con los ojos cerrados. Suficiente como pausa.",
+        "Pon una canzon, baila 3 minutos. El cuerpo agradece.",
+        "Ducha fria 30 segundos. Reseteas mejor que con 50 reels.",
+        "Riega una planta. Trae al cerebro a algo lento y vivo."
     )
 
     private val reflections = listOf(
@@ -53,7 +61,11 @@ object Tips {
         "Escoge tus distracciones a proposito. Las que te sorprenden son las que mas duelen.",
         "Si entras en Reels para 'descansar', acabas mas cansado. Comprobado.",
         "La curiosidad real dura horas. La de los Reels, 8 segundos.",
-        "Cierra los ojos 10 segundos. Eso ya es mas descanso que media hora de scroll."
+        "Cierra los ojos 10 segundos. Eso ya es mas descanso que media hora de scroll.",
+        "Lo bueno tarda. Lo de Reels llega en 15 segundos y se va igual de rapido.",
+        "La atencion es el recurso mas escaso del siglo. Y la regalas gratis.",
+        "Pregunta: ¿de quien era el ultimo reel que viste? Exacto.",
+        "Antes de coger el movil, respira tres veces. A veces se te quita."
     )
 
     private val all: List<String> = stats + alternatives + reflections

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ReelBlocker — Política de Privacidad</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+         max-width: 720px; margin: 2rem auto; padding: 0 1rem; line-height: 1.55;
+         color: #1a1a2e; background: #fafafa; }
+  h1 { font-size: 1.8rem; }
+  h2 { margin-top: 2rem; font-size: 1.25rem; }
+  a { color: #4338ca; }
+  code, pre { background: #f0f0f0; padding: 0.1rem 0.3rem; border-radius: 4px;
+              font-size: 0.92em; }
+  .updated { color: #666; font-size: 0.9rem; }
+  ul { padding-left: 1.4rem; }
+  li { margin: 0.25rem 0; }
+  .lang { float: right; font-size: 0.9rem; }
+  hr { margin: 2.5rem 0; border: 0; border-top: 1px solid #ddd; }
+</style>
+</head>
+<body>
+<a class="lang" href="#english">English version below ↓</a>
+<h1>ReelBlocker — Política de Privacidad</h1>
+<p class="updated">Última actualización: 21 de mayo de 2026</p>
+
+<h2>Resumen en una frase</h2>
+<p>ReelBlocker funciona <strong>100% en tu dispositivo</strong>. No envía ni recoge
+ningún dato fuera de tu móvil, no tiene analítica, no tiene cuentas de usuario,
+no comparte nada con terceros.</p>
+
+<h2>Qué hace la app</h2>
+<p>ReelBlocker detecta cuando entras en Reels de Instagram o Shorts de YouTube y
+ejecuta la acción "atrás" del sistema para sacarte. Usa el servicio de Accesibilidad
+de Android, que es la única forma en Android de detectar qué pantalla concreta de
+otra app estás viendo.</p>
+
+<h2>Qué información lee</h2>
+<p>Mientras el servicio está activo, el sistema operativo le entrega eventos de
+accesibilidad de Instagram y YouTube. Para cada evento, la app:</p>
+<ul>
+  <li>Lee los <em>resource-id</em> de los elementos visibles (cadenas como
+      <code>clips_viewer_view_pager</code>) para reconocer si estás en el visor
+      de Reels o Shorts.</li>
+  <li>Comprueba el nombre de la <em>Activity</em> o <em>Fragment</em> activo
+      (p. ej. <code>InstagramMainActivity</code>) para distinguir contextos como
+      mensajes directos del feed principal.</li>
+</ul>
+<p>La app <strong>no</strong> lee el contenido de los mensajes, ni el texto de los
+posts, ni los nombres de las personas con las que hablas, ni las imágenes, ni
+ninguna información personal de Instagram o YouTube. Solo identifica
+contenedores genéricos por su id.</p>
+
+<h2>Qué información guarda en el dispositivo</h2>
+<p>En las <em>SharedPreferences</em> internas de la app se guarda, exclusivamente:</p>
+<ul>
+  <li>Contadores numéricos diarios de Reels / Shorts bloqueados (sólo cifras
+      agregadas).</li>
+  <li>Tus preferencias: qué apps quieres bloquear, si permites Reels desde DM,
+      si bloqueas también Stories.</li>
+  <li>Si ya completaste el onboarding inicial.</li>
+</ul>
+<p>Estos datos viven solo en tu dispositivo. Si desinstalas la app, se borran
+todos.</p>
+
+<h2>Qué envía la app a servidores externos</h2>
+<p><strong>Nada.</strong> La app no hace peticiones de red. No tiene SDK de
+analítica, ni Firebase, ni publicidad, ni informes de fallos en la nube.
+Puedes confirmarlo revisando el código fuente del proyecto.</p>
+
+<h2>Permisos que pide y por qué</h2>
+<ul>
+  <li><code>BIND_ACCESSIBILITY_SERVICE</code> — necesario para detectar las
+      pantallas de Reels/Shorts. Tú activas este permiso manualmente desde
+      Ajustes → Accesibilidad.</li>
+  <li><code>REQUEST_IGNORE_BATTERY_OPTIMIZATIONS</code> — para que el sistema
+      no mate el servicio en segundo plano. Es opcional.</li>
+  <li><em>Consulta de paquetes instalados</em> (<code>QUERY_ALL_PACKAGES</code>
+      no se solicita; usamos consultas concretas sobre Instagram y YouTube) —
+      para detectar si tienes Instagram o YouTube instalado y mostrar los
+      switches correspondientes.</li>
+</ul>
+
+<h2>Niños</h2>
+<p>La app no está dirigida específicamente a menores de 13 años, y no recoge
+datos sensibles de ningún tipo.</p>
+
+<h2>Cambios en esta política</h2>
+<p>Si la política cambia, la nueva versión se publicará en esta misma URL y se
+actualizará la fecha de "Última actualización" arriba.</p>
+
+<h2>Contacto</h2>
+<p>Para cualquier consulta sobre privacidad o sobre la app, escribe a:
+<code>[CORREO_CONTACTO]</code></p>
+
+<p>El código fuente está disponible en
+<a href="https://github.com/jose99segura/ReelBlocker">github.com/jose99segura/ReelBlocker</a>.</p>
+
+<hr>
+
+<h1 id="english">ReelBlocker — Privacy Policy (English)</h1>
+<p class="updated">Last updated: 21 May 2026</p>
+
+<h2>One-line summary</h2>
+<p>ReelBlocker runs <strong>100% on your device</strong>. It does not send or
+collect any data outside your phone, no analytics, no user accounts, no
+third-party sharing.</p>
+
+<h2>What the app does</h2>
+<p>ReelBlocker detects when you enter Instagram Reels or YouTube Shorts and
+triggers the system "back" action to get you out. It uses the Android
+Accessibility Service, the only Android API that can detect which specific
+screen of another app is currently visible.</p>
+
+<h2>What it reads</h2>
+<p>While the service is active, the OS delivers accessibility events from
+Instagram and YouTube. For each event, the app:</p>
+<ul>
+  <li>Reads the <em>resource-ids</em> of visible UI elements (strings such as
+      <code>clips_viewer_view_pager</code>) to recognize whether you are in
+      the Reels or Shorts viewer.</li>
+  <li>Checks the active Activity/Fragment class name (e.g.
+      <code>InstagramMainActivity</code>) to distinguish contexts such as
+      direct messages vs. the main feed.</li>
+</ul>
+<p>The app <strong>does not</strong> read message content, post text, user
+names, images, or any personal information from Instagram or YouTube. It only
+identifies generic UI containers by id.</p>
+
+<h2>What it stores on the device</h2>
+<p>The app's local SharedPreferences hold exclusively:</p>
+<ul>
+  <li>Daily numeric counters of blocked Reels / Shorts (aggregate numbers only).</li>
+  <li>Your preferences: which apps to block, whether to allow Reels from DMs,
+      whether to also block Stories.</li>
+  <li>Whether you've completed the initial onboarding.</li>
+</ul>
+<p>This data lives only on your device. Uninstalling the app deletes all of it.</p>
+
+<h2>What is sent to external servers</h2>
+<p><strong>Nothing.</strong> The app makes no network requests. There is no
+analytics SDK, no Firebase, no advertising, no cloud crash reports. You can
+verify this by reviewing the source code.</p>
+
+<h2>Permissions requested and why</h2>
+<ul>
+  <li><code>BIND_ACCESSIBILITY_SERVICE</code> — required to detect Reels/Shorts
+      screens. You enable this manually under Settings → Accessibility.</li>
+  <li><code>REQUEST_IGNORE_BATTERY_OPTIMIZATIONS</code> — so the OS doesn't kill
+      the background service. Optional.</li>
+  <li><em>Specific package queries</em> against Instagram and YouTube — to
+      detect whether they are installed and show the corresponding switches.
+      We do not request <code>QUERY_ALL_PACKAGES</code>.</li>
+</ul>
+
+<h2>Children</h2>
+<p>The app is not specifically directed at children under 13 and does not
+collect any sensitive data.</p>
+
+<h2>Changes to this policy</h2>
+<p>If this policy changes, the new version will be published at this same URL
+and the "Last updated" date above will be revised.</p>
+
+<h2>Contact</h2>
+<p>For any privacy question or concern about the app, please write to:
+<code>[CONTACT_EMAIL]</code></p>
+
+<p>Source code:
+<a href="https://github.com/jose99segura/ReelBlocker">github.com/jose99segura/ReelBlocker</a>.</p>
+
+</body>
+</html>

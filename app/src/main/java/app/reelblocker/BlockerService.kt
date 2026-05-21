@@ -35,26 +35,26 @@ class BlockerService : AccessibilityService() {
             "clips_swipe_refresh"
         )
 
-        // Pistas de pantalla "estoy en un DM/mensaje directo". Si las vemos
-        // justo antes de un match de reels, permitimos el reel.
-        // Instagram usa muchos resource-id con prefijo "direct_" en su
-        // pantalla de mensajes; tambien "thread" y "message" suelen aparecer.
+        // Hints en el ARBOL: solo se usan para elevar el flag a true en
+        // eventos de contenido. Tienen que ser muy especificos para no
+        // confundir el icono "DM" del menu (presente en todas las pantallas)
+        // o el fragmento de comentarios de un reel.
         private val INSTAGRAM_DM_HINTS = listOf(
-            "direct_",
-            "thread_",
-            "message_thread",
-            "message_list",
-            "messages_recycler",
-            "row_message",
-            "msg_"
+            "direct_thread",
+            "row_thread",
+            "thread_composer",
+            "direct_composer"
         )
 
-        // Subcadenas para detectar pantalla DM por nombre de clase
-        // (event.className en TYPE_WINDOW_STATE_CHANGED).
+        // Hints en event.className (solo TYPE_WINDOW_STATE_CHANGED). Aqui
+        // si podemos pasar el flag a false. Usamos cadenas compuestas para
+        // evitar matchear "Thread" o "Inbox" sueltos que aparecen tambien
+        // en otras partes de IG.
         private val INSTAGRAM_DM_CLASSNAME_HINTS = listOf(
-            "Direct",
-            "Thread",
-            "Inbox"
+            "DirectThread",
+            "DirectInbox",
+            "DirectMessage",
+            "DirectShare"
         )
 
         private val YOUTUBE_SHORTS_HINTS = listOf(
@@ -111,32 +111,39 @@ class BlockerService : AccessibilityService() {
             return
         }
 
-        // Actualizar el flag de DM solo para Instagram, antes del scan de reels.
+        // Actualizar el flag de DM solo para Instagram.
+        // Regla: className (en STATE_CHANGED) es la unica fuente que puede
+        // BAJAR el flag a false. Hints del arbol solo lo SUBEN a true.
         if (pkg == PKG_INSTAGRAM) {
-            // Senal 1: nombre de clase del evento (solo en cambios de pantalla).
-            val classHint = if (event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
-                val cls = event.className?.toString().orEmpty()
-                INSTAGRAM_DM_CLASSNAME_HINTS.any { cls.contains(it, ignoreCase = true) }
-            } else false
+            val isStateChange = event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
+            val cls = event.className?.toString().orEmpty()
+            val classMatch = isStateChange && INSTAGRAM_DM_CLASSNAME_HINTS.any {
+                cls.contains(it, ignoreCase = true)
+            }
 
-            // Senal 2: BFS sobre el arbol buscando hints de DM.
-            val treeHint = containsAnyHint(root, INSTAGRAM_DM_HINTS)
-
-            val inDm = classHint || treeHint
-            if (inDm != lastIgScreenIsDm) {
-                Log.d(TAG, "lastIgScreenIsDm: $lastIgScreenIsDm -> $inDm  (clase=$classHint tree=$treeHint)")
-                if (inDm) {
-                    Log.d(TAG, "  className=${event.className}")
+            if (isStateChange) {
+                // Cambio de pantalla: la verdad la dicta el className.
+                val previous = lastIgScreenIsDm
+                lastIgScreenIsDm = classMatch
+                if (previous != classMatch) {
+                    Log.d(TAG, "lastIgScreenIsDm[state]: $previous -> $classMatch  className=$cls")
+                    if (previous && !classMatch) {
+                        // Saliendo de DM. Abrir grace por si lo siguiente es
+                        // el visor de reels (la transicion puede ser inmediata).
+                        dmGraceUntil = SystemClock.elapsedRealtime() + DM_GRACE_MS
+                        Log.d(TAG, "  abro ventana de gracia DM")
+                    }
+                    if (classMatch) dumpDmCandidates(root)
+                }
+            } else if (!lastIgScreenIsDm) {
+                // Evento de contenido y no estabamos en DM: comprobar si
+                // algun hint estrictamente DM aparece en el arbol.
+                if (containsAnyHint(root, INSTAGRAM_DM_HINTS)) {
+                    lastIgScreenIsDm = true
+                    Log.d(TAG, "lastIgScreenIsDm[tree]: false -> true (hint encontrado)")
                     dumpDmCandidates(root)
-                } else if (lastIgScreenIsDm) {
-                    // Acabamos de salir del DM. Abrimos la ventana de gracia
-                    // ya, porque el visor de reels puede llegar inmediatamente
-                    // despues y para entonces el arbol no tendra hints de DM.
-                    dmGraceUntil = SystemClock.elapsedRealtime() + DM_GRACE_MS
-                    Log.d(TAG, "  abro ventana de gracia DM hasta $dmGraceUntil")
                 }
             }
-            lastIgScreenIsDm = inDm
         }
 
         val hints = when (pkg) {

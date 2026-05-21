@@ -78,11 +78,11 @@ class BlockerService : AccessibilityService() {
         // Tras consumir un bypass DM, ignorar matches durante este intervalo
         // para no contar dos veces el mismo reel por eventos de contenido
         // que llegan en rafaga al abrir el visor.
-        private const val DM_CONSUMED_GRACE_MS = 800L
-        // Presupuesto de visualizacion del reel desde DM = 0: en cuanto se
-        // acaba la gracia post-consumo, el siguiente match dispara BACK.
-        // El usuario ve la carga inicial (~DM_CONSUMED_GRACE_MS) y vuelve.
-        private const val DM_VIEW_BUDGET_MS = 0L
+        private const val DM_CONSUMED_GRACE_MS = 2000L
+        // Red de seguridad: si por lo que sea no detectamos el swipe, tras
+        // este tiempo cualquier nuevo match dispara BACK. 5 min es de
+        // sobra para ver un reel pero corta una sesion olvidada.
+        private const val DM_VIEW_BUDGET_MS = 300_000L
     }
 
     private var lastActionTime = 0L
@@ -125,6 +125,20 @@ class BlockerService : AccessibilityService() {
         // Gate por preferencias del usuario.
         if (!Stats.isAppEnabled(this, pkg)) {
             Log.v(TAG, "Bloqueo desactivado por el usuario en $pkg")
+            return
+        }
+
+        // Detectar swipe dentro del visor: si estabamos viendo un reel
+        // permitido por DM y el usuario hace scroll para pasar al siguiente,
+        // terminamos el bypass y dejamos que el proximo match dispare BACK.
+        if (event.eventType == AccessibilityEvent.TYPE_VIEW_SCROLLED &&
+            pkg == PKG_INSTAGRAM &&
+            lastReelsPackage == pkg &&
+            dmState == DmState.CONSUMED) {
+            Log.d(TAG, "Scroll detectado en visor DM, fin de bypass — proximo reel se bloquea")
+            dmAllowanceStarted = 0L
+            lastReelsPackage = null
+            dmConsumedUntil = 0L
             return
         }
 

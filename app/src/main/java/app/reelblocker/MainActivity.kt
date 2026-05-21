@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.os.PowerManager
 import android.provider.Settings
 import android.text.TextUtils
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.AnimatedContent
@@ -19,6 +20,7 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -37,8 +39,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -141,22 +146,58 @@ private fun HomeScreen() {
 
     val serviceEnabled = remember(refreshKey) { isAccessibilityEnabled(ctx) }
     val batteryExempt = remember(refreshKey) { isBatteryExempt(ctx) }
+    val isPro = remember(refreshKey) { Premium.isPro(ctx) }
     val today = remember(refreshKey) { Stats.read(ctx) }
     val history = remember(refreshKey) { Stats.readLastDays(ctx, 7) }
+
+    var showPaywall by remember { mutableStateOf(false) }
+    // Secret tap counter — 5 taps al wordmark "Basta" desbloquea Pro debug.
+    var secretTapCount by remember { mutableIntStateOf(0) }
+
+    if (showPaywall) {
+        PaywallSheet(
+            onDismiss = { showPaywall = false },
+            onPurchase = {
+                Toast.makeText(ctx, "Play Billing proximamente — usa el tap secreto para probar", Toast.LENGTH_LONG).show()
+                showPaywall = false
+            },
+            onRestore = {
+                Toast.makeText(ctx, "Play Billing proximamente", Toast.LENGTH_SHORT).show()
+            }
+        )
+    }
 
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(title = {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.clickable {
+                        secretTapCount++
+                        if (secretTapCount >= 5) {
+                            val newValue = !Premium.isPro(ctx)
+                            Premium.setPro(ctx, newValue)
+                            Toast.makeText(
+                                ctx,
+                                if (newValue) "🔓 Pro activado (debug)" else "🔒 Pro desactivado (debug)",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            secretTapCount = 0
+                            refreshKey++
+                        }
+                    }
+                ) {
                     Text(
                         text = "Basta",
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Black
                     )
                     Text(
-                        text = "Reel Blocker",
+                        text = if (isPro) "Reel Blocker · Pro" else "Reel Blocker",
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = if (isPro) MaterialTheme.colorScheme.primary
+                                else MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontWeight = if (isPro) FontWeight.Bold else FontWeight.Normal
                     )
                 }
             })
@@ -191,7 +232,15 @@ private fun HomeScreen() {
             // Contenido principal.
             StatsCard(today = today, history = history)
             TipCard()
-            AppsCard(refreshKey) { refreshKey++ }
+            AppsCard(
+                refreshKey = refreshKey,
+                isPro = isPro,
+                onChanged = { refreshKey++ },
+                onOpenPaywall = { showPaywall = true }
+            )
+            if (!isPro) {
+                ProUpsellCard(onClick = { showPaywall = true })
+            }
             HelpCard()
 
             // Status pequeño al final.
@@ -286,7 +335,12 @@ private fun StatusChip(text: String, ok: Boolean) {
 }
 
 @Composable
-private fun AppsCard(refreshKey: Int, onChanged: () -> Unit) {
+private fun AppsCard(
+    refreshKey: Int,
+    isPro: Boolean,
+    onChanged: () -> Unit,
+    onOpenPaywall: () -> Unit
+) {
     val ctx = LocalContext.current
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -332,7 +386,12 @@ private fun AppsCard(refreshKey: Int, onChanged: () -> Unit) {
 
                 // Sub-opciones de Instagram (solo si esta instalado y activado).
                 if (pkg == Stats.PKG_INSTAGRAM && enabled && installed) {
-                    InstagramSubOptions(refreshKey = refreshKey, onChanged = onChanged)
+                    InstagramSubOptions(
+                        refreshKey = refreshKey,
+                        isPro = isPro,
+                        onChanged = onChanged,
+                        onOpenPaywall = onOpenPaywall
+                    )
                 }
 
                 // Separador entre apps (no tras la ultima).
@@ -345,7 +404,12 @@ private fun AppsCard(refreshKey: Int, onChanged: () -> Unit) {
 }
 
 @Composable
-private fun InstagramSubOptions(refreshKey: Int, onChanged: () -> Unit) {
+private fun InstagramSubOptions(
+    refreshKey: Int,
+    isPro: Boolean,
+    onChanged: () -> Unit,
+    onOpenPaywall: () -> Unit
+) {
     val ctx = LocalContext.current
     val dmAllowed = remember(refreshKey) { Stats.isDmReelsAllowed(ctx) }
     val storiesBlocked = remember(refreshKey) { Stats.isStoriesBlocked(ctx) }
@@ -353,20 +417,24 @@ private fun InstagramSubOptions(refreshKey: Int, onChanged: () -> Unit) {
     SubOptionRow(
         title = "Permitir reels desde DM",
         description = "Reels enviados por amigos en mensajes directos no se bloquean",
-        checked = dmAllowed,
+        checked = isPro && dmAllowed,
+        isPro = isPro,
         onCheckedChange = {
             Stats.setDmReelsAllowed(ctx, it)
             onChanged()
-        }
+        },
+        onLockedClick = onOpenPaywall
     )
     SubOptionRow(
         title = "Bloquear Historias",
         description = "Por defecto las stories no se bloquean. Activalo si tambien quieres bloquearlas.",
-        checked = storiesBlocked,
+        checked = isPro && storiesBlocked,
+        isPro = isPro,
         onCheckedChange = {
             Stats.setStoriesBlocked(ctx, it)
             onChanged()
-        }
+        },
+        onLockedClick = onOpenPaywall
     )
 }
 
@@ -375,19 +443,35 @@ private fun SubOptionRow(
     title: String,
     description: String,
     checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit
+    isPro: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    onLockedClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .let { if (!isPro) it.clickable { onLockedClick() } else it }
             .padding(start = 52.dp, top = 4.dp, bottom = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.bodyMedium
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = if (isPro) MaterialTheme.colorScheme.onSurface
+                            else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                )
+                if (!isPro) {
+                    Spacer(Modifier.width(6.dp))
+                    Icon(
+                        imageVector = Icons.Outlined.Lock,
+                        contentDescription = "Pro",
+                        modifier = Modifier.size(14.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
             Text(
                 text = description,
                 style = MaterialTheme.typography.bodySmall,
@@ -396,6 +480,7 @@ private fun SubOptionRow(
         }
         Switch(
             checked = checked,
+            enabled = isPro,
             onCheckedChange = onCheckedChange
         )
     }
@@ -571,6 +656,46 @@ private fun TipCard() {
                     color = MaterialTheme.colorScheme.onTertiaryContainer
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun ProUpsellCard(onClick: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() },
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Basta! Pro",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+                Spacer(Modifier.height(2.dp))
+                Text(
+                    text = "Permite reels desde DM, bloquea Stories y mas. ${Premium.PRO_PRICE}.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.85f)
+                )
+            }
+            Spacer(Modifier.width(12.dp))
+            Text(
+                text = "→",
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onPrimaryContainer
+            )
         }
     }
 }

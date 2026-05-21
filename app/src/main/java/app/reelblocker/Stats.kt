@@ -60,6 +60,19 @@ object Stats {
         prefs(ctx).edit().putBoolean(KEY_BLOCK_IG_STORIES, blocked).apply()
     }
 
+    /**
+     * Valor EFECTIVO del DM bypass: requiere ser Pro Y tener el switch ON.
+     * El servicio consulta este, no la pref pelada (que es lo que muestra la UI).
+     */
+    fun effectiveDmAllowed(ctx: Context): Boolean =
+        Premium.isPro(ctx) && isDmReelsAllowed(ctx)
+
+    /**
+     * Valor EFECTIVO de bloquear stories: requiere ser Pro Y tener el switch ON.
+     */
+    fun effectiveStoriesBlocked(ctx: Context): Boolean =
+        Premium.isPro(ctx) && isStoriesBlocked(ctx)
+
     data class Counts(val total: Int, val instagram: Int, val youtube: Int) {
         companion object { val ZERO = Counts(0, 0, 0) }
     }

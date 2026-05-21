@@ -163,7 +163,7 @@ class BlockerService : AccessibilityService() {
             PKG_INSTAGRAM -> {
                 val list = ArrayList<String>(4)
                 list.addAll(INSTAGRAM_REELS_HINTS)
-                if (Stats.isStoriesBlocked(this)) list.addAll(INSTAGRAM_STORIES_HINTS)
+                if (Stats.effectiveStoriesBlocked(this)) list.addAll(INSTAGRAM_STORIES_HINTS)
                 list
             }
             PKG_YOUTUBE -> YOUTUBE_SHORTS_HINTS
@@ -172,15 +172,15 @@ class BlockerService : AccessibilityService() {
 
         val matched = findFullscreenMatch(root, hints)
         if (matched != null) {
-            handleReelsDetected(pkg, matched, root)
+            handleReelsDetected(pkg, matched)
         } else {
             handleReelsAbsent(pkg)
         }
     }
 
-    private fun handleReelsDetected(pkg: String, matchedId: String, root: AccessibilityNodeInfo) {
+    private fun handleReelsDetected(pkg: String, matchedId: String) {
         val now = SystemClock.elapsedRealtime()
-        val dmAllowed = pkg == PKG_INSTAGRAM && Stats.isDmReelsAllowed(this)
+        val dmAllowed = pkg == PKG_INSTAGRAM && Stats.effectiveDmAllowed(this)
 
         // Si ya estabamos viendo un reel autorizado por DM y no ha pasado el
         // watchdog, ignoramos. Si pasa el watchdog, dejamos caer al fire BACK.

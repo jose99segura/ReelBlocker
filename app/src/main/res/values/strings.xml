@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ReelBlocker</string>
+    <string name="service_label">ReelBlocker</string>
+    <string name="service_description">Te ayuda a no caer en Reels de Instagram y Shorts de YouTube. Cuando detecta que entras, cierra esa sección para que sigas con lo que estabas haciendo. No envía nada fuera del dispositivo.</string>
+    <string name="toast_blocked">ReelBlocker: bloqueado</string>
+    <string name="stats_format">Hoy: %1$d bloqueados   (Instagram: %2$d  ·  YouTube: %3$d)</string>
+</resources>

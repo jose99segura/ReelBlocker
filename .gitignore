@@ -1,0 +1,23 @@
+*.iml
+.gradle
+/local.properties
+/.idea
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+
+# Build outputs
+**/build/
+*.apk
+*.aab
+
+# OS
+Thumbs.db
+
+# Keystores — NUNCA versionar claves de firma
+*.jks
+*.keystore
+keystore.properties

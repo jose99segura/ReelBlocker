@@ -80,9 +80,10 @@ class BlockerService : AccessibilityService() {
         private const val DM_CONSUMED_GRACE_MS = 2000L
         // Presupuesto de visualizacion del reel desde DM. Pasado este tiempo
         // dentro del visor, cualquier nuevo match dispara BACK (para que el
-        // usuario no pueda hacer swipe a reels infinitos). 10 s cubre un
-        // reel corto tipico; despues lo cerramos.
-        private const val DM_VIEW_BUDGET_MS = 10_000L
+        // usuario no pueda hacer swipe a reels infinitos). 5 s cubre la
+        // carga inicial y el primer momento del reel; suficiente para no
+        // sentir que la app es violenta, pero corto para impedir scroll.
+        private const val DM_VIEW_BUDGET_MS = 5_000L
     }
 
     private var lastActionTime = 0L

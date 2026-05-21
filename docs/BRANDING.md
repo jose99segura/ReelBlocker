@@ -50,11 +50,21 @@ En la app Android se usa la paleta dinámica de Material 3 (`dynamicLightColorSc
 ## Icono
 
 Vector minimalista en `app/src/main/res/drawable/ic_launcher_foreground.xml`:
-rectángulo blanco vertical (formato "móvil/reel") con flecha back recortada
-en color del fondo (#1A1A2E). El cutout es la marca visual — no se cambia.
+sobre fondo índigo #1A1A2E, un signo de exclamación "!" en blanco (barra
+vertical con esquinas suavemente redondeadas) cuyo punto inferior es un
+círculo rojo accent (#DC2626).
 
-No incluir el nombre "Basta!" dentro del icono. El nombre vive en el
-sistema (lanzador) y en marketing.
+El "!" es la última letra del wordmark "Basta!" — el icono lo dice todo
+con un solo símbolo. El círculo rojo añade tono de "stop / atención" sin
+ser explícito. No incluir el nombre "Basta!" dentro del icono — el nombre
+vive en el sistema (lanzador) y en marketing.
+
+Proporciones (viewport 108×108):
+- Barra del "!": rect (47-61, 24-62), corner radius 2.5
+- Punto rojo: círculo en (54, 73), radio 7
+
+Todo dentro del safe-zone circular de 66dp para que las máscaras
+adaptativas (círculo, squircle, rounded square) no recorten contenido.
 
 ---
 

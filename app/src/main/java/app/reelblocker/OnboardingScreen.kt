@@ -252,32 +252,25 @@ private fun BastaIconBadge(size: Dp) {
             .background(Color(0xFF1A1A2E)),
         contentAlignment = Alignment.Center
     ) {
-        // Mismo path que ic_launcher_foreground.xml, dibujado directamente
-        // para no depender del adaptive-icon (que painterResource no soporta).
+        // Mismo diseno que ic_launcher_foreground.xml: "!" blanco con
+        // punto rojo. Viewport 108x108 escalado al tamano del badge.
         Canvas(modifier = Modifier.fillMaxSize()) {
             val s = this.size.width // asumimos cuadrado
-            fun u(v: Float) = v / 108f * s  // viewport del XML es 108x108
+            fun u(v: Float) = v / 108f * s
 
-            // Rectangulo blanco vertical (el "movil/reel")
+            // Barra vertical del "!"
             drawRoundRect(
                 color = Color.White,
-                topLeft = Offset(u(42f), u(28f)),
-                size = Size(u(66f - 42f), u(80f - 28f)),
-                cornerRadius = CornerRadius(u(5f), u(5f))
+                topLeft = Offset(u(47f), u(24f)),
+                size = Size(u(14f), u(38f)),
+                cornerRadius = CornerRadius(u(2.5f), u(2.5f))
             )
-
-            // Flecha back "recortada" en color del fondo
-            val arrow = Path().apply {
-                moveTo(u(40f), u(54f))
-                lineTo(u(50f), u(44f))
-                lineTo(u(50f), u(49f))
-                lineTo(u(64f), u(49f))
-                lineTo(u(64f), u(59f))
-                lineTo(u(50f), u(59f))
-                lineTo(u(50f), u(64f))
-                close()
-            }
-            drawPath(arrow, Color(0xFF1A1A2E))
+            // Punto del "!": circulo rojo limpio
+            drawCircle(
+                color = Color(0xFFDC2626),
+                radius = u(7f),
+                center = Offset(u(54f), u(73f))
+            )
         }
     }
 }

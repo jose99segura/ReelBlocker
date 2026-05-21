@@ -4,15 +4,13 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
 
-    <!-- Vertical rounded rectangle: el "movil/reel" en blanco. -->
+    <!-- Barra vertical del "!" en blanco. -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M 40 30 L 68 30 A 6 6 0 0 1 74 36 L 74 72 A 6 6 0 0 1 68 78 L 40 78 A 6 6 0 0 1 34 72 L 34 36 A 6 6 0 0 1 40 30 Z" />
+        android:pathData="M 49.5 24 L 58.5 24 A 2.5 2.5 0 0 1 61 26.5 L 61 59.5 A 2.5 2.5 0 0 1 58.5 62 L 49.5 62 A 2.5 2.5 0 0 1 47 59.5 L 47 26.5 A 2.5 2.5 0 0 1 49.5 24 Z" />
 
-    <!-- Flecha "back" recortada del rectangulo (pintada en el color del
-         background para que se vea como un agujero). Significa: "te saca
-         del reel". -->
+    <!-- Punto del "!": circulo rojo accent (#DC2626). -->
     <path
-        android:fillColor="#1A1A2E"
-        android:pathData="M 40 54 L 50 44 L 50 49 L 64 49 L 64 59 L 50 59 L 50 64 Z" />
+        android:fillColor="#DC2626"
+        android:pathData="M 54 73 m -7 0 a 7 7 0 1 0 14 0 a 7 7 0 1 0 -14 0" />
 </vector>

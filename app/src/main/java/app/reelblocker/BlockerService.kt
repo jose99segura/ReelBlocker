@@ -37,12 +37,24 @@ class BlockerService : AccessibilityService() {
 
         // Pistas de pantalla "estoy en un DM/mensaje directo". Si las vemos
         // justo antes de un match de reels, permitimos el reel.
+        // Instagram usa muchos resource-id con prefijo "direct_" en su
+        // pantalla de mensajes; tambien "thread" y "message" suelen aparecer.
         private val INSTAGRAM_DM_HINTS = listOf(
-            "direct_thread",
-            "direct_inbox",
-            "thread_view",
-            "direct_chat",
-            "row_message"
+            "direct_",
+            "thread_",
+            "message_thread",
+            "message_list",
+            "messages_recycler",
+            "row_message",
+            "msg_"
+        )
+
+        // Subcadenas para detectar pantalla DM por nombre de clase
+        // (event.className en TYPE_WINDOW_STATE_CHANGED).
+        private val INSTAGRAM_DM_CLASSNAME_HINTS = listOf(
+            "Direct",
+            "Thread",
+            "Inbox"
         )
 
         private val YOUTUBE_SHORTS_HINTS = listOf(
@@ -101,9 +113,28 @@ class BlockerService : AccessibilityService() {
 
         // Actualizar el flag de DM solo para Instagram, antes del scan de reels.
         if (pkg == PKG_INSTAGRAM) {
-            val inDm = containsAnyHint(root, INSTAGRAM_DM_HINTS)
+            // Senal 1: nombre de clase del evento (solo en cambios de pantalla).
+            val classHint = if (event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
+                val cls = event.className?.toString().orEmpty()
+                INSTAGRAM_DM_CLASSNAME_HINTS.any { cls.contains(it, ignoreCase = true) }
+            } else false
+
+            // Senal 2: BFS sobre el arbol buscando hints de DM.
+            val treeHint = containsAnyHint(root, INSTAGRAM_DM_HINTS)
+
+            val inDm = classHint || treeHint
             if (inDm != lastIgScreenIsDm) {
-                Log.v(TAG, "lastIgScreenIsDm: $lastIgScreenIsDm -> $inDm")
+                Log.d(TAG, "lastIgScreenIsDm: $lastIgScreenIsDm -> $inDm  (clase=$classHint tree=$treeHint)")
+                if (inDm) {
+                    Log.d(TAG, "  className=${event.className}")
+                    dumpDmCandidates(root)
+                } else if (lastIgScreenIsDm) {
+                    // Acabamos de salir del DM. Abrimos la ventana de gracia
+                    // ya, porque el visor de reels puede llegar inmediatamente
+                    // despues y para entonces el arbol no tendra hints de DM.
+                    dmGraceUntil = SystemClock.elapsedRealtime() + DM_GRACE_MS
+                    Log.d(TAG, "  abro ventana de gracia DM hasta $dmGraceUntil")
+                }
             }
             lastIgScreenIsDm = inDm
         }
@@ -125,8 +156,9 @@ class BlockerService : AccessibilityService() {
     private fun handleReelsDetected(pkg: String, matchedId: String) {
         val now = SystemClock.elapsedRealtime()
 
-        // Excepcion DM (solo Instagram).
-        if (pkg == PKG_INSTAGRAM && (lastIgScreenIsDm || now < dmGraceUntil)) {
+        // Excepcion DM (solo Instagram, y solo si esta activada en preferencias).
+        val dmAllowed = pkg == PKG_INSTAGRAM && Stats.isDmReelsAllowed(this)
+        if (dmAllowed && (lastIgScreenIsDm || now < dmGraceUntil)) {
             if (now >= dmGraceUntil) {
                 Log.d(TAG, "Reel desde DM, permitido (id=$matchedId)")
             } else {
@@ -167,6 +199,32 @@ class BlockerService : AccessibilityService() {
      * viewIdResourceName contiene alguna pista. No exige visibilidad ni
      * tamano — basta con que el fragmento exista en el arbol.
      */
+    /**
+     * Diagnostico: log los primeros N ids del arbol que contengan keywords
+     * candidatas a DM. Util para descubrir los resource-id reales que usa
+     * Instagram cuando deja de coincidir con INSTAGRAM_DM_HINTS.
+     */
+    private fun dumpDmCandidates(root: AccessibilityNodeInfo) {
+        val keywords = listOf("direct", "thread", "message", "msg", "chat", "inbox")
+        val seen = mutableSetOf<String>()
+        val queue = ArrayDeque<AccessibilityNodeInfo>()
+        queue.add(root)
+        var visited = 0
+        while (queue.isNotEmpty() && visited < 1500 && seen.size < 25) {
+            val node = queue.removeFirst()
+            visited++
+            node.viewIdResourceName?.let { id ->
+                if (keywords.any { id.contains(it, ignoreCase = true) } && seen.add(id)) {
+                    Log.d(TAG, "  dm-candidate id: $id")
+                }
+            }
+            for (i in 0 until node.childCount) {
+                node.getChild(i)?.let { queue.add(it) }
+            }
+        }
+        if (seen.isEmpty()) Log.d(TAG, "  no dm-candidate ids encontrados")
+    }
+
     private fun containsAnyHint(
         root: AccessibilityNodeInfo,
         hints: List<String>

@@ -42,6 +42,15 @@ object Stats {
         prefs(ctx).edit().putBoolean(appEnabledKey(pkg), enabled).apply()
     }
 
+    private const val KEY_ALLOW_IG_DM = "allow_ig_dm_reels"
+
+    fun isDmReelsAllowed(ctx: Context): Boolean =
+        prefs(ctx).getBoolean(KEY_ALLOW_IG_DM, true)
+
+    fun setDmReelsAllowed(ctx: Context, allowed: Boolean) {
+        prefs(ctx).edit().putBoolean(KEY_ALLOW_IG_DM, allowed).apply()
+    }
+
     data class Counts(val total: Int, val instagram: Int, val youtube: Int) {
         companion object { val ZERO = Counts(0, 0, 0) }
     }

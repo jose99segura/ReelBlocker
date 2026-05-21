@@ -234,6 +234,36 @@ private fun AppsCard(refreshKey: Int, onChanged: () -> Unit) {
                         }
                     )
                 }
+                // Sub-opcion: permitir reels desde DM, solo bajo Instagram
+                // y solo si Instagram esta encendido.
+                if (pkg == Stats.PKG_INSTAGRAM && enabled) {
+                    val dmAllowed = remember(refreshKey) { Stats.isDmReelsAllowed(ctx) }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 16.dp, top = 4.dp, bottom = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Permitir reels desde DM",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                            Text(
+                                text = "Reels enviados por amigos en mensajes directos no se bloquean",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Switch(
+                            checked = dmAllowed,
+                            onCheckedChange = { newValue ->
+                                Stats.setDmReelsAllowed(ctx, newValue)
+                                onChanged()
+                            }
+                        )
+                    }
+                }
             }
         }
     }

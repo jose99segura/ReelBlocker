@@ -76,14 +76,13 @@ class BlockerService : AccessibilityService() {
         private const val POST_EXIT_GRACE_MS = 1500L
         private const val FULLSCREEN_FRACTION = 0.6
         // Tras consumir un bypass DM, ignorar matches durante este intervalo
-        // para no contar dos veces el mismo reel por eventos de contenido.
-        private const val DM_CONSUMED_GRACE_MS = 2000L
-        // Presupuesto de visualizacion del reel desde DM. Pasado este tiempo
-        // dentro del visor, cualquier nuevo match dispara BACK (para que el
-        // usuario no pueda hacer swipe a reels infinitos). 5 s cubre la
-        // carga inicial y el primer momento del reel; suficiente para no
-        // sentir que la app es violenta, pero corto para impedir scroll.
-        private const val DM_VIEW_BUDGET_MS = 5_000L
+        // para no contar dos veces el mismo reel por eventos de contenido
+        // que llegan en rafaga al abrir el visor.
+        private const val DM_CONSUMED_GRACE_MS = 800L
+        // Presupuesto de visualizacion del reel desde DM = 0: en cuanto se
+        // acaba la gracia post-consumo, el siguiente match dispara BACK.
+        // El usuario ve la carga inicial (~DM_CONSUMED_GRACE_MS) y vuelve.
+        private const val DM_VIEW_BUDGET_MS = 0L
     }
 
     private var lastActionTime = 0L

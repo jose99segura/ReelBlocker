@@ -26,7 +26,16 @@ android {
     signingConfigs {
         release {
             if (keystorePropertiesFile.exists()) {
-                storeFile file(keystoreProperties['storeFile'])
+                // Resolver path RELATIVO a la raiz del repo (rootProject),
+                // no relativo a app/. Asi keystore.properties puede usar
+                // p.ej. "keystore/basta-release.jks" sin sorpresas. Tambien
+                // soporta paths absolutos sin problemas.
+                def storePath = keystoreProperties['storeFile']
+                def storeFileObj = new File(storePath)
+                if (!storeFileObj.isAbsolute()) {
+                    storeFileObj = rootProject.file(storePath)
+                }
+                storeFile storeFileObj
                 storePassword keystoreProperties['storePassword']
                 keyAlias keystoreProperties['keyAlias']
                 keyPassword keystoreProperties['keyPassword']

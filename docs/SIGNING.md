@@ -34,13 +34,19 @@ Crea un archivo `keystore.properties` (no lo commitees — ya está en
 `.gitignore`) en `C:\Users\jose9\OneDrive\Escritorio\ReelBlocker\` con:
 
 ```
-storeFile=C:\\ruta\\completa\\a\\reelblocker-release.jks
+storeFile=keystore/basta-release.jks
 storePassword=la_que_pusiste
-keyAlias=reelblocker
+keyAlias=basta
 keyPassword=la_misma_o_la_otra
 ```
 
-(Doble backslash en Windows.)
+El `storeFile` puede ser:
+- **Path relativo** (recomendado): se resuelve respecto a la raíz del
+  repo. Crea una carpeta `keystore/` ahí mismo y mete el .jks dentro
+  (también está en `.gitignore`).
+- **Path absoluto**: p. ej. `C:\\dev\\keystores\\basta-release.jks` —
+  útil si guardas las keystores fuera del repo (más seguro).
+  (Doble backslash en Windows.)
 
 ## 3) Compilar el AAB de release
 

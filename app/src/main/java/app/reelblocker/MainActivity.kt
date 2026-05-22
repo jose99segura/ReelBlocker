@@ -41,6 +41,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -67,6 +68,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
@@ -223,16 +225,16 @@ private fun HomeScreen(onResetOnboarding: () -> Unit = {}) {
             if (!serviceEnabled) {
                 ActionRequiredCard(
                     title = "Activa el servicio de accesibilidad",
-                    body = "Sin esto, ReelBlocker no puede detectar los Reels. Tocalo y activa ReelBlocker en la lista.",
+                    body = "Sin esto, Basta! no puede detectar los Reels. Tócalo y activa Basta! en la lista.",
                     actionLabel = "Abrir ajustes de accesibilidad",
                     onAction = { ctx.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)) }
                 )
             }
             if (serviceEnabled && !batteryExempt) {
                 ActionRequiredCard(
-                    title = "Excluye de la optimizacion de bateria",
+                    title = "Excluye de la optimización de batería",
                     body = "Sin esto, el sistema puede matar el servicio al cabo de unas horas.",
-                    actionLabel = "Excluir de la bateria",
+                    actionLabel = "Excluir de la batería",
                     onAction = { requestBatteryExemption(ctx) },
                     showOemHint = true
                 )
@@ -321,7 +323,7 @@ private fun StatusFooter(serviceEnabled: Boolean, batteryExempt: Boolean) {
         StatusChip(text = "Servicio activo", ok = true)
         Spacer(Modifier.width(12.dp))
         if (batteryExempt) {
-            StatusChip(text = "Bateria exenta", ok = true)
+            StatusChip(text = "Batería exenta", ok = true)
         }
     }
 }
@@ -437,7 +439,7 @@ private fun InstagramSubOptions(
     )
     SubOptionRow(
         title = "Bloquear Historias",
-        description = "Por defecto las stories no se bloquean. Activalo si tambien quieres bloquearlas.",
+        description = "Por defecto las stories no se bloquean. Actívalo si también quieres bloquearlas.",
         checked = isPro && storiesBlocked,
         isPro = isPro,
         onCheckedChange = {
@@ -534,15 +536,11 @@ private fun AppIconBadge(icon: Drawable?, fallbackLetter: String, enabled: Boole
 private fun StatsCard(today: Stats.Counts, history: List<Stats.DayCounts>) {
     val hasAnyHistory = history.any { it.counts.total > 0 }
 
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-    ) {
+    Card(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text("Hoy", style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.height(4.dp))
             if (today.total == 0) {
-                // Empty state amable cuando todavia no has caido hoy.
                 Text(
                     text = "0",
                     fontSize = 48.sp,
@@ -550,7 +548,7 @@ private fun StatsCard(today: Stats.Counts, history: List<Stats.DayCounts>) {
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                 )
                 Text(
-                    text = "Sin caidas en Reels todavia. Bien.",
+                    text = "Sin caídas en Reels todavía. Bien.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -568,13 +566,13 @@ private fun StatsCard(today: Stats.Counts, history: List<Stats.DayCounts>) {
             }
 
             Spacer(Modifier.height(16.dp))
-            Text("Ultimos 7 dias", style = MaterialTheme.typography.titleSmall)
+            Text("Últimos 7 días", style = MaterialTheme.typography.titleSmall)
             Spacer(Modifier.height(8.dp))
             if (hasAnyHistory) {
                 WeeklyChart(history)
             } else {
                 Text(
-                    text = "Aun no hay historial. Vuelve manana — los datos se acumulan.",
+                    text = "Aún no hay historial. Vuelve mañana — los datos se acumulan.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier
@@ -588,73 +586,75 @@ private fun StatsCard(today: Stats.Counts, history: List<Stats.DayCounts>) {
 
 @Composable
 private fun WeeklyChart(history: List<Stats.DayCounts>) {
-    val barColor = MaterialTheme.colorScheme.primary
+    val primary = MaterialTheme.colorScheme.primary
     val labelColor = MaterialTheme.colorScheme.onSurfaceVariant
     val maxValue = (history.maxOfOrNull { it.counts.total } ?: 0).coerceAtLeast(1)
     val dayFmt = remember { DateTimeFormatter.ofPattern("EEE", Locale("es")) }
+    val lastIdx = history.lastIndex
 
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(120.dp),
+                .height(124.dp),
             verticalAlignment = Alignment.Bottom,
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            history.forEach { day ->
+            history.forEachIndexed { idx, day ->
+                val isToday = idx == lastIdx
                 val fraction = day.counts.total / maxValue.toFloat()
+                val barHeight = (100f * fraction).coerceAtLeast(3f).dp
+                // Hoy con gradiente lleno; los demás días más tenues.
+                val barBrush = if (isToday) {
+                    Brush.verticalGradient(listOf(primary, primary.copy(alpha = 0.65f)))
+                } else {
+                    Brush.verticalGradient(
+                        listOf(primary.copy(alpha = 0.45f), primary.copy(alpha = 0.25f))
+                    )
+                }
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Bottom,
-                    modifier = Modifier.width(32.dp)
+                    modifier = Modifier.width(34.dp)
                 ) {
                     Text(
                         text = day.counts.total.toString(),
                         style = MaterialTheme.typography.labelSmall,
-                        color = labelColor
+                        fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal,
+                        color = if (isToday) primary else labelColor
                     )
-                    Spacer(Modifier.height(2.dp))
-                    Canvas(
+                    Spacer(Modifier.height(3.dp))
+                    Box(
                         modifier = Modifier
-                            .width(20.dp)
-                            .height((100.dp.value * fraction).coerceAtLeast(2f).dp)
-                    ) {
-                        drawRoundedBar(size, barColor)
-                    }
+                            .width(22.dp)
+                            .height(barHeight)
+                            .clip(RoundedCornerShape(topStart = 7.dp, topEnd = 7.dp))
+                            .background(barBrush)
+                    )
                 }
             }
         }
-        Spacer(Modifier.height(4.dp))
+        Spacer(Modifier.height(5.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            history.forEach { day ->
+            history.forEachIndexed { idx, day ->
+                val isToday = idx == lastIdx
                 Box(
-                    modifier = Modifier.width(32.dp),
+                    modifier = Modifier.width(34.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = day.date.format(dayFmt).take(3),
+                        text = if (isToday) "Hoy" else day.date.format(dayFmt).take(3),
                         style = MaterialTheme.typography.labelSmall,
-                        color = labelColor
+                        fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal,
+                        color = if (isToday) primary else labelColor
                     )
                 }
             }
         }
     }
-}
-
-private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawRoundedBar(
-    size: Size,
-    color: Color
-) {
-    drawRoundRect(
-        color = color,
-        topLeft = Offset.Zero,
-        size = size,
-        cornerRadius = androidx.compose.ui.geometry.CornerRadius(8f, 8f)
-    )
 }
 
 @Composable
@@ -670,17 +670,12 @@ private fun TipCard() {
             tip = next
         }
     }
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.tertiaryContainer
-        )
-    ) {
+    Card(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
-                text = "💡 ¿Sabias que…",
+                text = "💡 ¿Sabías que…",
                 style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.7f)
+                color = MaterialTheme.colorScheme.primary
             )
             Spacer(Modifier.height(6.dp))
             AnimatedContent(
@@ -691,7 +686,7 @@ private fun TipCard() {
                 Text(
                     text = currentTip,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onTertiaryContainer
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             }
         }
@@ -706,10 +701,7 @@ private fun AboutCard(onResetOnboarding: () -> Unit) {
             ctx.packageManager.getPackageInfo(ctx.packageName, 0).versionName ?: "1.0"
         } catch (_: Exception) { "1.0" }
     }
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-    ) {
+    Card(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
             Text(
                 text = "Acerca de",
@@ -730,7 +722,7 @@ private fun AboutCard(onResetOnboarding: () -> Unit) {
                         Intent(Intent.ACTION_VIEW, Uri.parse("https://jose99segura.github.io/ReelBlocker/privacy.html"))
                     )
                 }
-            ) { Text("Politica de privacidad") }
+            ) { Text("Política de privacidad") }
 
             TextButton(onClick = onResetOnboarding) {
                 Text("Volver a ver tutorial")
@@ -749,46 +741,86 @@ private fun ProUpsellCard(onClick: () -> Unit) {
             containerColor = MaterialTheme.colorScheme.primaryContainer
         )
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = "Basta! Pro",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Black,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    modifier = Modifier.weight(1f)
+                )
+                Text(
+                    text = Premium.priceLabel ?: Premium.PRO_PRICE,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
-                Spacer(Modifier.height(2.dp))
-                Text(
-                    text = "Permite reels desde DM, bloquea Stories y mas. ${Premium.PRO_PRICE}.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.85f)
-                )
             }
-            Spacer(Modifier.width(12.dp))
+            Spacer(Modifier.height(2.dp))
             Text(
-                text = "→",
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onPrimaryContainer
+                text = "Pago único, sin suscripción.",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
             )
+
+            Spacer(Modifier.height(12.dp))
+            ProComparisonLine(text = "Bloqueo de Reels y Shorts", inFree = true)
+            ProComparisonLine(text = "Estadísticas del día y la semana", inFree = true)
+            ProComparisonLine(text = "Permitir reels desde DM de amigos", inFree = false)
+            ProComparisonLine(text = "Bloquear Historias de Instagram", inFree = false)
+
+            Spacer(Modifier.height(12.dp))
+            Button(
+                onClick = onClick,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Desbloquear Pro")
+            }
         }
     }
 }
 
 @Composable
-private fun HelpCard() {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+private fun ProComparisonLine(text: String, inFree: Boolean) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 3.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
+        Icon(
+            imageVector = if (inFree) Icons.Outlined.Check else Icons.Outlined.Lock,
+            contentDescription = null,
+            modifier = Modifier.size(16.dp),
+            tint = MaterialTheme.colorScheme.onPrimaryContainer
+        )
+        Spacer(Modifier.width(8.dp))
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onPrimaryContainer
+        )
+        Spacer(Modifier.width(8.dp))
+        Text(
+            text = if (inFree) "Gratis" else "Pro",
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(
+                alpha = if (inFree) 0.6f else 1f
+            )
+        )
+    }
+}
+
+@Composable
+private fun HelpCard() {
+    Card(modifier = Modifier.fillMaxWidth()) {
         Text(
             text = "Cuando entres en Reels de Instagram o Shorts de YouTube " +
-                "te sacara con el boton atras. No envia nada fuera del dispositivo.",
+                "te sacará con el botón atrás. No envía nada fuera del dispositivo.",
             style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(16.dp)
         )
     }

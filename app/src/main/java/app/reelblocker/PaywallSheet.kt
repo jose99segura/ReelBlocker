@@ -57,7 +57,7 @@ fun PaywallSheet(
             )
             Spacer(Modifier.height(4.dp))
             Text(
-                text = "Personaliza como bloquea",
+                text = "Personaliza cómo bloquea",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.fillMaxWidth(),
@@ -68,8 +68,8 @@ fun PaywallSheet(
 
             FeatureLine("Permitir Reels desde DM de amigos")
             FeatureLine("Bloquear Historias (opcional)")
-            FeatureLine("Horarios programados (proximamente)")
-            FeatureLine("Estadisticas extendidas (proximamente)")
+            FeatureLine("Horarios programados (próximamente)")
+            FeatureLine("Estadísticas extendidas (próximamente)")
 
             Spacer(Modifier.height(20.dp))
 
@@ -82,7 +82,7 @@ fun PaywallSheet(
                 textAlign = TextAlign.Center
             )
             Text(
-                text = "Compra unica. Sin suscripcion.",
+                text = "Compra única. Sin suscripción.",
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.fillMaxWidth(),
@@ -111,7 +111,7 @@ fun PaywallSheet(
             Spacer(Modifier.height(12.dp))
 
             Text(
-                text = "Sin Pro la app sigue bloqueando Reels y Shorts. Pro solo da control fino sobre qu y cuando.",
+                text = "Sin Pro la app sigue bloqueando Reels y Shorts. Pro solo da control fino sobre qué y cuándo.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.fillMaxWidth(),

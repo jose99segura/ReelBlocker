@@ -100,12 +100,12 @@ fun OnboardingScreen(
     val pages = listOf(
         OnboardingPage(
             title = "Basta!",
-            body = "95 min/dia. Es lo que perdemos de media en Reels y Shorts. Casi hora y media. Cada dia.\n\nCuando entras, esta app te saca. Sin coaches motivacionales, sin sermones.",
+            body = "95 min/día. Es lo que perdemos de media en Reels y Shorts. Casi hora y media. Cada día.\n\nCuando entras, esta app te saca. Sin coaches motivacionales, sin sermones.",
             isWordmark = true
         ),
         OnboardingPage(
             title = "Activa el servicio",
-            body = "Es la unica forma que tiene Android de detectar Reels. Solo lee identificadores de pantalla, nunca el contenido de tus mensajes.",
+            body = "Es la única forma que tiene Android de detectar Reels. Solo lee identificadores de pantalla, nunca el contenido de tus mensajes.",
             statusContent = { acts, granted ->
                 if (granted) GrantedBadge("Servicio activado")
                 else Button(onClick = { acts.openAccessibility() }) {
@@ -115,12 +115,12 @@ fun OnboardingScreen(
             isGranted = { it.isAccessibilityEnabled() }
         ),
         OnboardingPage(
-            title = "Y dile a la bateria que no nos mate",
-            body = "Sin esto, el sistema cierra el servicio en horas y aqui ya no habria Basta!",
+            title = "Y dile a la batería que no nos mate",
+            body = "Sin esto, el sistema cierra el servicio en horas y aquí ya no habría Basta!",
             statusContent = { acts, granted ->
-                if (granted) GrantedBadge("Bateria: exenta")
+                if (granted) GrantedBadge("Batería: exenta")
                 else Button(onClick = { acts.requestBatteryExemption() }) {
-                    Text("Excluir de la bateria")
+                    Text("Excluir de la batería")
                 }
             },
             isGranted = { it.isBatteryExempt() }

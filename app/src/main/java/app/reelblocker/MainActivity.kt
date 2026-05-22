@@ -727,14 +727,6 @@ private fun AboutCard(onResetOnboarding: () -> Unit) {
                 }
             ) { Text("Politica de privacidad") }
 
-            TextButton(
-                onClick = {
-                    ctx.startActivity(
-                        Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/jose99segura/ReelBlocker"))
-                    )
-                }
-            ) { Text("Codigo fuente (GitHub)") }
-
             TextButton(onClick = onResetOnboarding) {
                 Text("Volver a ver tutorial")
             }

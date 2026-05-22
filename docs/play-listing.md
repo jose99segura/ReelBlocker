@@ -74,7 +74,7 @@ además el "Autoarranque" de la app en los ajustes del sistema para que
 no la maten en segundo plano.
 
 CONTACTO Y CÓDIGO ABIERTO
-Si encuentras un fallo o quieres sugerir algo: [CORREO_CONTACTO]
+Si encuentras un fallo o quieres sugerir algo: senaprojectai@gmail.com
 Código fuente: github.com/jose99segura/ReelBlocker
 
 Basta! Recupera tu atención.

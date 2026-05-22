@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.sp
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PaywallSheet(
+    priceLabel: String,
     onDismiss: () -> Unit,
     onPurchase: () -> Unit,
     onRestore: () -> Unit
@@ -73,7 +74,7 @@ fun PaywallSheet(
             Spacer(Modifier.height(20.dp))
 
             Text(
-                text = Premium.PRO_PRICE,
+                text = priceLabel,
                 fontSize = 40.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface,

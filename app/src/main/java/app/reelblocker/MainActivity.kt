@@ -1,5 +1,6 @@
 package app.reelblocker
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -73,15 +74,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toBitmap
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Premium.init(applicationContext)
         setContent {
             ReelBlockerTheme {
                 Surface(color = MaterialTheme.colorScheme.background) {
@@ -150,23 +152,26 @@ private fun HomeScreen(onResetOnboarding: () -> Unit = {}) {
 
     val serviceEnabled = remember(refreshKey) { isAccessibilityEnabled(ctx) }
     val batteryExempt = remember(refreshKey) { isBatteryExempt(ctx) }
-    val isPro = remember(refreshKey) { Premium.isPro(ctx) }
+    // Estado vivo de Pro: reacciona al instante a una compra.
+    val isPro = Premium.isProLive
     val today = remember(refreshKey) { Stats.read(ctx) }
     val history = remember(refreshKey) { Stats.readLastDays(ctx, 7) }
 
     var showPaywall by remember { mutableStateOf(false) }
-    // Secret tap counter — 5 taps al wordmark "Basta" desbloquea Pro debug.
+    // Tap counter — 5 taps al wordmark alterna Pro. SOLO en builds debug.
     var secretTapCount by remember { mutableIntStateOf(0) }
 
     if (showPaywall) {
         PaywallSheet(
+            priceLabel = Premium.priceLabel ?: Premium.PRO_PRICE,
             onDismiss = { showPaywall = false },
             onPurchase = {
-                Toast.makeText(ctx, "Play Billing proximamente — usa el tap secreto para probar", Toast.LENGTH_LONG).show()
+                (ctx as? Activity)?.let { Premium.launchPurchase(it) }
                 showPaywall = false
             },
             onRestore = {
-                Toast.makeText(ctx, "Play Billing proximamente", Toast.LENGTH_SHORT).show()
+                Premium.restore(ctx)
+                Toast.makeText(ctx, "Comprobando compras…", Toast.LENGTH_SHORT).show()
             }
         )
     }
@@ -177,17 +182,17 @@ private fun HomeScreen(onResetOnboarding: () -> Unit = {}) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.clickable {
+                        if (!BuildConfig.DEBUG) return@clickable
                         secretTapCount++
                         if (secretTapCount >= 5) {
                             val newValue = !Premium.isPro(ctx)
-                            Premium.setPro(ctx, newValue)
+                            Premium.setProDebug(ctx, newValue)
                             Toast.makeText(
                                 ctx,
                                 if (newValue) "🔓 Pro activado (debug)" else "🔒 Pro desactivado (debug)",
                                 Toast.LENGTH_SHORT
                             ).show()
                             secretTapCount = 0
-                            refreshKey++
                         }
                     }
                 ) {

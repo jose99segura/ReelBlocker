@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <!-- Fondo indigo de marca -->
+  <rect width="512" height="512" rx="114" fill="#1A1A2E"/>
+  <!-- Barra del "!" en blanco (escalado x4.74 desde viewport 108) -->
+  <rect x="222.5" y="113.7" width="66.3" height="180" rx="11.8" fill="#FFFFFF"/>
+  <!-- Punto del "!": circulo rojo accent -->
+  <circle cx="256" cy="346" r="33.2" fill="#DC2626"/>
+</svg>

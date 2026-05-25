@@ -31,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -99,28 +100,29 @@ fun OnboardingScreen(
 
     val pages = listOf(
         OnboardingPage(
+            // Wordmark de la marca, no traducible.
             title = "Basta!",
-            body = "95 min/día. Es lo que perdemos de media en Reels y Shorts. Casi hora y media. Cada día.\n\nCuando entras, esta app te saca. Sin coaches motivacionales, sin sermones.",
+            body = stringResource(R.string.onboarding_p1_body),
             isWordmark = true
         ),
         OnboardingPage(
-            title = "Activa el servicio",
-            body = "Es la única forma que tiene Android de detectar Reels. Solo lee identificadores de pantalla, nunca el contenido de tus mensajes.",
+            title = stringResource(R.string.onboarding_p2_title),
+            body = stringResource(R.string.onboarding_p2_body),
             statusContent = { acts, granted ->
-                if (granted) GrantedBadge("Servicio activado")
+                if (granted) GrantedBadge(stringResource(R.string.granted_service_enabled))
                 else Button(onClick = { acts.openAccessibility() }) {
-                    Text("Abrir ajustes de accesibilidad")
+                    Text(stringResource(R.string.button_open_accessibility))
                 }
             },
             isGranted = { it.isAccessibilityEnabled() }
         ),
         OnboardingPage(
-            title = "Y dile a la batería que no nos mate",
-            body = "Sin esto, el sistema cierra el servicio en horas y aquí ya no habría Basta!",
+            title = stringResource(R.string.onboarding_p3_title),
+            body = stringResource(R.string.onboarding_p3_body),
             statusContent = { acts, granted ->
-                if (granted) GrantedBadge("Batería: exenta")
+                if (granted) GrantedBadge(stringResource(R.string.granted_battery_exempt))
                 else Button(onClick = { acts.requestBatteryExemption() }) {
-                    Text("Excluir de la batería")
+                    Text(stringResource(R.string.button_exclude_from_battery))
                 }
             },
             isGranted = { it.isBatteryExempt() }
@@ -141,7 +143,7 @@ fun OnboardingScreen(
 
     Column(modifier = Modifier.fillMaxSize().padding(24.dp)) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-            TextButton(onClick = onFinish) { Text("Saltar") }
+            TextButton(onClick = onFinish) { Text(stringResource(R.string.onboarding_skip)) }
         }
 
         HorizontalPager(
@@ -196,7 +198,7 @@ fun OnboardingScreen(
                 if (page.source != null) {
                     Spacer(Modifier.height(8.dp))
                     Text(
-                        text = "Fuente: ${page.source}",
+                        text = stringResource(R.string.onboarding_source_format, page.source),
                         style = MaterialTheme.typography.labelSmall,
                         textAlign = TextAlign.Center,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
@@ -238,7 +240,7 @@ fun OnboardingScreen(
                 else scope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) }
             }
         ) {
-            Text(if (isLast) "Empezar" else "Siguiente")
+            Text(stringResource(if (isLast) R.string.onboarding_start else R.string.onboarding_next))
         }
     }
 }
@@ -275,9 +277,10 @@ private fun BastaIconBadge(size: Dp) {
     }
 }
 
-/** Resalta digitos + "min" en rojo para impacto visual. */
+/** Resalta digitos + "min" en rojo para impacto visual. Tolerante a sufijos
+ *  por locale: "95 min", "95 min/dia", "95 min/day", etc. */
 private fun highlightStats(text: String): AnnotatedString {
-    val regex = Regex("""\d+\s*min(?:/dia)?""")
+    val regex = Regex("""\d+\s*min(?:/\w+)?""")
     return androidx.compose.ui.text.buildAnnotatedString {
         var lastEnd = 0
         regex.findAll(text).forEach { match ->

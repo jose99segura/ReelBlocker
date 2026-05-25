@@ -155,12 +155,21 @@ object Premium {
         }
     }
 
-    /** Lanza el flujo de compra. Necesita el Activity actual. */
-    fun launchPurchase(activity: Activity) {
-        val client = billingClient ?: return
+    /**
+     * Lanza el flujo de compra. Devuelve true si Play aceptó abrir el diálogo,
+     * false si todavía no está listo (billing sin conectar, ProductDetails sin
+     * cargar, o el propio launchBillingFlow rechaza). La UI usa el bool para
+     * mantener el paywall abierto y enseñar feedback en lugar de cerrarlo en
+     * silencio.
+     */
+    fun launchPurchase(activity: Activity): Boolean {
+        val client = billingClient ?: run {
+            Log.w(TAG, "launchPurchase: BillingClient no inicializado")
+            return false
+        }
         val details = productDetails ?: run {
             Log.w(TAG, "launchPurchase: ProductDetails aun no cargado")
-            return
+            return false
         }
         val params = BillingFlowParams.newBuilder()
             .setProductDetailsParamsList(
@@ -171,7 +180,12 @@ object Premium {
                 )
             )
             .build()
-        client.launchBillingFlow(activity, params)
+        val result = client.launchBillingFlow(activity, params)
+        if (result.responseCode != BillingClient.BillingResponseCode.OK) {
+            Log.w(TAG, "launchBillingFlow rechazado: code=${result.responseCode}")
+            return false
+        }
+        return true
     }
 
     /** Para el boton "Restaurar compras". */

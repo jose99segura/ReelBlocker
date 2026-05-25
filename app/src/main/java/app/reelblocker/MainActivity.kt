@@ -72,6 +72,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -168,12 +169,22 @@ private fun HomeScreen(onResetOnboarding: () -> Unit = {}) {
             priceLabel = Premium.priceLabel ?: Premium.PRO_PRICE,
             onDismiss = { showPaywall = false },
             onPurchase = {
-                (ctx as? Activity)?.let { Premium.launchPurchase(it) }
-                showPaywall = false
+                // Si Play aún no ha cargado el producto, no cerramos el sheet
+                // para que el usuario pueda reintentar; solo avisamos.
+                val launched = (ctx as? Activity)?.let { Premium.launchPurchase(it) } ?: false
+                if (launched) {
+                    showPaywall = false
+                } else {
+                    Toast.makeText(
+                        ctx,
+                        ctx.getString(R.string.toast_loading_prices),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
             },
             onRestore = {
                 Premium.restore(ctx)
-                Toast.makeText(ctx, "Comprobando compras…", Toast.LENGTH_SHORT).show()
+                Toast.makeText(ctx, ctx.getString(R.string.toast_checking_purchases), Toast.LENGTH_SHORT).show()
             }
         )
     }
@@ -191,7 +202,10 @@ private fun HomeScreen(onResetOnboarding: () -> Unit = {}) {
                             Premium.setProDebug(ctx, newValue)
                             Toast.makeText(
                                 ctx,
-                                if (newValue) "🔓 Pro activado (debug)" else "🔒 Pro desactivado (debug)",
+                                ctx.getString(
+                                    if (newValue) R.string.toast_pro_enabled_debug
+                                    else R.string.toast_pro_disabled_debug
+                                ),
                                 Toast.LENGTH_SHORT
                             ).show()
                             secretTapCount = 0
@@ -204,7 +218,10 @@ private fun HomeScreen(onResetOnboarding: () -> Unit = {}) {
                         fontWeight = FontWeight.Black
                     )
                     Text(
-                        text = if (isPro) "Reel Blocker · Pro" else "Reel Blocker",
+                        text = stringResource(
+                            if (isPro) R.string.topbar_subtitle_pro
+                            else R.string.topbar_subtitle_free
+                        ),
                         style = MaterialTheme.typography.labelSmall,
                         color = if (isPro) MaterialTheme.colorScheme.primary
                                 else MaterialTheme.colorScheme.onSurfaceVariant,
@@ -224,17 +241,17 @@ private fun HomeScreen(onResetOnboarding: () -> Unit = {}) {
             // Alertas: solo si requieren accion del usuario.
             if (!serviceEnabled) {
                 ActionRequiredCard(
-                    title = "Activa el servicio de accesibilidad",
-                    body = "Sin esto, Basta! no puede detectar los Reels. Tócalo y activa Basta! en la lista.",
-                    actionLabel = "Abrir ajustes de accesibilidad",
+                    title = stringResource(R.string.action_accessibility_title),
+                    body = stringResource(R.string.action_accessibility_body),
+                    actionLabel = stringResource(R.string.button_open_accessibility),
                     onAction = { ctx.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)) }
                 )
             }
             if (serviceEnabled && !batteryExempt) {
                 ActionRequiredCard(
-                    title = "Excluye de la optimización de batería",
-                    body = "Sin esto, el sistema puede matar el servicio al cabo de unas horas.",
-                    actionLabel = "Excluir de la batería",
+                    title = stringResource(R.string.action_battery_title),
+                    body = stringResource(R.string.action_battery_body),
+                    actionLabel = stringResource(R.string.button_exclude_from_battery),
                     onAction = { requestBatteryExemption(ctx) },
                     showOemHint = true
                 )
@@ -320,10 +337,10 @@ private fun StatusFooter(serviceEnabled: Boolean, batteryExempt: Boolean) {
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        StatusChip(text = "Servicio activo", ok = true)
+        StatusChip(text = stringResource(R.string.status_service_active), ok = true)
         Spacer(Modifier.width(12.dp))
         if (batteryExempt) {
-            StatusChip(text = "Batería exenta", ok = true)
+            StatusChip(text = stringResource(R.string.status_battery_exempt), ok = true)
         }
     }
 }
@@ -356,7 +373,7 @@ private fun AppsCard(
     val ctx = LocalContext.current
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text("Apps a bloquear", style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.apps_card_title), style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.height(8.dp))
             Stats.BLOCKABLE_APPS.forEachIndexed { idx, (pkg, label) ->
                 val installed = remember(refreshKey, pkg) { isAppInstalled(ctx, pkg) }
@@ -380,7 +397,7 @@ private fun AppsCard(
                         )
                         if (!installed) {
                             Text(
-                                text = "No instalada",
+                                text = stringResource(R.string.apps_not_installed),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -427,8 +444,8 @@ private fun InstagramSubOptions(
     val storiesBlocked = remember(refreshKey) { Stats.isStoriesBlocked(ctx) }
 
     SubOptionRow(
-        title = "Permitir reels desde DM",
-        description = "Reels enviados por amigos en mensajes directos no se bloquean",
+        title = stringResource(R.string.ig_dm_title),
+        description = stringResource(R.string.ig_dm_desc),
         checked = isPro && dmAllowed,
         isPro = isPro,
         onCheckedChange = {
@@ -438,8 +455,8 @@ private fun InstagramSubOptions(
         onLockedClick = onOpenPaywall
     )
     SubOptionRow(
-        title = "Bloquear Historias",
-        description = "Por defecto las stories no se bloquean. Actívalo si también quieres bloquearlas.",
+        title = stringResource(R.string.ig_stories_title),
+        description = stringResource(R.string.ig_stories_desc),
         checked = isPro && storiesBlocked,
         isPro = isPro,
         onCheckedChange = {
@@ -538,7 +555,7 @@ private fun StatsCard(today: Stats.Counts, history: List<Stats.DayCounts>) {
 
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text("Hoy", style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.stats_today_title), style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.height(4.dp))
             if (today.total == 0) {
                 Text(
@@ -548,7 +565,7 @@ private fun StatsCard(today: Stats.Counts, history: List<Stats.DayCounts>) {
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                 )
                 Text(
-                    text = "Sin caídas en Reels todavía. Bien.",
+                    text = stringResource(R.string.stats_empty),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -559,20 +576,20 @@ private fun StatsCard(today: Stats.Counts, history: List<Stats.DayCounts>) {
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "Instagram: ${today.instagram}  ·  YouTube: ${today.youtube}",
+                    text = stringResource(R.string.stats_breakdown_format, today.instagram, today.youtube),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
             Spacer(Modifier.height(16.dp))
-            Text("Últimos 7 días", style = MaterialTheme.typography.titleSmall)
+            Text(stringResource(R.string.stats_last_7_days), style = MaterialTheme.typography.titleSmall)
             Spacer(Modifier.height(8.dp))
             if (hasAnyHistory) {
                 WeeklyChart(history)
             } else {
                 Text(
-                    text = "Aún no hay historial. Vuelve mañana — los datos se acumulan.",
+                    text = stringResource(R.string.stats_no_history),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier
@@ -589,7 +606,7 @@ private fun WeeklyChart(history: List<Stats.DayCounts>) {
     val primary = MaterialTheme.colorScheme.primary
     val labelColor = MaterialTheme.colorScheme.onSurfaceVariant
     val maxValue = (history.maxOfOrNull { it.counts.total } ?: 0).coerceAtLeast(1)
-    val dayFmt = remember { DateTimeFormatter.ofPattern("EEE", Locale("es")) }
+    val dayFmt = remember { DateTimeFormatter.ofPattern("EEE", Locale.getDefault()) }
     val lastIdx = history.lastIndex
 
     Column(modifier = Modifier.fillMaxWidth()) {
@@ -646,7 +663,8 @@ private fun WeeklyChart(history: List<Stats.DayCounts>) {
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = if (isToday) "Hoy" else day.date.format(dayFmt).take(3),
+                        text = if (isToday) stringResource(R.string.stats_chart_today_label)
+                               else day.date.format(dayFmt).take(3),
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal,
                         color = if (isToday) primary else labelColor
@@ -659,21 +677,22 @@ private fun WeeklyChart(history: List<Stats.DayCounts>) {
 
 @Composable
 private fun TipCard() {
+    val ctx = LocalContext.current
     // Tip rotativo cada 8 segundos con fade transition.
-    var tip by remember { mutableStateOf(Tips.random()) }
+    var tip by remember { mutableStateOf(Tips.random(ctx)) }
     LaunchedEffect(Unit) {
         while (true) {
             delay(8000)
             // Forzar uno nuevo distinto al actual.
             var next: String
-            do { next = Tips.random() } while (next == tip)
+            do { next = Tips.random(ctx) } while (next == tip)
             tip = next
         }
     }
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
-                text = "💡 ¿Sabías que…",
+                text = stringResource(R.string.tip_card_header),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.primary
             )
@@ -704,13 +723,13 @@ private fun AboutCard(onResetOnboarding: () -> Unit) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
             Text(
-                text = "Acerca de",
+                text = stringResource(R.string.about_title),
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(Modifier.height(4.dp))
             Text(
-                text = "Basta! Reel Blocker · v$versionName",
+                text = stringResource(R.string.about_version_format, versionName),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -722,10 +741,10 @@ private fun AboutCard(onResetOnboarding: () -> Unit) {
                         Intent(Intent.ACTION_VIEW, Uri.parse("https://jose99segura.github.io/ReelBlocker/privacy.html"))
                     )
                 }
-            ) { Text("Política de privacidad") }
+            ) { Text(stringResource(R.string.about_privacy_policy)) }
 
             TextButton(onClick = onResetOnboarding) {
-                Text("Volver a ver tutorial")
+                Text(stringResource(R.string.about_reset_tutorial))
             }
         }
     }
@@ -759,23 +778,23 @@ private fun ProUpsellCard(onClick: () -> Unit) {
             }
             Spacer(Modifier.height(2.dp))
             Text(
-                text = "Pago único, sin suscripción.",
+                text = stringResource(R.string.pro_one_time_short),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
             )
 
             Spacer(Modifier.height(12.dp))
-            ProComparisonLine(text = "Bloqueo de Reels y Shorts", inFree = true)
-            ProComparisonLine(text = "Estadísticas del día y la semana", inFree = true)
-            ProComparisonLine(text = "Permitir reels desde DM de amigos", inFree = false)
-            ProComparisonLine(text = "Bloquear Historias de Instagram", inFree = false)
+            ProComparisonLine(text = stringResource(R.string.pro_compare_block_reels_shorts), inFree = true)
+            ProComparisonLine(text = stringResource(R.string.pro_compare_stats), inFree = true)
+            ProComparisonLine(text = stringResource(R.string.pro_compare_dm), inFree = false)
+            ProComparisonLine(text = stringResource(R.string.pro_compare_stories), inFree = false)
 
             Spacer(Modifier.height(12.dp))
             Button(
                 onClick = onClick,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Desbloquear Pro")
+                Text(stringResource(R.string.button_unlock_pro))
             }
         }
     }
@@ -803,7 +822,10 @@ private fun ProComparisonLine(text: String, inFree: Boolean) {
         )
         Spacer(Modifier.width(8.dp))
         Text(
-            text = if (inFree) "Gratis" else "Pro",
+            text = stringResource(
+                if (inFree) R.string.pro_compare_free_badge
+                else R.string.pro_compare_pro_badge
+            ),
             style = MaterialTheme.typography.labelSmall,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onPrimaryContainer.copy(
@@ -817,8 +839,7 @@ private fun ProComparisonLine(text: String, inFree: Boolean) {
 private fun HelpCard() {
     Card(modifier = Modifier.fillMaxWidth()) {
         Text(
-            text = "Cuando entres en Reels de Instagram o Shorts de YouTube " +
-                "te sacará con el botón atrás. No envía nada fuera del dispositivo.",
+            text = stringResource(R.string.help_card_text),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(16.dp)

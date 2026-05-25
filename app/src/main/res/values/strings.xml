@@ -1,13 +1,148 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Brand / service -->
     <string name="app_name">Basta!</string>
-    <string name="app_tagline">Reel Blocker</string>
     <string name="service_label">Basta! — Reel Blocker</string>
-    <string name="service_description">Te ayuda a no caer en Reels de Instagram y Shorts de YouTube. Cuando detecta que entras, cierra esa sección para que sigas con lo que estabas haciendo. No envía nada fuera del dispositivo.</string>
-    <string name="toast_blocked">¡Basta!</string>
-    <string name="stats_format">Hoy: %1$d bloqueados   (Instagram: %2$d  ·  YouTube: %3$d)</string>
-    <string name="battery_state_optimized">Batería: el sistema puede matar el servicio ⚠</string>
-    <string name="battery_state_excluded">Batería: exenta ✅</string>
-    <string name="battery_action">Excluir de la optimización de batería</string>
-    <string name="oem_hint">En tu móvil (%1$s), además de la exención de batería entra en Ajustes → Apps → Basta! → Autoarranque y actívalo. Si no, el sistema cerrará el servicio en segundo plano.</string>
+    <string name="service_description">Helps you avoid getting pulled into Instagram Reels and YouTube Shorts. When it detects you entering, it closes that section so you can keep doing what you were doing. Nothing leaves the device.</string>
+    <string name="toast_blocked">Enough!</string>
+
+    <!-- Action cards -->
+    <string name="action_accessibility_title">Enable the accessibility service</string>
+    <string name="action_accessibility_body">Without this, Basta! can\'t detect Reels. Tap it and enable Basta! in the list.</string>
+    <string name="action_battery_title">Exclude from battery optimization</string>
+    <string name="action_battery_body">Without this, the system may kill the service after a few hours.</string>
+    <string name="button_open_accessibility">Open accessibility settings</string>
+    <string name="button_exclude_from_battery">Exclude from battery</string>
+    <string name="oem_hint">On your phone (%1$s), besides the battery exemption go to Settings → Apps → Basta! → Autostart and enable it. Otherwise the system will close the service in the background.</string>
+
+    <!-- Status chips -->
+    <string name="status_service_active">Service active</string>
+    <string name="status_battery_exempt">Battery exempt</string>
+    <string name="granted_service_enabled">Service enabled</string>
+    <string name="granted_battery_exempt">Battery: exempt</string>
+
+    <!-- Toasts -->
+    <string name="toast_loading_prices">Loading prices, try again in a moment</string>
+    <string name="toast_checking_purchases">Checking purchases…</string>
+    <string name="toast_pro_enabled_debug">🔓 Pro enabled (debug)</string>
+    <string name="toast_pro_disabled_debug">🔒 Pro disabled (debug)</string>
+
+    <!-- Topbar -->
+    <string name="topbar_subtitle_free">Reel Blocker</string>
+    <string name="topbar_subtitle_pro">Reel Blocker · Pro</string>
+
+    <!-- Apps card -->
+    <string name="apps_card_title">Apps to block</string>
+    <string name="apps_not_installed">Not installed</string>
+    <string name="ig_dm_title">Allow reels from DMs</string>
+    <string name="ig_dm_desc">Reels sent by friends in direct messages aren\'t blocked</string>
+    <string name="ig_stories_title">Block Stories</string>
+    <string name="ig_stories_desc">Stories aren\'t blocked by default. Turn this on to block them too.</string>
+
+    <!-- Stats card -->
+    <string name="stats_today_title">Today</string>
+    <string name="stats_empty">No Reel slips yet. Good.</string>
+    <string name="stats_breakdown_format">Instagram: %1$d  ·  YouTube: %2$d</string>
+    <string name="stats_last_7_days">Last 7 days</string>
+    <string name="stats_no_history">No history yet. Come back tomorrow — data accumulates.</string>
+    <string name="stats_chart_today_label">Today</string>
+
+    <!-- Tip card -->
+    <string name="tip_card_header">💡 Did you know…</string>
+
+    <!-- About card -->
+    <string name="about_title">About</string>
+    <string name="about_version_format">Basta! Reel Blocker · v%1$s</string>
+    <string name="about_privacy_policy">Privacy policy</string>
+    <string name="about_reset_tutorial">Watch tutorial again</string>
+
+    <!-- Help card -->
+    <string name="help_card_text">When you enter Reels on Instagram or Shorts on YouTube it will send you back. Nothing leaves the device.</string>
+
+    <!-- Pro upsell card -->
+    <string name="pro_one_time_short">One-time payment, no subscription.</string>
+    <string name="pro_compare_block_reels_shorts">Block Reels and Shorts</string>
+    <string name="pro_compare_stats">Daily and weekly stats</string>
+    <string name="pro_compare_dm">Allow reels from friends in DMs</string>
+    <string name="pro_compare_stories">Block Instagram Stories</string>
+    <string name="pro_compare_free_badge">Free</string>
+    <string name="pro_compare_pro_badge">Pro</string>
+    <string name="button_unlock_pro">Unlock Pro</string>
+
+    <!-- Paywall -->
+    <string name="button_restore_purchases">Restore purchases</string>
+    <string name="paywall_subtitle">Customize how it blocks</string>
+    <string name="paywall_feature_dm">Allow Reels from friends\' DMs</string>
+    <string name="paywall_feature_stories">Block Stories (optional)</string>
+    <string name="paywall_feature_schedules">Scheduled hours (coming soon)</string>
+    <string name="paywall_feature_stats">Extended stats (coming soon)</string>
+    <string name="paywall_price_label">One-time purchase. No subscription.</string>
+    <string name="paywall_disclaimer">Without Pro the app still blocks Reels and Shorts. Pro just gives fine-grained control over what and when.</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_skip">Skip</string>
+    <string name="onboarding_next">Next</string>
+    <string name="onboarding_start">Start</string>
+    <string name="onboarding_p1_body">95 min/day. That\'s what we lose on average to Reels and Shorts. Almost an hour and a half. Every day.\n\nWhen you enter, this app pulls you out. No motivational coaches, no sermons.</string>
+    <string name="onboarding_p2_title">Enable the service</string>
+    <string name="onboarding_p2_body">It\'s the only way Android has to detect Reels. It only reads screen identifiers, never the contents of your messages.</string>
+    <string name="onboarding_p3_title">And tell the battery not to kill us</string>
+    <string name="onboarding_p3_body">Without this, the system closes the service within hours and there\'d be no Basta! anymore.</string>
+    <string name="onboarding_source_format">Source: %1$s</string>
+
+    <!-- Tips: stats -->
+    <string-array name="tips_stats">
+        <item>The average user spends 95 min a day on Reels and Shorts. Almost a movie.</item>
+        <item>Your brain takes 23 min to recover focus after each distraction.</item>
+        <item>Reels plays 30 videos in 5 min. 30 micro-doses of dopamine.</item>
+        <item>Infinite scroll is designed so your brain never decides to stop.</item>
+        <item>1 hour of screen before bed = 22 min less deep sleep.</item>
+        <item>70% of users lose track of time on Reels.</item>
+        <item>TikTok hooks you in 8 min of use. Faster than coffee.</item>
+        <item>An average Reels session lasts 24 min. Almost half an episode of something good.</item>
+        <item>The younger the user, the more time on short video. You barely see it in grandparents.</item>
+        <item>Every like you get on Reels isn\'t yours. It\'s the algorithm deciding for you.</item>
+        <item>Teens with +3h/day on short video show 2x more anxiety symptoms.</item>
+        <item>60% of people check their phone in the first 10 min after waking up.</item>
+        <item>We spend on average 3h 15min a day on our phones. That\'s 49 full days a year.</item>
+        <item>Blue screen light delays melatonin release by 1.5 hours.</item>
+    </string-array>
+
+    <!-- Tips: alternatives -->
+    <string-array name="tips_alternatives">
+        <item>5 min of Reels = 5 min reading. When did you last finish a whole book?</item>
+        <item>If you have 20 min, go for a walk. You can\'t see the sun while doomscrolling.</item>
+        <item>Call a friend. One conversation beats 100 reels combined.</item>
+        <item>Boredom is the signal that your brain is about to create something. Don\'t shut it off.</item>
+        <item>Cook something simple instead of scrolling. You eat better and you actually get what you wanted.</item>
+        <item>10 min of stretching when you wake up &gt; 10 min of Reels in bed.</item>
+        <item>Write down 3 things you want to do today. Start with one, no thinking.</item>
+        <item>Step out on the balcony for 2 min. The screen isn\'t going anywhere.</item>
+        <item>20 squats right now give you more energy than 20 reels.</item>
+        <item>Writing a long message to someone you care about hits harder than any scroll.</item>
+        <item>A coffee with someone in person is worth a week of stories.</item>
+        <item>If you\'re bored, look out the window for 30 seconds. Seriously.</item>
+        <item>Listen to a song with your eyes closed. Enough as a break.</item>
+        <item>Put on a song and dance for 3 minutes. Your body will thank you.</item>
+        <item>Cold shower for 30 seconds. Better reset than 50 reels.</item>
+        <item>Water a plant. Brings the brain to something slow and alive.</item>
+    </string-array>
+
+    <!-- Tips: reflections -->
+    <string-array name="tips_reflections">
+        <item>The first scroll isn\'t the problem. Number 50 is.</item>
+        <item>You don\'t have to be productive all the time. Being a little bored is fine too.</item>
+        <item>The hard part isn\'t quitting Reels. It\'s not opening them without thinking.</item>
+        <item>The algorithm remembers you every second. How much do you remember the algorithm?</item>
+        <item>Every time this app pulls you out, you gain time you didn\'t see slipping away.</item>
+        <item>Your free time isn\'t \"dead time.\" It\'s one of the few moments that are really yours.</item>
+        <item>Choose your distractions on purpose. The ones that catch you off guard hurt the most.</item>
+        <item>If you open Reels to \"rest,\" you end up more tired. Confirmed.</item>
+        <item>Real curiosity lasts hours. Reels curiosity, 8 seconds.</item>
+        <item>Close your eyes for 10 seconds. That\'s more rest than half an hour of scrolling.</item>
+        <item>Good things take time. Reels things arrive in 15 seconds and leave just as fast.</item>
+        <item>Attention is the scarcest resource of the century. And you give it away for free.</item>
+        <item>Question: whose was the last reel you watched? Exactly.</item>
+        <item>Before grabbing your phone, breathe three times. Sometimes the urge passes.</item>
+    </string-array>
 </resources>

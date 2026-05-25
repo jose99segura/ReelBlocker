@@ -23,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -48,6 +49,7 @@ fun PaywallSheet(
                 .padding(horizontal = 24.dp, vertical = 12.dp)
         ) {
             Text(
+                // Marca, no traducible.
                 text = "Basta! Pro",
                 fontSize = 36.sp,
                 fontWeight = FontWeight.Black,
@@ -57,7 +59,7 @@ fun PaywallSheet(
             )
             Spacer(Modifier.height(4.dp))
             Text(
-                text = "Personaliza cómo bloquea",
+                text = stringResource(R.string.paywall_subtitle),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.fillMaxWidth(),
@@ -66,10 +68,10 @@ fun PaywallSheet(
 
             Spacer(Modifier.height(24.dp))
 
-            FeatureLine("Permitir Reels desde DM de amigos")
-            FeatureLine("Bloquear Historias (opcional)")
-            FeatureLine("Horarios programados (próximamente)")
-            FeatureLine("Estadísticas extendidas (próximamente)")
+            FeatureLine(stringResource(R.string.paywall_feature_dm))
+            FeatureLine(stringResource(R.string.paywall_feature_stories))
+            FeatureLine(stringResource(R.string.paywall_feature_schedules))
+            FeatureLine(stringResource(R.string.paywall_feature_stats))
 
             Spacer(Modifier.height(20.dp))
 
@@ -82,7 +84,7 @@ fun PaywallSheet(
                 textAlign = TextAlign.Center
             )
             Text(
-                text = "Compra única. Sin suscripción.",
+                text = stringResource(R.string.paywall_price_label),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.fillMaxWidth(),
@@ -95,7 +97,7 @@ fun PaywallSheet(
                 onClick = onPurchase,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Desbloquear Pro")
+                Text(stringResource(R.string.button_unlock_pro))
             }
 
             TextButton(
@@ -103,7 +105,7 @@ fun PaywallSheet(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = "Restaurar compras",
+                    text = stringResource(R.string.button_restore_purchases),
                     style = MaterialTheme.typography.labelMedium
                 )
             }
@@ -111,7 +113,7 @@ fun PaywallSheet(
             Spacer(Modifier.height(12.dp))
 
             Text(
-                text = "Sin Pro la app sigue bloqueando Reels y Shorts. Pro solo da control fino sobre qué y cuándo.",
+                text = stringResource(R.string.paywall_disclaimer),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.fillMaxWidth(),

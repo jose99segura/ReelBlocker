@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Brand / service -->
+    <string name="app_name">Basta!</string>
+    <string name="service_label">Basta! — Reel Blocker</string>
+    <string name="service_description">Te ayuda a no caer en Reels de Instagram y Shorts de YouTube. Cuando detecta que entras, cierra esa sección para que sigas con lo que estabas haciendo. No envía nada fuera del dispositivo.</string>
+    <string name="toast_blocked">¡Basta!</string>
+
+    <!-- Action cards -->
+    <string name="action_accessibility_title">Activa el servicio de accesibilidad</string>
+    <string name="action_accessibility_body">Sin esto, Basta! no puede detectar los Reels. Tócalo y activa Basta! en la lista.</string>
+    <string name="action_battery_title">Excluye de la optimización de batería</string>
+    <string name="action_battery_body">Sin esto, el sistema puede matar el servicio al cabo de unas horas.</string>
+    <string name="button_open_accessibility">Abrir ajustes de accesibilidad</string>
+    <string name="button_exclude_from_battery">Excluir de la batería</string>
+    <string name="oem_hint">En tu móvil (%1$s), además de la exención de batería entra en Ajustes → Apps → Basta! → Autoarranque y actívalo. Si no, el sistema cerrará el servicio en segundo plano.</string>
+
+    <!-- Status chips -->
+    <string name="status_service_active">Servicio activo</string>
+    <string name="status_battery_exempt">Batería exenta</string>
+    <string name="granted_service_enabled">Servicio activado</string>
+    <string name="granted_battery_exempt">Batería: exenta</string>
+
+    <!-- Toasts -->
+    <string name="toast_loading_prices">Cargando precios, prueba de nuevo en un momento</string>
+    <string name="toast_checking_purchases">Comprobando compras…</string>
+    <string name="toast_pro_enabled_debug">🔓 Pro activado (debug)</string>
+    <string name="toast_pro_disabled_debug">🔒 Pro desactivado (debug)</string>
+
+    <!-- Topbar -->
+    <string name="topbar_subtitle_free">Reel Blocker</string>
+    <string name="topbar_subtitle_pro">Reel Blocker · Pro</string>
+
+    <!-- Apps card -->
+    <string name="apps_card_title">Apps a bloquear</string>
+    <string name="apps_not_installed">No instalada</string>
+    <string name="ig_dm_title">Permitir reels desde DM</string>
+    <string name="ig_dm_desc">Reels enviados por amigos en mensajes directos no se bloquean</string>
+    <string name="ig_stories_title">Bloquear Historias</string>
+    <string name="ig_stories_desc">Por defecto las stories no se bloquean. Actívalo si también quieres bloquearlas.</string>
+
+    <!-- Stats card -->
+    <string name="stats_today_title">Hoy</string>
+    <string name="stats_empty">Sin caídas en Reels todavía. Bien.</string>
+    <string name="stats_breakdown_format">Instagram: %1$d  ·  YouTube: %2$d</string>
+    <string name="stats_last_7_days">Últimos 7 días</string>
+    <string name="stats_no_history">Aún no hay historial. Vuelve mañana — los datos se acumulan.</string>
+    <string name="stats_chart_today_label">Hoy</string>
+
+    <!-- Tip card -->
+    <string name="tip_card_header">💡 ¿Sabías que…</string>
+
+    <!-- About card -->
+    <string name="about_title">Acerca de</string>
+    <string name="about_version_format">Basta! Reel Blocker · v%1$s</string>
+    <string name="about_privacy_policy">Política de privacidad</string>
+    <string name="about_reset_tutorial">Volver a ver tutorial</string>
+
+    <!-- Help card -->
+    <string name="help_card_text">Cuando entres en Reels de Instagram o Shorts de YouTube te sacará con el botón atrás. No envía nada fuera del dispositivo.</string>
+
+    <!-- Pro upsell card -->
+    <string name="pro_one_time_short">Pago único, sin suscripción.</string>
+    <string name="pro_compare_block_reels_shorts">Bloqueo de Reels y Shorts</string>
+    <string name="pro_compare_stats">Estadísticas del día y la semana</string>
+    <string name="pro_compare_dm">Permitir reels desde DM de amigos</string>
+    <string name="pro_compare_stories">Bloquear Historias de Instagram</string>
+    <string name="pro_compare_free_badge">Gratis</string>
+    <string name="pro_compare_pro_badge">Pro</string>
+    <string name="button_unlock_pro">Desbloquear Pro</string>
+
+    <!-- Paywall -->
+    <string name="button_restore_purchases">Restaurar compras</string>
+    <string name="paywall_subtitle">Personaliza cómo bloquea</string>
+    <string name="paywall_feature_dm">Permitir Reels desde DM de amigos</string>
+    <string name="paywall_feature_stories">Bloquear Historias (opcional)</string>
+    <string name="paywall_feature_schedules">Horarios programados (próximamente)</string>
+    <string name="paywall_feature_stats">Estadísticas extendidas (próximamente)</string>
+    <string name="paywall_price_label">Compra única. Sin suscripción.</string>
+    <string name="paywall_disclaimer">Sin Pro la app sigue bloqueando Reels y Shorts. Pro solo da control fino sobre qué y cuándo.</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_skip">Saltar</string>
+    <string name="onboarding_next">Siguiente</string>
+    <string name="onboarding_start">Empezar</string>
+    <string name="onboarding_p1_body">95 min/día. Es lo que perdemos de media en Reels y Shorts. Casi hora y media. Cada día.\n\nCuando entras, esta app te saca. Sin coaches motivacionales, sin sermones.</string>
+    <string name="onboarding_p2_title">Activa el servicio</string>
+    <string name="onboarding_p2_body">Es la única forma que tiene Android de detectar Reels. Solo lee identificadores de pantalla, nunca el contenido de tus mensajes.</string>
+    <string name="onboarding_p3_title">Y dile a la batería que no nos mate</string>
+    <string name="onboarding_p3_body">Sin esto, el sistema cierra el servicio en horas y aquí ya no habría Basta!</string>
+    <string name="onboarding_source_format">Fuente: %1$s</string>
+
+    <!-- Tips: estadisticas -->
+    <string-array name="tips_stats">
+        <item>El usuario medio pasa 95 min al día en Reels y Shorts. Casi una peli.</item>
+        <item>Tu cerebro tarda 23 min en recuperar la concentración tras cada distracción.</item>
+        <item>Reels reproducen 30 vídeos en 5 min. 30 micro-dosis de dopamina.</item>
+        <item>El scroll infinito está diseñado para que tu cerebro no decida parar.</item>
+        <item>1 hora de pantalla antes de dormir = 22 min menos de sueño profundo.</item>
+        <item>El 70% de los usuarios pierde la noción del tiempo en Reels.</item>
+        <item>TikTok engancha en 8 min de uso. Más rápido que el café.</item>
+        <item>Una sesión media de Reels dura 24 min. Casi medio episodio de algo bueno.</item>
+        <item>Cuanto más joven el usuario, más tiempo en vídeo corto. Cuesta verlo en abuelos.</item>
+        <item>Cada like que recibes en Reels no es tuyo. Es del algoritmo decidiendo por ti.</item>
+        <item>Adolescentes con +3h/día en vídeo corto tienen 2x más síntomas de ansiedad.</item>
+        <item>El 60% de la gente revisa el móvil en los primeros 10 min al despertar.</item>
+        <item>Pasamos de media 3h 15min al día con el móvil. Eso son 49 días enteros al año.</item>
+        <item>La luz azul de la pantalla retrasa la liberación de melatonina 1,5 horas.</item>
+    </string-array>
+
+    <!-- Tips: alternativas -->
+    <string-array name="tips_alternatives">
+        <item>5 min de Reels = 5 min leyendo. ¿Cuándo terminaste un libro entero?</item>
+        <item>Si tienes 20 min, sal a andar. El sol no se ve haciendo doomscrolling.</item>
+        <item>Llama a un amigo. Una conversación supera a 100 reels juntos.</item>
+        <item>Aburrirte es la señal de que el cerebro va a crear algo. No lo apagues.</item>
+        <item>Cocina algo sencillo en vez de scrollear. Comes mejor y te sale lo que querías.</item>
+        <item>10 min de estiramientos al despertar &gt; 10 min de Reels en la cama.</item>
+        <item>Apunta 3 cosas que quieras hacer hoy. Empieza por una, sin pensar.</item>
+        <item>Sal al balcón 2 min. La pantalla no se va a ir a ningún lado.</item>
+        <item>20 sentadillas ahora te dan más energía que 20 reels.</item>
+        <item>Escribir un mensaje largo a alguien que te importa pega más que cualquier scroll.</item>
+        <item>Un café con alguien en persona vale por una semana de stories.</item>
+        <item>Si te aburres, mira por la ventana 30 segundos. En serio.</item>
+        <item>Escucha una canción con los ojos cerrados. Suficiente como pausa.</item>
+        <item>Pon una canción y baila 3 minutos. El cuerpo lo agradece.</item>
+        <item>Ducha fría 30 segundos. Reseteas mejor que con 50 reels.</item>
+        <item>Riega una planta. Trae al cerebro a algo lento y vivo.</item>
+    </string-array>
+
+    <!-- Tips: reflexiones -->
+    <string-array name="tips_reflections">
+        <item>El primer scroll no es el problema. El número 50 sí.</item>
+        <item>No tienes que ser productivo todo el rato. Aburrirte un poco también vale.</item>
+        <item>Lo difícil no es dejar los Reels. Es no abrirlos sin pensar.</item>
+        <item>El algoritmo se acuerda de ti cada segundo. Tú, ¿cuánto te acuerdas del algoritmo?</item>
+        <item>Cada vez que esta app te saca, ganas tiempo que no veías gastar.</item>
+        <item>Tu tiempo libre no es \'tiempo muerto\'. Es de los pocos ratos que son tuyos.</item>
+        <item>Escoge tus distracciones a propósito. Las que te sorprenden son las que más duelen.</item>
+        <item>Si entras en Reels para \'descansar\', acabas más cansado. Comprobado.</item>
+        <item>La curiosidad real dura horas. La de los Reels, 8 segundos.</item>
+        <item>Cierra los ojos 10 segundos. Eso ya es más descanso que media hora de scroll.</item>
+        <item>Lo bueno tarda. Lo de Reels llega en 15 segundos y se va igual de rápido.</item>
+        <item>La atención es el recurso más escaso del siglo. Y la regalas gratis.</item>
+        <item>Pregunta: ¿de quién era el último reel que viste? Exacto.</item>
+        <item>Antes de coger el móvil, respira tres veces. A veces se te quita.</item>
+    </string-array>
+</resources>

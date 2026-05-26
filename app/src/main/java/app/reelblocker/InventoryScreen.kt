@@ -61,7 +61,8 @@ fun InventoryScreen() {
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Black
                     )
-                }
+                },
+                windowInsets = androidx.compose.foundation.layout.WindowInsets(0)
             )
         }
     ) { padding ->

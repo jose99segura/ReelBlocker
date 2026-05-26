@@ -94,7 +94,8 @@ fun SettingsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.settings_title)) }
+                title = { Text(stringResource(R.string.settings_title)) },
+                windowInsets = androidx.compose.foundation.layout.WindowInsets(0)
             )
         }
     ) { padding ->

@@ -19,8 +19,11 @@ android {
         applicationId "app.reelblocker"
         minSdk 24
         targetSdk 35
-        versionCode 4
-        versionName "1.0"
+        // Convención: versionCode = versionName sin puntos × 10.
+        // 1.0 → 100, 1.1 → 110, 1.1.1 → 111, 1.2 → 120. Deja hueco para
+        // hotfixes (e.g. 1.1 → 110, hotfix → 111) sin saltos raros.
+        versionCode 110
+        versionName "1.1"
     }
 
     signingConfigs {
@@ -86,4 +89,7 @@ dependencies {
     implementation 'androidx.compose.material:material-icons-extended'
 
     implementation 'com.android.billingclient:billing-ktx:7.1.1'
+
+    // Confetti en la evolucion de la mascota (sistema de rachas).
+    implementation 'nl.dionsegijn:konfetti-compose:2.0.4'
 }

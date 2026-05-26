@@ -28,6 +28,7 @@ class BlockerService : AccessibilityService() {
 
         private const val PKG_INSTAGRAM = "com.instagram.android"
         private const val PKG_YOUTUBE = "com.google.android.youtube"
+        private const val PKG_FACEBOOK = "com.facebook.katana"
 
         // Reels publicos (TikTok-like). Bloquear siempre si IG esta activo.
         private val INSTAGRAM_REELS_HINTS = listOf(
@@ -111,6 +112,8 @@ class BlockerService : AccessibilityService() {
     // Timestamp del ultimo evento donde vimos hints DM en el arbol. Sirve
     // para decidir si un reel recien detectado viene de un DM.
     private var lastSeenDmTimestamp = 0L
+    // Rate-limit del volcado diagnostico de Facebook.
+    private var lastFbDumpTime = 0L
 
     override fun onServiceConnected() {
         super.onServiceConnected()
@@ -126,7 +129,11 @@ class BlockerService : AccessibilityService() {
 
         Log.v(TAG, "Evento pkg=$pkg tipo=${event.eventType}")
 
-        if (pkg != PKG_INSTAGRAM && pkg != PKG_YOUTUBE) return
+        if (pkg != PKG_INSTAGRAM && pkg != PKG_YOUTUBE && pkg != PKG_FACEBOOK) return
+
+        // Descanso Pro activo: el servicio sigue conectado (la racha cuenta el
+        // día) pero no disparamos back durante la pausa.
+        if (Breaks.isOnBreak(this)) return
 
         // Gate por preferencias del usuario.
         if (!Stats.isAppEnabled(this, pkg)) {
@@ -149,6 +156,13 @@ class BlockerService : AccessibilityService() {
         val root = rootInActiveWindow
         if (root == null) {
             Log.w(TAG, "rootInActiveWindow NULL para $pkg")
+            return
+        }
+
+        // FASE DESCUBRIMIENTO Facebook: por ahora solo volcamos el arbol
+        // para ver que resource-ids / className expone. Aun no bloqueamos.
+        if (pkg == PKG_FACEBOOK) {
+            dumpFacebookTree(event, root)
             return
         }
 
@@ -266,6 +280,36 @@ class BlockerService : AccessibilityService() {
             }
         }
         if (seen.isEmpty()) Log.d(TAG, "  no dm-candidate ids encontrados")
+    }
+
+    /**
+     * Diagnostico Facebook: cada ~1.5 s, volcar el className del evento y
+     * todos los resource-id no nulos del arbol. Sirve para descubrir por
+     * que se reconoce el visor de Reels de Facebook.
+     */
+    private fun dumpFacebookTree(event: AccessibilityEvent, root: AccessibilityNodeInfo) {
+        val now = SystemClock.elapsedRealtime()
+        if (now - lastFbDumpTime < 1500L) return
+        lastFbDumpTime = now
+
+        Log.d(TAG, "FB === evento tipo=${event.eventType} className=${event.className}")
+        val ids = mutableSetOf<String>()
+        val queue = ArrayDeque<AccessibilityNodeInfo>()
+        queue.add(root)
+        var visited = 0
+        while (queue.isNotEmpty() && visited < 1500 && ids.size < 60) {
+            val node = queue.removeFirst()
+            visited++
+            node.viewIdResourceName?.let { if (it.isNotBlank()) ids.add(it) }
+            for (i in 0 until node.childCount) {
+                node.getChild(i)?.let { queue.add(it) }
+            }
+        }
+        if (ids.isEmpty()) {
+            Log.d(TAG, "FB   (sin resource-ids en el arbol — $visited nodos)")
+        } else {
+            ids.forEach { Log.d(TAG, "FB   id: $it") }
+        }
     }
 
     private fun containsAnyHint(

@@ -23,6 +23,13 @@ crash.txt
 # OS
 Thumbs.db
 
+# Claude Code project state — local, no commit
+.claude/
+
+# Screenshots temporales de testing
+sc.png
+sc_*.png
+
 # Keystores — NUNCA versionar claves de firma
 *.jks
 *.keystore

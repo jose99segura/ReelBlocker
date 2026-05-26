@@ -133,6 +133,17 @@ object Stats {
         return entry.toCounts()
     }
 
+    /** Suma todos los bloqueos en la historia (ultimos MAX_HISTORY_DAYS). */
+    fun totalBlocks(ctx: Context): Int {
+        val history = loadHistory(prefs(ctx))
+        var sum = 0
+        val iter = history.keys()
+        while (iter.hasNext()) {
+            sum += history.optJSONObject(iter.next())?.optInt("t") ?: 0
+        }
+        return sum
+    }
+
     /**
      * Devuelve los ultimos N dias incluyendo hoy, en orden cronologico
      * ascendente. Dias sin datos rellenan con ceros.

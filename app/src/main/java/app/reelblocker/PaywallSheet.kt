@@ -22,7 +22,7 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -48,7 +48,7 @@ fun PaywallSheet(
                 .padding(horizontal = 24.dp, vertical = 12.dp)
         ) {
             Text(
-                text = "Basta! Pro",
+                text = stringResource(R.string.paywall_title),
                 fontSize = 36.sp,
                 fontWeight = FontWeight.Black,
                 color = MaterialTheme.colorScheme.primary,
@@ -57,7 +57,7 @@ fun PaywallSheet(
             )
             Spacer(Modifier.height(4.dp))
             Text(
-                text = "Personaliza cómo bloquea",
+                text = stringResource(R.string.paywall_subtitle),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.fillMaxWidth(),
@@ -66,10 +66,24 @@ fun PaywallSheet(
 
             Spacer(Modifier.height(24.dp))
 
-            FeatureLine("Permitir Reels desde DM de amigos")
-            FeatureLine("Bloquear Historias (opcional)")
-            FeatureLine("Horarios programados (próximamente)")
-            FeatureLine("Estadísticas extendidas (próximamente)")
+            // Feature destacada — la promesa emocional principal.
+            FeatureLine(stringResource(R.string.paywall_feature_break), highlight = true)
+            FeatureLine(stringResource(R.string.paywall_feature_dm))
+            FeatureLine(stringResource(R.string.paywall_feature_stories))
+
+            Spacer(Modifier.height(20.dp))
+
+            // Línea emocional sutil — refuerza la propuesta anti-manipulación.
+            Text(
+                text = stringResource(R.string.paywall_emotional),
+                style = MaterialTheme.typography.bodySmall,
+                fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                textAlign = TextAlign.Center
+            )
 
             Spacer(Modifier.height(20.dp))
 
@@ -82,7 +96,7 @@ fun PaywallSheet(
                 textAlign = TextAlign.Center
             )
             Text(
-                text = "Compra única. Sin suscripción.",
+                text = stringResource(R.string.paywall_one_time),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.fillMaxWidth(),
@@ -95,7 +109,7 @@ fun PaywallSheet(
                 onClick = onPurchase,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Desbloquear Pro")
+                Text(stringResource(R.string.paywall_cta_purchase))
             }
 
             TextButton(
@@ -103,7 +117,7 @@ fun PaywallSheet(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = "Restaurar compras",
+                    text = stringResource(R.string.paywall_cta_restore),
                     style = MaterialTheme.typography.labelMedium
                 )
             }
@@ -111,7 +125,7 @@ fun PaywallSheet(
             Spacer(Modifier.height(12.dp))
 
             Text(
-                text = "Sin Pro la app sigue bloqueando Reels y Shorts. Pro solo da control fino sobre qué y cuándo.",
+                text = stringResource(R.string.paywall_disclaimer),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.fillMaxWidth(),
@@ -124,7 +138,7 @@ fun PaywallSheet(
 }
 
 @Composable
-private fun FeatureLine(text: String) {
+private fun FeatureLine(text: String, highlight: Boolean = false) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -135,13 +149,15 @@ private fun FeatureLine(text: String) {
         Icon(
             imageVector = Icons.Outlined.Check,
             contentDescription = null,
-            tint = Color(0xFF2E7D32),
+            tint = if (highlight) MaterialTheme.colorScheme.primary
+                   else MaterialTheme.colorScheme.tertiary,
             modifier = Modifier.size(20.dp)
         )
         Spacer(Modifier.width(12.dp))
         Text(
             text = text,
             style = MaterialTheme.typography.bodyMedium,
+            fontWeight = if (highlight) FontWeight.SemiBold else FontWeight.Normal,
             color = MaterialTheme.colorScheme.onSurface
         )
     }

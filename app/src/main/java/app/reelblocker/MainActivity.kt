@@ -6,20 +6,14 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.os.PowerManager
 import android.provider.Settings
 import android.text.TextUtils
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -28,28 +22,48 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ShowChart
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.WorkspacePremium
+import androidx.compose.material.icons.automirrored.outlined.HelpOutline
+import androidx.compose.material.icons.automirrored.outlined.ShowChart
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Pets
+import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Pets
+import androidx.compose.material.icons.outlined.Tune
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.minimumInteractiveComponentSize
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.core.graphics.drawable.toBitmap
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Check
-import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.darkColorScheme
@@ -62,29 +76,29 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import kotlinx.coroutines.delay
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.graphics.drawable.toBitmap
-import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Status bar transparente para que el gradiente del hero "fluya" desde arriba.
+        WindowCompat.setDecorFitsSystemWindows(window, true)
         Premium.init(applicationContext)
         setContent {
             ReelBlockerTheme {
@@ -111,9 +125,9 @@ private fun Root() {
                     requestBatteryExemption(ctx)
                 }
                 override fun isAccessibilityEnabled(): Boolean =
-                    isAccessibilityEnabled(ctx)
+                    app.reelblocker.isAccessibilityEnabled(ctx)
                 override fun isBatteryExempt(): Boolean =
-                    isBatteryExempt(ctx)
+                    app.reelblocker.isBatteryExempt(ctx)
             }
         }
         OnboardingScreen(
@@ -124,7 +138,7 @@ private fun Root() {
             }
         )
     } else {
-        HomeScreen(onResetOnboarding = {
+        AppRoot(onResetOnboarding = {
             Stats.setOnboardingDone(ctx, done = false)
             onboardingDone = false
         })
@@ -137,31 +151,48 @@ private fun ReelBlockerTheme(content: @Composable () -> Unit) {
     MaterialTheme(colorScheme = colors, content = content)
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun HomeScreen(onResetOnboarding: () -> Unit = {}) {
+private fun AppRoot(onResetOnboarding: () -> Unit) {
     val ctx = LocalContext.current
-    val lifecycleOwner = LocalLifecycleOwner.current
+    var currentScreen: Screen by remember { mutableStateOf<Screen>(Screen.Home) }
+    var showPaywall by remember { mutableStateOf(false) }
+    var pendingGraduationVisible by remember { mutableStateOf(Collection.pendingGraduation(ctx) != null) }
 
-    var refreshKey by remember { mutableIntStateOf(0) }
-    DisposableEffect(lifecycleOwner) {
-        val obs = LifecycleEventObserver { _, e ->
-            if (e == Lifecycle.Event.ON_RESUME) refreshKey++
-        }
-        lifecycleOwner.lifecycle.addObserver(obs)
-        onDispose { lifecycleOwner.lifecycle.removeObserver(obs) }
+    BackHandler(enabled = currentScreen != Screen.Home) {
+        currentScreen = Screen.Home
     }
 
-    val serviceEnabled = remember(refreshKey) { isAccessibilityEnabled(ctx) }
-    val batteryExempt = remember(refreshKey) { isBatteryExempt(ctx) }
-    // Estado vivo de Pro: reacciona al instante a una compra.
-    val isPro = Premium.isProLive
-    val today = remember(refreshKey) { Stats.read(ctx) }
-    val history = remember(refreshKey) { Stats.readLastDays(ctx, 7) }
-
-    var showPaywall by remember { mutableStateOf(false) }
-    // Tap counter — 5 taps al wordmark alterna Pro. SOLO en builds debug.
-    var secretTapCount by remember { mutableIntStateOf(0) }
+    Scaffold(
+        bottomBar = {
+            BottomNavBar(
+                current = currentScreen,
+                inventoryBadge = pendingGraduationVisible,
+                onSelect = { tab -> currentScreen = tab }
+            )
+        }
+    ) { outerPadding ->
+        ScreenContainer(
+            current = currentScreen,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(outerPadding)
+        ) { screen ->
+            when (screen) {
+                is Screen.Home -> HomeScreen(
+                    onOpenPaywall = { showPaywall = true },
+                    onPendingGraduationChanged = { pendingGraduationVisible = it }
+                )
+                is Screen.Stats -> StatsScreen(
+                    onOpenPaywall = { showPaywall = true }
+                )
+                is Screen.Settings -> SettingsScreen(
+                    onOpenPaywall = { showPaywall = true },
+                    onResetOnboarding = onResetOnboarding
+                )
+                is Screen.Inventory -> InventoryScreen()
+            }
+        }
+    }
 
     if (showPaywall) {
         PaywallSheet(
@@ -173,105 +204,335 @@ private fun HomeScreen(onResetOnboarding: () -> Unit = {}) {
             },
             onRestore = {
                 Premium.restore(ctx)
-                Toast.makeText(ctx, "Comprobando compras…", Toast.LENGTH_SHORT).show()
+                Toast.makeText(ctx, ctx.getString(R.string.toast_checking_purchases), Toast.LENGTH_SHORT).show()
             }
         )
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun HomeScreen(
+    onOpenPaywall: () -> Unit,
+    onPendingGraduationChanged: (Boolean) -> Unit
+) {
+    val ctx = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    var refreshKey by remember { mutableIntStateOf(0) }
+    var externalDisableInfo by remember { mutableStateOf<ExternalDisableInfo?>(null) }
+    var pendingGraduation by remember { mutableStateOf<MascotSpecies?>(null) }
+    var breakRemainingMs by remember { mutableStateOf(Breaks.millisRemaining(ctx)) }
+    DisposableEffect(lifecycleOwner) {
+        val obs = LifecycleEventObserver { _, e ->
+            if (e == Lifecycle.Event.ON_RESUME) {
+                val enabledNow = isAccessibilityEnabled(ctx)
+                val wasProtecting = Streak.wasProtecting(ctx)
+                val nowProtecting = Streak.shouldBeProtecting(ctx)
+                if (wasProtecting && !nowProtecting) {
+                    // Capturar estado ANTES de romper, para mostrar al usuario
+                    // el coste real (día y especie que pierde).
+                    val priorState = Streak.current(ctx)
+                    val priorSpecies = Collection.currentSpecies(ctx)
+                    Streak.breakStreak(ctx, reason = "strict_disabled")
+                    externalDisableInfo = ExternalDisableInfo(
+                        priorCount = priorState.count,
+                        priorLevel = priorState.level,
+                        priorSpecies = priorSpecies
+                    )
+                } else if (nowProtecting) {
+                    Streak.tick(ctx)
+                }
+                Streak.setServiceEnabledSeen(ctx, enabledNow)
+                Streak.setProtectingSeen(ctx, nowProtecting)
+                pendingGraduation = Collection.pendingGraduation(ctx)
+                onPendingGraduationChanged(pendingGraduation != null)
+                breakRemainingMs = Breaks.millisRemaining(ctx)
+                refreshKey++
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(obs)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(obs) }
+    }
+
+    // Countdown del descanso — actualiza cada segundo mientras hay pausa.
+    LaunchedEffect(breakRemainingMs != null) {
+        while (breakRemainingMs != null) {
+            kotlinx.coroutines.delay(1000)
+            val remaining = Breaks.millisRemaining(ctx)
+            if (remaining == null) {
+                breakRemainingMs = null
+                refreshKey++  // re-leer Streak.current y forzar repaint
+                break
+            }
+            breakRemainingMs = remaining
+        }
+    }
+
+    val serviceEnabled = remember(refreshKey) { isAccessibilityEnabled(ctx) }
+    val batteryExempt = remember(refreshKey) { isBatteryExempt(ctx) }
+    val isPro = Premium.isProLive
+    val streakState = remember(refreshKey) { Streak.current(ctx) }
+    val today = remember(refreshKey) { Stats.read(ctx) }
+    val totalBlocks = remember(refreshKey) { Stats.totalBlocks(ctx) }
+    var showHowItWorks by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(title = {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.clickable {
-                        if (!BuildConfig.DEBUG) return@clickable
-                        secretTapCount++
-                        if (secretTapCount >= 5) {
-                            val newValue = !Premium.isPro(ctx)
-                            Premium.setProDebug(ctx, newValue)
-                            Toast.makeText(
-                                ctx,
-                                if (newValue) "🔓 Pro activado (debug)" else "🔒 Pro desactivado (debug)",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                            secretTapCount = 0
-                        }
+            CenterAlignedTopAppBar(
+                title = {
+                    Text(
+                        text = stringResource(R.string.home_title),
+                        fontSize = 26.sp,
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = (-0.5).sp
+                    )
+                },
+                actions = {
+                    // Cómo funciona — único atajo a info contextual.
+                    IconButton(onClick = { showHowItWorks = true }) {
+                        Icon(
+                            Icons.AutoMirrored.Outlined.HelpOutline,
+                            contentDescription = stringResource(R.string.cd_how_it_works)
+                        )
                     }
-                ) {
-                    Text(
-                        text = "Basta",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Black
-                    )
-                    Text(
-                        text = if (isPro) "Reel Blocker · Pro" else "Reel Blocker",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = if (isPro) MaterialTheme.colorScheme.primary
-                                else MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontWeight = if (isPro) FontWeight.Bold else FontWeight.Normal
-                    )
-                }
-            })
+                    if (isPro) {
+                        ProBadge()
+                    } else {
+                        UpgradeChip(onClick = onOpenPaywall)
+                    }
+                },
+                // Sin inset extra — el Scaffold padre (con bottomBar) ya
+                // reserva el inset de la status bar arriba.
+                windowInsets = androidx.compose.foundation.layout.WindowInsets(0)
+            )
         }
     ) { padding ->
         Column(
             modifier = Modifier
                 .padding(padding)
-                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .fillMaxSize()
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Alertas: solo si requieren accion del usuario.
+            // (Las apps activas se muestran ahora abajo en el StatusFooter,
+            // unidas al punto verde — una sola fila discreta.)
+
+            // Alertas accion requerida (servicio/bateria) — solo si aplica.
             if (!serviceEnabled) {
-                ActionRequiredCard(
-                    title = "Activa el servicio de accesibilidad",
-                    body = "Sin esto, Basta! no puede detectar los Reels. Tócalo y activa Basta! en la lista.",
-                    actionLabel = "Abrir ajustes de accesibilidad",
-                    onAction = { ctx.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)) }
-                )
+                Box(modifier = Modifier.padding(horizontal = 24.dp)) {
+                    ActionRequiredCard(
+                        title = stringResource(R.string.home_action_accessibility_title),
+                        body = stringResource(R.string.home_action_accessibility_body),
+                        actionLabel = stringResource(R.string.home_action_accessibility_cta),
+                        onAction = { ctx.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)) }
+                    )
+                }
             }
             if (serviceEnabled && !batteryExempt) {
-                ActionRequiredCard(
-                    title = "Excluye de la optimización de batería",
-                    body = "Sin esto, el sistema puede matar el servicio al cabo de unas horas.",
-                    actionLabel = "Excluir de la batería",
-                    onAction = { requestBatteryExemption(ctx) },
-                    showOemHint = true
+                Box(modifier = Modifier.padding(horizontal = 24.dp)) {
+                    ActionRequiredCard(
+                        title = stringResource(R.string.home_action_battery_title),
+                        body = stringResource(R.string.home_action_battery_body),
+                        actionLabel = stringResource(R.string.home_action_battery_cta),
+                        onAction = { requestBatteryExemption(ctx) }
+                    )
+                }
+            }
+            // ExternalDisableDialog se renderiza al final de HomeScreen como
+            // modal — no consume espacio aquí dentro del scroll.
+
+            // ===== HERO — edge-to-edge para que el glow se extienda libremente =====
+            StreakCard(
+                refreshKey = refreshKey,
+                serviceEnabled = serviceEnabled,
+                breakRemainingMs = breakRemainingMs
+            )
+
+            // ===== STRIP — metricas resumen (sin nav: para detalle vía bottom nav) =====
+            Box(modifier = Modifier.padding(horizontal = 24.dp)) {
+                MetricsStrip(
+                    today = today.total,
+                    totalBlocks = totalBlocks,
+                    record = streakState.record,
+                    onClick = null
                 )
             }
 
-            // Contenido principal.
-            StatsCard(today = today, history = history)
-            TipCard()
-            AppsCard(
-                refreshKey = refreshKey,
-                isPro = isPro,
-                onChanged = { refreshKey++ },
-                onOpenPaywall = { showPaywall = true }
+            // ===== TIP cita =====
+            TipQuote(
+                modifier = Modifier
+                    .padding(horizontal = 24.dp, vertical = 4.dp)
             )
-            if (!isPro) {
-                ProUpsellCard(onClick = { showPaywall = true })
-            }
-            HelpCard()
-            AboutCard(onResetOnboarding = onResetOnboarding)
 
-            // Status pequeño al final.
-            Spacer(Modifier.height(4.dp))
-            StatusFooter(serviceEnabled = serviceEnabled, batteryExempt = batteryExempt)
-            Spacer(Modifier.height(8.dp))
+            // ===== FOOTER fino — solo estado, sin acciones destructivas =====
+            StatusFooter(
+                serviceEnabled = serviceEnabled,
+                refreshKey = refreshKey
+            )
         }
     }
+
+    pendingGraduation?.let { graduated ->
+        GraduationDialog(
+            graduatedSpecies = graduated,
+            daysReached = streakState.count.coerceAtLeast(MascotLevel.ADULT.minDays),
+            onConfirm = {
+                Collection.consumePendingGraduation(ctx, daysReached = MascotLevel.ADULT.minDays)
+                pendingGraduation = null
+                refreshKey++
+            }
+        )
+    }
+
+    externalDisableInfo?.let { info ->
+        ExternalDisableDialog(
+            info = info,
+            onDismiss = { externalDisableInfo = null }
+        )
+    }
+
+    if (showHowItWorks) {
+        HowItWorksDialog(onDismiss = { showHowItWorks = false })
+    }
 }
+
+/**
+ * Datos capturados ANTES de romper la racha — para mostrar al usuario
+ * exactamente qué perdió cuando vuelve a la app tras desactivar el servicio.
+ */
+internal data class ExternalDisableInfo(
+    val priorCount: Int,
+    val priorLevel: MascotLevel,
+    val priorSpecies: MascotSpecies
+)
+
+// ===== Top bar components =====
+
+@Composable
+private fun ProBadge() {
+    Row(
+        modifier = Modifier
+            .padding(end = 12.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .background(MaterialTheme.colorScheme.primaryContainer)
+            .padding(horizontal = 10.dp, vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = Icons.Filled.WorkspacePremium,
+            contentDescription = null,
+            modifier = Modifier.size(14.dp),
+            tint = MaterialTheme.colorScheme.onPrimaryContainer
+        )
+        Spacer(Modifier.width(4.dp))
+        Text(
+            text = stringResource(R.string.badge_pro),
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onPrimaryContainer
+        )
+    }
+}
+
+@Composable
+private fun UpgradeChip(onClick: () -> Unit) {
+    TextButton(
+        onClick = onClick,
+        modifier = Modifier.padding(end = 4.dp)
+    ) {
+        Icon(
+            imageVector = Icons.Filled.AutoAwesome,
+            contentDescription = null,
+            modifier = Modifier.size(14.dp),
+            tint = MaterialTheme.colorScheme.primary
+        )
+        Spacer(Modifier.width(4.dp))
+        Text(
+            text = stringResource(R.string.chip_upgrade),
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.Bold
+        )
+    }
+}
+
+// ===== Metrics strip =====
+
+@Composable
+private fun MetricsStrip(
+    today: Int,
+    totalBlocks: Int,
+    record: Int,
+    onClick: (() -> Unit)?
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .then(if (onClick != null) Modifier.clickable { onClick() } else Modifier)
+            .padding(vertical = 8.dp, horizontal = 4.dp),
+        horizontalArrangement = Arrangement.SpaceEvenly,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        MetricItem(label = stringResource(R.string.metric_today), value = today.toString())
+        VerticalDot()
+        MetricItem(label = stringResource(R.string.metric_recovered), value = formatRecoveredShort(totalBlocks))
+        VerticalDot()
+        MetricItem(
+            label = stringResource(R.string.metric_record),
+            value = if (record == 0) stringResource(R.string.metric_dash)
+                    else stringResource(R.string.metric_record_days, record)
+        )
+    }
+}
+
+@Composable
+private fun MetricItem(label: String, value: String) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(
+            text = value,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+@Composable
+private fun VerticalDot() {
+    Box(
+        modifier = Modifier
+            .size(3.dp)
+            .clip(CircleShape)
+            .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f))
+    )
+}
+
+private fun formatRecoveredShort(blocks: Int): String {
+    val totalSeconds = blocks * 30L
+    val hours = totalSeconds / 3600
+    val minutes = (totalSeconds % 3600) / 60
+    return when {
+        hours > 0 -> "${hours}h ${minutes}m"
+        minutes > 0 -> "${minutes}m"
+        else -> "—"
+    }
+}
+
+// ===== Action required & external disable cards (siguen siendo de home) =====
 
 @Composable
 private fun ActionRequiredCard(
     title: String,
     body: String,
     actionLabel: String,
-    onAction: () -> Unit,
-    showOemHint: Boolean = false
+    onAction: () -> Unit
 ) {
-    val ctx = LocalContext.current
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -290,20 +551,6 @@ private fun ActionRequiredCard(
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onErrorContainer
             )
-            if (showOemHint) {
-                val oem = Build.MANUFACTURER.lowercase()
-                val isAggressiveOem = oem in setOf(
-                    "xiaomi", "redmi", "poco", "huawei", "honor", "samsung", "oppo", "vivo", "realme"
-                )
-                if (isAggressiveOem) {
-                    Spacer(Modifier.height(8.dp))
-                    Text(
-                        text = ctx.getString(R.string.oem_hint, Build.MANUFACTURER),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.8f)
-                    )
-                }
-            }
             Spacer(Modifier.height(12.dp))
             Button(onClick = onAction, modifier = Modifier.fillMaxWidth()) {
                 Text(actionLabel)
@@ -312,523 +559,158 @@ private fun ActionRequiredCard(
     }
 }
 
+/**
+ * Modal post-fact que aparece al volver a la app tras desactivar el servicio
+ * desde fuera (ajustes del sistema). Más fuerte que el banner antiguo:
+ * mascota triste, copy emocional con el coste real de la acción.
+ */
 @Composable
-private fun StatusFooter(serviceEnabled: Boolean, batteryExempt: Boolean) {
-    if (!serviceEnabled) return  // Si esta inactivo, el aviso ya esta arriba.
+private fun ExternalDisableDialog(info: ExternalDisableInfo, onDismiss: () -> Unit) {
+    val speciesName = stringResource(info.priorSpecies.displayNameRes)
+    androidx.compose.ui.window.Dialog(onDismissRequest = onDismiss) {
+        Surface(
+            shape = androidx.compose.foundation.shape.RoundedCornerShape(28.dp),
+            color = MaterialTheme.colorScheme.surface,
+            tonalElevation = 6.dp
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp, vertical = 24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Box(modifier = Modifier.size(96.dp), contentAlignment = Alignment.Center) {
+                    MascotCanvas(
+                        level = info.priorLevel,
+                        species = info.priorSpecies,
+                        animate = true,
+                        sad = true,
+                        modifier = Modifier.size(96.dp)
+                    )
+                }
+                Spacer(Modifier.height(16.dp))
+                Text(
+                    text = stringResource(R.string.home_external_disable_title),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Black,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                )
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    text = stringResource(
+                        R.string.external_disable_dialog_body,
+                        info.priorCount,
+                        speciesName
+                    ),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                )
+                Spacer(Modifier.height(24.dp))
+                Button(onClick = onDismiss, modifier = Modifier.fillMaxWidth()) {
+                    Text(stringResource(R.string.action_dismiss))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun StatusFooter(
+    serviceEnabled: Boolean,
+    refreshKey: Int
+) {
+    val ctx = LocalContext.current
+    if (!serviceEnabled) return
+    // Una sola fila discreta: punto verde + "Activo en" + chips de las apps
+    // que se están bloqueando. Sustituye al BlockedAppsIndicator anterior.
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        StatusChip(text = "Servicio activo", ok = true)
-        Spacer(Modifier.width(12.dp))
-        if (batteryExempt) {
-            StatusChip(text = "Batería exenta", ok = true)
-        }
-    }
-}
-
-@Composable
-private fun StatusChip(text: String, ok: Boolean) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
         Box(
             modifier = Modifier
                 .size(6.dp)
                 .clip(CircleShape)
-                .background(if (ok) Color(0xFF2E7D32) else Color(0xFFC62828))
+                .background(MaterialTheme.colorScheme.tertiary)
         )
-        Spacer(Modifier.width(4.dp))
+        Spacer(Modifier.width(6.dp))
         Text(
-            text = text,
+            text = stringResource(R.string.status_active_in),
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-    }
-}
-
-@Composable
-private fun AppsCard(
-    refreshKey: Int,
-    isPro: Boolean,
-    onChanged: () -> Unit,
-    onOpenPaywall: () -> Unit
-) {
-    val ctx = LocalContext.current
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text("Apps a bloquear", style = MaterialTheme.typography.titleMedium)
-            Spacer(Modifier.height(8.dp))
-            Stats.BLOCKABLE_APPS.forEachIndexed { idx, (pkg, label) ->
-                val installed = remember(refreshKey, pkg) { isAppInstalled(ctx, pkg) }
-                val icon = remember(refreshKey, pkg) { loadAppIcon(ctx, pkg) }
-                val enabled = remember(refreshKey, pkg) { Stats.isAppEnabled(ctx, pkg) }
-                // Si la app no esta instalada, el switch se queda como esta
-                // (apagado por defecto) y no podemos activarlo.
-
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    AppIconBadge(icon = icon, fallbackLetter = label.first().toString(), enabled = installed)
-                    Spacer(Modifier.width(12.dp))
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = label,
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = if (installed) MaterialTheme.colorScheme.onSurface
-                                    else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
-                        )
-                        if (!installed) {
-                            Text(
-                                text = "No instalada",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                    Switch(
-                        checked = enabled && installed,
-                        enabled = installed,
-                        onCheckedChange = { newValue ->
-                            Stats.setAppEnabled(ctx, pkg, newValue)
-                            onChanged()
-                        }
-                    )
+        Spacer(Modifier.width(8.dp))
+        Stats.BLOCKABLE_APPS.forEach { (pkg, label) ->
+            AppIconChip(
+                pkg = pkg,
+                label = label,
+                refreshKey = refreshKey,
+                onClick = {
+                    ctx.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
                 }
-
-                // Sub-opciones de Instagram (solo si esta instalado y activado).
-                if (pkg == Stats.PKG_INSTAGRAM && enabled && installed) {
-                    InstagramSubOptions(
-                        refreshKey = refreshKey,
-                        isPro = isPro,
-                        onChanged = onChanged,
-                        onOpenPaywall = onOpenPaywall
-                    )
-                }
-
-                // Separador entre apps (no tras la ultima).
-                if (idx < Stats.BLOCKABLE_APPS.lastIndex) {
-                    Spacer(Modifier.height(4.dp))
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun InstagramSubOptions(
-    refreshKey: Int,
-    isPro: Boolean,
-    onChanged: () -> Unit,
-    onOpenPaywall: () -> Unit
-) {
-    val ctx = LocalContext.current
-    val dmAllowed = remember(refreshKey) { Stats.isDmReelsAllowed(ctx) }
-    val storiesBlocked = remember(refreshKey) { Stats.isStoriesBlocked(ctx) }
-
-    SubOptionRow(
-        title = "Permitir reels desde DM",
-        description = "Reels enviados por amigos en mensajes directos no se bloquean",
-        checked = isPro && dmAllowed,
-        isPro = isPro,
-        onCheckedChange = {
-            Stats.setDmReelsAllowed(ctx, it)
-            onChanged()
-        },
-        onLockedClick = onOpenPaywall
-    )
-    SubOptionRow(
-        title = "Bloquear Historias",
-        description = "Por defecto las stories no se bloquean. Actívalo si también quieres bloquearlas.",
-        checked = isPro && storiesBlocked,
-        isPro = isPro,
-        onCheckedChange = {
-            Stats.setStoriesBlocked(ctx, it)
-            onChanged()
-        },
-        onLockedClick = onOpenPaywall
-    )
-}
-
-@Composable
-private fun SubOptionRow(
-    title: String,
-    description: String,
-    checked: Boolean,
-    isPro: Boolean,
-    onCheckedChange: (Boolean) -> Unit,
-    onLockedClick: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .let { if (!isPro) it.clickable { onLockedClick() } else it }
-            .padding(start = 52.dp, top = 4.dp, bottom = 4.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = if (isPro) MaterialTheme.colorScheme.onSurface
-                            else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                )
-                if (!isPro) {
-                    Spacer(Modifier.width(6.dp))
-                    Icon(
-                        imageVector = Icons.Outlined.Lock,
-                        contentDescription = "Pro",
-                        modifier = Modifier.size(14.dp),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
-            }
-            Text(
-                text = description,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+            Spacer(Modifier.width(6.dp))
         }
-        Switch(
-            checked = checked,
-            enabled = isPro,
-            onCheckedChange = onCheckedChange
-        )
     }
 }
 
 @Composable
-private fun AppIconBadge(icon: Drawable?, fallbackLetter: String, enabled: Boolean) {
-    val alpha = if (enabled) 1f else 0.35f
+private fun AppIconChip(
+    pkg: String,
+    label: String,
+    refreshKey: Int,
+    onClick: () -> Unit
+) {
+    val ctx = LocalContext.current
+    val installed = remember(refreshKey, pkg) { isAppInstalled(ctx, pkg) }
+    val enabled = remember(refreshKey, pkg) { Stats.isAppEnabled(ctx, pkg) }
+    val drawable = remember(refreshKey, pkg) { loadAppIcon(ctx, pkg) }
+    val active = installed && enabled
+    val alpha = if (active) 1f else 0.3f
+
     Box(
         modifier = Modifier
-            .size(40.dp)
-            .clip(RoundedCornerShape(10.dp))
-            .background(
-                if (icon == null) MaterialTheme.colorScheme.surfaceVariant
-                else Color.Transparent
-            ),
+            .minimumInteractiveComponentSize()
+            .size(32.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .clickable { onClick() },
         contentAlignment = Alignment.Center
     ) {
-        if (icon != null) {
-            val bitmap = remember(icon) { icon.toBitmap(96, 96).asImageBitmap() }
+        if (drawable != null) {
+            val bitmap = remember(drawable) { drawable.toBitmap(64, 64).asImageBitmap() }
             Image(
                 bitmap = bitmap,
-                contentDescription = null,
+                contentDescription = label,
                 modifier = Modifier
-                    .size(40.dp)
-                    .clip(RoundedCornerShape(10.dp)),
+                    .size(28.dp)
+                    .clip(RoundedCornerShape(7.dp)),
                 alpha = alpha
             )
         } else {
-            Text(
-                text = fallbackLetter,
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = alpha)
-            )
-        }
-    }
-}
-
-@Composable
-private fun StatsCard(today: Stats.Counts, history: List<Stats.DayCounts>) {
-    val hasAnyHistory = history.any { it.counts.total > 0 }
-
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text("Hoy", style = MaterialTheme.typography.titleMedium)
-            Spacer(Modifier.height(4.dp))
-            if (today.total == 0) {
-                Text(
-                    text = "0",
-                    fontSize = 48.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                )
-                Text(
-                    text = "Sin caídas en Reels todavía. Bien.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            } else {
-                Text(
-                    text = today.total.toString(),
-                    fontSize = 48.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = "Instagram: ${today.instagram}  ·  YouTube: ${today.youtube}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
-            Spacer(Modifier.height(16.dp))
-            Text("Últimos 7 días", style = MaterialTheme.typography.titleSmall)
-            Spacer(Modifier.height(8.dp))
-            if (hasAnyHistory) {
-                WeeklyChart(history)
-            } else {
-                Text(
-                    text = "Aún no hay historial. Vuelve mañana — los datos se acumulan.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 24.dp)
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun WeeklyChart(history: List<Stats.DayCounts>) {
-    val primary = MaterialTheme.colorScheme.primary
-    val labelColor = MaterialTheme.colorScheme.onSurfaceVariant
-    val maxValue = (history.maxOfOrNull { it.counts.total } ?: 0).coerceAtLeast(1)
-    val dayFmt = remember { DateTimeFormatter.ofPattern("EEE", Locale("es")) }
-    val lastIdx = history.lastIndex
-
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(124.dp),
-            verticalAlignment = Alignment.Bottom,
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            history.forEachIndexed { idx, day ->
-                val isToday = idx == lastIdx
-                val fraction = day.counts.total / maxValue.toFloat()
-                val barHeight = (100f * fraction).coerceAtLeast(3f).dp
-                // Hoy con gradiente lleno; los demás días más tenues.
-                val barBrush = if (isToday) {
-                    Brush.verticalGradient(listOf(primary, primary.copy(alpha = 0.65f)))
-                } else {
-                    Brush.verticalGradient(
-                        listOf(primary.copy(alpha = 0.45f), primary.copy(alpha = 0.25f))
-                    )
-                }
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Bottom,
-                    modifier = Modifier.width(34.dp)
-                ) {
-                    Text(
-                        text = day.counts.total.toString(),
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal,
-                        color = if (isToday) primary else labelColor
-                    )
-                    Spacer(Modifier.height(3.dp))
-                    Box(
-                        modifier = Modifier
-                            .width(22.dp)
-                            .height(barHeight)
-                            .clip(RoundedCornerShape(topStart = 7.dp, topEnd = 7.dp))
-                            .background(barBrush)
-                    )
-                }
-            }
-        }
-        Spacer(Modifier.height(5.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            history.forEachIndexed { idx, day ->
-                val isToday = idx == lastIdx
-                Box(
-                    modifier = Modifier.width(34.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = if (isToday) "Hoy" else day.date.format(dayFmt).take(3),
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal,
-                        color = if (isToday) primary else labelColor
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun TipCard() {
-    // Tip rotativo cada 8 segundos con fade transition.
-    var tip by remember { mutableStateOf(Tips.random()) }
-    LaunchedEffect(Unit) {
-        while (true) {
-            delay(8000)
-            // Forzar uno nuevo distinto al actual.
-            var next: String
-            do { next = Tips.random() } while (next == tip)
-            tip = next
-        }
-    }
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = "💡 ¿Sabías que…",
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.primary
-            )
-            Spacer(Modifier.height(6.dp))
-            AnimatedContent(
-                targetState = tip,
-                transitionSpec = { fadeIn() togetherWith fadeOut() },
-                label = "tip"
-            ) { currentTip ->
-                Text(
-                    text = currentTip,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun AboutCard(onResetOnboarding: () -> Unit) {
-    val ctx = LocalContext.current
-    val versionName = remember {
-        try {
-            ctx.packageManager.getPackageInfo(ctx.packageName, 0).versionName ?: "1.0"
-        } catch (_: Exception) { "1.0" }
-    }
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
-            Text(
-                text = "Acerca de",
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Spacer(Modifier.height(4.dp))
-            Text(
-                text = "Basta! Reel Blocker · v$versionName",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            Spacer(Modifier.height(8.dp))
-            TextButton(
-                onClick = {
-                    ctx.startActivity(
-                        Intent(Intent.ACTION_VIEW, Uri.parse("https://jose99segura.github.io/ReelBlocker/privacy.html"))
-                    )
-                }
-            ) { Text("Política de privacidad") }
-
-            TextButton(onClick = onResetOnboarding) {
-                Text("Volver a ver tutorial")
-            }
-        }
-    }
-}
-
-@Composable
-private fun ProUpsellCard(onClick: () -> Unit) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() },
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
-        )
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = "Basta! Pro",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Black,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    modifier = Modifier.weight(1f)
-                )
-                Text(
-                    text = Premium.priceLabel ?: Premium.PRO_PRICE,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            }
-            Spacer(Modifier.height(2.dp))
-            Text(
-                text = "Pago único, sin suscripción.",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
-            )
-
-            Spacer(Modifier.height(12.dp))
-            ProComparisonLine(text = "Bloqueo de Reels y Shorts", inFree = true)
-            ProComparisonLine(text = "Estadísticas del día y la semana", inFree = true)
-            ProComparisonLine(text = "Permitir reels desde DM de amigos", inFree = false)
-            ProComparisonLine(text = "Bloquear Historias de Instagram", inFree = false)
-
-            Spacer(Modifier.height(12.dp))
-            Button(
-                onClick = onClick,
-                modifier = Modifier.fillMaxWidth()
+            Box(
+                modifier = Modifier
+                    .size(28.dp)
+                    .clip(RoundedCornerShape(7.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
             ) {
-                Text("Desbloquear Pro")
+                Text(
+                    text = label.first().toString(),
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = alpha),
+                    modifier = Modifier.align(Alignment.Center)
+                )
             }
         }
     }
 }
 
-@Composable
-private fun ProComparisonLine(text: String, inFree: Boolean) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 3.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            imageVector = if (inFree) Icons.Outlined.Check else Icons.Outlined.Lock,
-            contentDescription = null,
-            modifier = Modifier.size(16.dp),
-            tint = MaterialTheme.colorScheme.onPrimaryContainer
-        )
-        Spacer(Modifier.width(8.dp))
-        Text(
-            text = text,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onPrimaryContainer
-        )
-        Spacer(Modifier.width(8.dp))
-        Text(
-            text = if (inFree) "Gratis" else "Pro",
-            style = MaterialTheme.typography.labelSmall,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(
-                alpha = if (inFree) 0.6f else 1f
-            )
-        )
-    }
-}
+// ===== Helpers de servicio/sistema (internal para que las usen otras pantallas) =====
 
-@Composable
-private fun HelpCard() {
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Text(
-            text = "Cuando entres en Reels de Instagram o Shorts de YouTube " +
-                "te sacará con el botón atrás. No envía nada fuera del dispositivo.",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(16.dp)
-        )
-    }
-}
-
-// ---- helpers fuera de Compose ----
-
-private fun isAccessibilityEnabled(ctx: Context): Boolean {
+internal fun isAccessibilityEnabled(ctx: Context): Boolean {
     val expected = "${ctx.packageName}/${BlockerService::class.java.name}"
     val enabled = Settings.Secure.getString(
         ctx.contentResolver,
@@ -842,13 +724,13 @@ private fun isAccessibilityEnabled(ctx: Context): Boolean {
     return false
 }
 
-private fun isBatteryExempt(ctx: Context): Boolean {
+internal fun isBatteryExempt(ctx: Context): Boolean {
     val pm = ctx.getSystemService(Context.POWER_SERVICE) as PowerManager
     return pm.isIgnoringBatteryOptimizations(ctx.packageName)
 }
 
 @Suppress("BatteryLife")
-private fun requestBatteryExemption(ctx: Context) {
+internal fun requestBatteryExemption(ctx: Context) {
     try {
         ctx.startActivity(
             Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
@@ -859,15 +741,276 @@ private fun requestBatteryExemption(ctx: Context) {
     }
 }
 
-private fun isAppInstalled(ctx: Context, pkg: String): Boolean = try {
+internal fun isAppInstalled(ctx: Context, pkg: String): Boolean = try {
     ctx.packageManager.getPackageInfo(pkg, 0)
     true
 } catch (_: PackageManager.NameNotFoundException) {
     false
 }
 
-private fun loadAppIcon(ctx: Context, pkg: String): Drawable? = try {
+internal fun loadAppIcon(ctx: Context, pkg: String): Drawable? = try {
     ctx.packageManager.getApplicationIcon(pkg)
 } catch (_: PackageManager.NameNotFoundException) {
     null
+}
+
+@Composable
+private fun BottomNavBar(
+    current: Screen,
+    inventoryBadge: Boolean,
+    onSelect: (Screen) -> Unit
+) {
+    val inventoryBadgeDescription = stringResource(R.string.cd_inventory_pending_badge)
+    val labelHome = stringResource(R.string.nav_home)
+    val labelStats = stringResource(R.string.nav_stats)
+    val labelInventory = stringResource(R.string.nav_inventory)
+    val labelSettings = stringResource(R.string.nav_settings)
+    NavigationBar {
+        Screen.bottomTabs.forEach { tab ->
+            val selected = tab == current
+            NavigationBarItem(
+                selected = selected,
+                onClick = { onSelect(tab) },
+                icon = {
+                    val icon = when (tab) {
+                        is Screen.Home -> if (selected) Icons.Filled.Home else Icons.Outlined.Home
+                        is Screen.Stats -> if (selected) Icons.AutoMirrored.Filled.ShowChart
+                                        else Icons.AutoMirrored.Outlined.ShowChart
+                        is Screen.Inventory -> if (selected) Icons.Filled.Pets else Icons.Outlined.Pets
+                        is Screen.Settings -> if (selected) Icons.Filled.Tune else Icons.Outlined.Tune
+                    }
+                    if (tab is Screen.Inventory && inventoryBadge) {
+                        BadgedBox(
+                            badge = {
+                                Badge(
+                                    modifier = Modifier.semantics {
+                                        contentDescription = inventoryBadgeDescription
+                                    }
+                                )
+                            }
+                        ) {
+                            Icon(icon, contentDescription = null)
+                        }
+                    } else {
+                        Icon(icon, contentDescription = null)
+                    }
+                },
+                label = {
+                    Text(
+                        text = when (tab) {
+                            is Screen.Home -> labelHome
+                            is Screen.Stats -> labelStats
+                            is Screen.Inventory -> labelInventory
+                            is Screen.Settings -> labelSettings
+                        }
+                    )
+                },
+                colors = NavigationBarItemDefaults.colors()
+            )
+        }
+    }
+}
+
+@Composable
+private fun HowItWorksDialog(onDismiss: () -> Unit) {
+    androidx.compose.ui.window.Dialog(onDismissRequest = onDismiss) {
+        Surface(
+            modifier = Modifier.heightIn(max = 560.dp),
+            shape = androidx.compose.foundation.shape.RoundedCornerShape(28.dp),
+            color = MaterialTheme.colorScheme.surface,
+            tonalElevation = 6.dp
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 24.dp, vertical = 24.dp),
+                horizontalAlignment = Alignment.Start
+            ) {
+                Text(
+                    text = stringResource(R.string.howitworks_label),
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary,
+                    letterSpacing = 3.sp
+                )
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    text = stringResource(R.string.howitworks_title),
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Black
+                )
+
+                HowSection(
+                    title = stringResource(R.string.howitworks_section_what_title),
+                    body = stringResource(R.string.howitworks_section_what_body)
+                )
+                HowSection(
+                    title = stringResource(R.string.howitworks_section_streak_title),
+                    body = stringResource(R.string.howitworks_section_streak_body)
+                )
+                HowSection(
+                    title = stringResource(R.string.howitworks_section_grows_title),
+                    body = stringResource(R.string.howitworks_section_grows_body)
+                )
+                // Mini-timeline visual de la evolución.
+                Spacer(Modifier.height(12.dp))
+                EvolutionTimeline()
+
+                HowSection(
+                    title = stringResource(R.string.howitworks_section_graduation_title),
+                    body = stringResource(R.string.howitworks_section_graduation_body)
+                )
+                HowSection(
+                    title = stringResource(R.string.howitworks_section_inventory_title),
+                    body = stringResource(R.string.howitworks_section_inventory_body)
+                )
+                HowSection(
+                    title = stringResource(R.string.howitworks_section_important_title),
+                    body = stringResource(R.string.howitworks_section_important_body)
+                )
+
+                Spacer(Modifier.height(8.dp))
+                Button(
+                    onClick = onDismiss,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(stringResource(R.string.action_dismiss))
+                }
+            }
+        }
+    }
+}
+
+/** Mini-timeline visual de la evolución — se usa dentro del HowItWorksDialog. */
+@Composable
+private fun EvolutionTimeline() {
+    val species = Collection.currentSpecies(LocalContext.current)
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.Top
+    ) {
+        TimelineStep(level = MascotLevel.EGG, dayLabel = "0", species = species)
+        TimelineStep(level = MascotLevel.CRACKING, dayLabel = "3", species = species)
+        TimelineStep(level = MascotLevel.HATCHLING, dayLabel = "7", species = species)
+        TimelineStep(level = MascotLevel.JUVENILE, dayLabel = "14", species = species)
+        TimelineStep(level = MascotLevel.ADULT, dayLabel = "30", species = species, highlight = true)
+    }
+}
+
+@Composable
+private fun TimelineStep(
+    level: MascotLevel,
+    dayLabel: String,
+    species: MascotSpecies,
+    highlight: Boolean = false
+) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        MascotCanvas(
+            level = level,
+            species = species,
+            animate = false,
+            modifier = Modifier.size(42.dp)
+        )
+        Spacer(Modifier.height(2.dp))
+        Text(
+            text = "Día $dayLabel",
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = if (highlight) FontWeight.Bold else FontWeight.Normal,
+            color = if (highlight) MaterialTheme.colorScheme.primary
+                    else MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+@Composable
+private fun HowSection(title: String, body: String) {
+    Spacer(Modifier.height(16.dp))
+    Text(
+        text = title,
+        style = MaterialTheme.typography.titleSmall,
+        fontWeight = FontWeight.Bold,
+        color = MaterialTheme.colorScheme.onSurface
+    )
+    Spacer(Modifier.height(4.dp))
+    Text(
+        text = body,
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
+    )
+}
+
+@Composable
+private fun GraduationDialog(
+    graduatedSpecies: MascotSpecies,
+    daysReached: Int,
+    onConfirm: () -> Unit
+) {
+    androidx.compose.ui.window.Dialog(
+        onDismissRequest = { /* no dismiss casual — debe confirmar */ }
+    ) {
+        Surface(
+            shape = androidx.compose.foundation.shape.RoundedCornerShape(28.dp),
+            color = MaterialTheme.colorScheme.surface,
+            tonalElevation = 6.dp
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp, vertical = 28.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = stringResource(R.string.graduation_label),
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary,
+                    letterSpacing = 3.sp
+                )
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    text = stringResource(R.string.graduation_title, stringResource(graduatedSpecies.displayNameRes)),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Black,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                )
+                Spacer(Modifier.height(16.dp))
+                Box(
+                    modifier = Modifier.size(180.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    MascotCanvas(
+                        level = MascotLevel.ADULT,
+                        species = graduatedSpecies,
+                        animate = true,
+                        modifier = Modifier.size(180.dp)
+                    )
+                }
+                Spacer(Modifier.height(16.dp))
+                Text(
+                    text = stringResource(R.string.graduation_body, daysReached),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                )
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    text = stringResource(R.string.graduation_body_secondary),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                )
+                Spacer(Modifier.height(24.dp))
+                Button(
+                    onClick = onConfirm,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(stringResource(R.string.graduation_confirm))
+                }
+            }
+        }
+    }
 }

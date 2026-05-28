@@ -26,8 +26,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -37,7 +40,10 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -55,14 +61,28 @@ fun InventoryScreen(
     onOpenPaywall: () -> Unit = {}
 ) {
     val ctx = LocalContext.current
-    val entries = remember { Collection.read(ctx) }
-    val firstByMember: Map<MascotSpecies, Collection.CollectedMascot> = remember {
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    // Refresca al volver a la app (incluido tras consumir una graduación
+    // mientras el Bestiario sigue siendo la pantalla actual). Mismo patrón
+    // que HomeScreen en MainActivity.kt.
+    var refreshKey by remember { mutableIntStateOf(0) }
+    DisposableEffect(lifecycleOwner) {
+        val obs = LifecycleEventObserver { _, e ->
+            if (e == Lifecycle.Event.ON_RESUME) refreshKey++
+        }
+        lifecycleOwner.lifecycle.addObserver(obs)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(obs) }
+    }
+
+    val entries = remember(refreshKey) { Collection.read(ctx) }
+    val firstByMember: Map<MascotSpecies, Collection.CollectedMascot> = remember(refreshKey) {
         entries.groupBy { it.species }.mapValues { it.value.first() }
     }
     val uniqueCount = firstByMember.size
     val totalSpecies = MascotSpecies.entries.size
-    val currentSpecies = remember { Collection.currentSpecies(ctx) }
-    val streakState = remember { Streak.current(ctx) }
+    val currentSpecies = remember(refreshKey) { Collection.currentSpecies(ctx) }
+    val streakState = remember(refreshKey) { Streak.current(ctx) }
     val isPro = Premium.isProLive
     val haptic = LocalHapticFeedback.current
 
@@ -159,19 +179,40 @@ private fun Constellation(
     isPro: Boolean,
     onProTap: () -> Unit
 ) {
-    val others = MascotSpecies.entries.filter { it != activeSpecies }
+    // Si la especie activa YA está graduada (firstByMember la contiene), el
+    // usuario está en una repetición. En ese caso ELLA TAMBIÉN debe aparecer
+    // como satélite (con su fecha original) — si no, su graduación previa
+    // queda invisible. Si es ciclo virgen, mantenemos los 4 satélites del
+    // diseño original (no metemos un slot "?" redundante junto al centro).
+    val activeIsRepeat = activeSpecies in firstByMember
+    val satellitesSpecies = if (activeIsRepeat) {
+        MascotSpecies.entries.toList()
+    } else {
+        MascotSpecies.entries.filter { it != activeSpecies }
+    }
 
-    // Anclas base de los 4 satélites — quincuncio asimétrico alrededor del centro.
-    val anchors = listOf(
-        DpPoint(x = (-100).dp, y = (-115).dp),
-        DpPoint(x = 100.dp, y = (-105).dp),
-        DpPoint(x = (-110).dp, y = 95.dp),
-        DpPoint(x = 105.dp, y = 110.dp)
-    )
+    // Anclas: 4 (quincuncio asimétrico) para ciclo virgen, 5 (pentagonal)
+    // cuando la activa es repetición.
+    val anchors = if (activeIsRepeat) {
+        listOf(
+            DpPoint(x = 0.dp, y = (-135).dp),
+            DpPoint(x = 130.dp, y = (-45).dp),
+            DpPoint(x = 85.dp, y = 115.dp),
+            DpPoint(x = (-85).dp, y = 115.dp),
+            DpPoint(x = (-130).dp, y = (-45).dp)
+        )
+    } else {
+        listOf(
+            DpPoint(x = (-100).dp, y = (-115).dp),
+            DpPoint(x = 100.dp, y = (-105).dp),
+            DpPoint(x = (-110).dp, y = 95.dp),
+            DpPoint(x = 105.dp, y = 110.dp)
+        )
+    }
 
-    val placements = remember(activeSpecies, firstByMember.size) {
+    val placements = remember(activeSpecies, firstByMember.size, activeIsRepeat) {
         val r = Random(System.nanoTime())
-        others.shuffled(r).mapIndexed { i, sp ->
+        satellitesSpecies.shuffled(r).mapIndexed { i, sp ->
             val base = anchors[i]
             TilePlacement(
                 species = sp,
@@ -189,7 +230,9 @@ private fun Constellation(
             .padding(horizontal = 16.dp),
         contentAlignment = Alignment.Center
     ) {
-        // Active tile en el centro — el huevo en curso, con su nivel actual.
+        // Active tile en el centro — el huevo/criatura en curso, con su
+        // nivel actual. Si es una repetición, la versión graduada ya está
+        // visible como satélite (no se duplica info en el centro).
         ActiveFeaturedTile(
             species = activeSpecies,
             level = activeLevel,
@@ -390,7 +433,7 @@ private fun SatelliteTile(
             Text(
                 text = stringResource(R.string.inventory_slot_pro_caption),
                 style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                 textAlign = TextAlign.Center
             )
         }

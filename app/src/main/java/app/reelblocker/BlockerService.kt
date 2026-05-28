@@ -257,32 +257,6 @@ class BlockerService : AccessibilityService() {
      * tamano — basta con que el fragmento exista en el arbol.
      */
     /**
-     * Diagnostico: log los primeros N ids del arbol que contengan keywords
-     * candidatas a DM. Util para descubrir los resource-id reales que usa
-     * Instagram cuando deja de coincidir con INSTAGRAM_DM_HINTS.
-     */
-    private fun dumpDmCandidates(root: AccessibilityNodeInfo) {
-        val keywords = listOf("direct", "thread", "message", "msg", "chat", "inbox")
-        val seen = mutableSetOf<String>()
-        val queue = ArrayDeque<AccessibilityNodeInfo>()
-        queue.add(root)
-        var visited = 0
-        while (queue.isNotEmpty() && visited < 1500 && seen.size < 25) {
-            val node = queue.removeFirst()
-            visited++
-            node.viewIdResourceName?.let { id ->
-                if (keywords.any { id.contains(it, ignoreCase = true) } && seen.add(id)) {
-                    Log.d(TAG, "  dm-candidate id: $id")
-                }
-            }
-            for (i in 0 until node.childCount) {
-                node.getChild(i)?.let { queue.add(it) }
-            }
-        }
-        if (seen.isEmpty()) Log.d(TAG, "  no dm-candidate ids encontrados")
-    }
-
-    /**
      * Diagnostico Facebook: cada ~1.5 s, volcar el className del evento y
      * todos los resource-id no nulos del arbol. Sirve para descubrir por
      * que se reconoce el visor de Reels de Facebook.

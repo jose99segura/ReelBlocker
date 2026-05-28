@@ -13,8 +13,8 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 enum class Tier { FREE, PRO }
 
 /**
- * Especies coleccionables. Cada una tiene una silueta distinta en HATCHLING/
- * JUVENILE/ADULT. EGG y CRACKING son los mismos primitivos con un tinte
+ * Especies coleccionables. Cada una tiene una silueta distinta en HATCHLING
+ * y ADULT. EGG y CRACKING son los mismos primitivos con un tinte
  * de acento propio para distinguir a primera vista.
  */
 enum class MascotSpecies(
@@ -113,8 +113,8 @@ internal fun DrawScope.drawDragonBody(level: MascotLevel, sad: Boolean, eyeOpenn
     // Cuernos siempre presentes.
     drawTwoHorns(cx, cy, bodySize, color = accent.darken(0.10f))
 
-    // Alas membranosas desde JUVENILE.
-    if (level.ordinal >= MascotLevel.JUVENILE.ordinal) {
+    // Alas membranosas desde ADULT.
+    if (level.ordinal >= MascotLevel.ADULT.ordinal) {
         drawMembraneWings(cx, cy, bodySize, accent = accent)
     }
 
@@ -300,8 +300,8 @@ internal fun DrawScope.drawBuhoBody(level: MascotLevel, sad: Boolean, eyeOpennes
 
     drawShadow(cx, cy, bodySize, h)
 
-    // Pequeñas alas plegadas a los lados (desde JUVENILE).
-    if (level.ordinal >= MascotLevel.JUVENILE.ordinal) {
+    // Pequeñas alas plegadas a los lados (desde ADULT).
+    if (level.ordinal >= MascotLevel.ADULT.ordinal) {
         val wingColor = body.darken(0.12f)
         val leftWing = Path().apply {
             moveTo(cx - bodySize * 0.35f, cy - bodySize * 0.05f)
@@ -476,19 +476,17 @@ internal fun DrawScope.drawFace(
     customNose: Boolean = false,
     eyeOpenness: Float = 1f
 ) {
-    if (level.ordinal <= MascotLevel.ADULT.ordinal) {
-        val blush = Color(0xFFFB7185).copy(alpha = 0.45f)
-        drawCircle(
-            color = blush,
-            radius = bodySize * 0.07f,
-            center = Offset(cx - bodySize * 0.22f, cy + bodySize * 0.05f)
-        )
-        drawCircle(
-            color = blush,
-            radius = bodySize * 0.07f,
-            center = Offset(cx + bodySize * 0.22f, cy + bodySize * 0.05f)
-        )
-    }
+    val blush = Color(0xFFFB7185).copy(alpha = 0.45f)
+    drawCircle(
+        color = blush,
+        radius = bodySize * 0.07f,
+        center = Offset(cx - bodySize * 0.22f, cy + bodySize * 0.05f)
+    )
+    drawCircle(
+        color = blush,
+        radius = bodySize * 0.07f,
+        center = Offset(cx + bodySize * 0.22f, cy + bodySize * 0.05f)
+    )
 
     val eyeY = cy - bodySize * 0.08f
     val eyeOffset = bodySize * 0.15f

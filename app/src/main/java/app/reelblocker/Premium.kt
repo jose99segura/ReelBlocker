@@ -110,6 +110,16 @@ object Premium {
         })
     }
 
+    /**
+     * Cierra la conexión de Billing. Llamar cuando la app termina de verdad
+     * (Activity.isFinishing), no en recreaciones por rotación. Evita dejar
+     * abierta la conexión al servicio de Google Play.
+     */
+    fun teardown() {
+        billingClient?.endConnection()
+        billingClient = null
+    }
+
     private fun queryProductDetails() {
         val client = billingClient ?: return
         val params = QueryProductDetailsParams.newBuilder()
@@ -198,5 +208,33 @@ object Premium {
     private fun revokePro(ctx: Context) {
         setProPersisted(ctx, false)
         isProLive = false
+    }
+}
+
+/**
+ * Cooldown del auto-trigger del paywall post-graduación. Sin esto, un free
+ * user que cicla repeticiones de las 2 especies free recibe paywall cada
+ * 30 días (día 60, 90, 120…). Demasiado agresivo. Apps premium tipo
+ * Opal/One Sec lo hacen con cooldown.
+ *
+ * Solo aplica al auto-trigger del flujo de graduación. Las entradas
+ * manuales (chip Upgrade en Home, slot Pro del Bestiario, fila Pro en
+ * Settings) NO pasan por este filtro — siempre funcionan.
+ */
+internal object PaywallThrottle {
+    private const val PREFS = "reelblocker_prefs"
+    private const val KEY_LAST_SHOWN_MS = "paywall_last_shown_ms"
+    private const val COOLDOWN_DAYS = 14L
+    private const val COOLDOWN_MS = COOLDOWN_DAYS * 24L * 60L * 60L * 1000L
+
+    fun shouldShow(ctx: Context): Boolean {
+        val last = ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .getLong(KEY_LAST_SHOWN_MS, 0L)
+        return (System.currentTimeMillis() - last) >= COOLDOWN_MS
+    }
+
+    fun markShown(ctx: Context) {
+        ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .edit().putLong(KEY_LAST_SHOWN_MS, System.currentTimeMillis()).apply()
     }
 }

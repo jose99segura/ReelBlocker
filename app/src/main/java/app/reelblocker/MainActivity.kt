@@ -103,6 +103,7 @@ class MainActivity : ComponentActivity() {
         // Status bar transparente para que el gradiente del hero "fluya" desde arriba.
         WindowCompat.setDecorFitsSystemWindows(window, true)
         Premium.init(applicationContext)
+        Streak.migrateToV21IfNeeded(applicationContext)
         setContent {
             ReelBlockerTheme {
                 Surface(color = MaterialTheme.colorScheme.background) {
@@ -110,6 +111,13 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        // Solo cerrar Billing cuando la Activity termina de verdad, no en
+        // recreaciones por cambio de configuración (rotación, etc.).
+        if (isFinishing) Premium.teardown()
     }
 }
 
@@ -219,7 +227,8 @@ private fun AppRoot(onResetOnboarding: () -> Unit) {
                 onRestore = {
                     Premium.restore(ctx)
                     Toast.makeText(ctx, ctx.getString(R.string.toast_checking_purchases), Toast.LENGTH_SHORT).show()
-                }
+                },
+                nextFreeSpecies = Collection.currentSpecies(ctx)
             )
         }
 
@@ -235,8 +244,16 @@ private fun AppRoot(onResetOnboarding: () -> Unit) {
                     Collection.consumePendingGraduation(ctx, daysReached = MascotLevel.ADULT.minDays)
                     pendingGraduation = null
                     if (Collection.pendingProUnlock(ctx)) {
+                        // Consume el flag siempre para que no quede pendiente,
+                        // pero el paywall solo se auto-dispara si el throttle
+                        // (14 días) lo permite. El usuario sigue pudiendo
+                        // abrirlo manualmente desde el chip Upgrade, Bestiario
+                        // o Settings.
                         Collection.consumeProUnlock(ctx)
-                        showPaywall = true
+                        if (PaywallThrottle.shouldShow(ctx)) {
+                            PaywallThrottle.markShown(ctx)
+                            showPaywall = true
+                        }
                     }
                 }
             )
@@ -259,7 +276,6 @@ private fun HomeScreen(
     DisposableEffect(lifecycleOwner) {
         val obs = LifecycleEventObserver { _, e ->
             if (e == Lifecycle.Event.ON_RESUME) {
-                val enabledNow = isAccessibilityEnabled(ctx)
                 val wasProtecting = Streak.wasProtecting(ctx)
                 val nowProtecting = Streak.shouldBeProtecting(ctx)
                 if (wasProtecting && !nowProtecting) {
@@ -276,7 +292,6 @@ private fun HomeScreen(
                 } else if (nowProtecting) {
                     Streak.tick(ctx)
                 }
-                Streak.setServiceEnabledSeen(ctx, enabledNow)
                 Streak.setProtectingSeen(ctx, nowProtecting)
                 onPendingGraduationChanged(Collection.pendingGraduation(ctx))
                 breakRemainingMs = Breaks.millisRemaining(ctx)
@@ -921,9 +936,8 @@ private fun EvolutionTimeline() {
     ) {
         TimelineStep(level = MascotLevel.EGG, dayLabel = "0", species = species)
         TimelineStep(level = MascotLevel.CRACKING, dayLabel = "3", species = species)
-        TimelineStep(level = MascotLevel.HATCHLING, dayLabel = "7", species = species)
-        TimelineStep(level = MascotLevel.JUVENILE, dayLabel = "14", species = species)
-        TimelineStep(level = MascotLevel.ADULT, dayLabel = "30", species = species, highlight = true)
+        TimelineStep(level = MascotLevel.HATCHLING, dayLabel = "8", species = species)
+        TimelineStep(level = MascotLevel.ADULT, dayLabel = "21", species = species, highlight = true)
     }
 }
 
@@ -967,76 +981,4 @@ private fun HowSection(title: String, body: String) {
         style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant
     )
-}
-
-@Composable
-private fun GraduationDialog(
-    graduatedSpecies: MascotSpecies,
-    daysReached: Int,
-    onConfirm: () -> Unit
-) {
-    androidx.compose.ui.window.Dialog(
-        onDismissRequest = { /* no dismiss casual — debe confirmar */ }
-    ) {
-        Surface(
-            shape = androidx.compose.foundation.shape.RoundedCornerShape(28.dp),
-            color = MaterialTheme.colorScheme.surface,
-            tonalElevation = 6.dp
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 28.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = stringResource(R.string.graduation_label),
-                    style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary,
-                    letterSpacing = 3.sp
-                )
-                Spacer(Modifier.height(8.dp))
-                Text(
-                    text = stringResource(R.string.graduation_title, stringResource(graduatedSpecies.displayNameRes)),
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Black,
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                )
-                Spacer(Modifier.height(16.dp))
-                Box(
-                    modifier = Modifier.size(180.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    MascotCanvas(
-                        level = MascotLevel.ADULT,
-                        species = graduatedSpecies,
-                        animate = true,
-                        modifier = Modifier.size(180.dp)
-                    )
-                }
-                Spacer(Modifier.height(16.dp))
-                Text(
-                    text = stringResource(R.string.graduation_body, daysReached),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                )
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    text = stringResource(R.string.graduation_body_secondary),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                )
-                Spacer(Modifier.height(24.dp))
-                Button(
-                    onClick = onConfirm,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(stringResource(R.string.graduation_confirm))
-                }
-            }
-        }
-    }
 }

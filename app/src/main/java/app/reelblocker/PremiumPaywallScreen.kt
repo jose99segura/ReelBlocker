@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -103,10 +104,14 @@ internal fun PremiumPaywallScreen(
     onClose: () -> Unit,
     onContinueFree: () -> Unit,
     onPurchase: (UiTier) -> Unit,
-    onRestore: () -> Unit
+    onRestore: () -> Unit,
+    nextFreeSpecies: MascotSpecies? = null
 ) {
     BackHandler { onClose() }
     val haptic = LocalHapticFeedback.current
+    val ctx = androidx.compose.ui.platform.LocalContext.current
+    // Fallback: si no se pasó la especie, leer la actual desde Collection.
+    val freeSpecies = nextFreeSpecies ?: Collection.currentSpecies(ctx)
     var selected by remember { mutableStateOf(UiTier.YEARLY) }
 
     Scaffold(
@@ -114,6 +119,7 @@ internal fun PremiumPaywallScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .statusBarsPadding()
                     .padding(top = 4.dp, end = 4.dp),
                 horizontalArrangement = Arrangement.End
             ) {
@@ -207,7 +213,10 @@ internal fun PremiumPaywallScreen(
             }
             TextButton(onClick = onContinueFree) {
                 Text(
-                    text = stringResource(R.string.ppw_secondary_continue_free),
+                    text = stringResource(
+                        R.string.ppw_secondary_continue_free,
+                        stringResource(freeSpecies.displayNameRes)
+                    ),
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
@@ -551,5 +560,54 @@ private fun StickyCta(
                 )
             }
         }
+    }
+}
+
+/**
+ * Promesa de privacidad: encabezado + 3 viñetas. Antes vivía en PaywallSheet.kt
+ * (eliminado); re-alojada aquí, el superviviente del paywall.
+ */
+@Composable
+internal fun PrivacyPromiseBlock() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 4.dp)
+    ) {
+        Text(
+            text = stringResource(R.string.privacy_promise_heading),
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center
+        )
+        Spacer(Modifier.height(8.dp))
+        PaywallPrivacyBullet(stringResource(R.string.privacy_promise_bullet_local))
+        PaywallPrivacyBullet(stringResource(R.string.privacy_promise_bullet_no_tracking))
+        PaywallPrivacyBullet(stringResource(R.string.privacy_promise_bullet_drive))
+    }
+}
+
+@Composable
+private fun PaywallPrivacyBullet(text: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 2.dp),
+        verticalAlignment = Alignment.Top
+    ) {
+        Text(
+            text = "·",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.width(12.dp),
+            textAlign = TextAlign.Center
+        )
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }

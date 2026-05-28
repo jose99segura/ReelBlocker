@@ -27,9 +27,9 @@ object Streak {
     private const val KEY_LAST_DATE = "streak_last_valid_date"
     private const val KEY_RECORD = "streak_record"
     private const val KEY_RECORD_DATE = "streak_record_date"
-    private const val KEY_LAST_SEEN_ENABLED = "streak_last_seen_enabled"
     private const val KEY_LAST_SEEN_PROTECTING = "streak_last_seen_protecting"
     private const val KEY_PENDING_EVOLUTION_FROM = "streak_pending_evolution_from"
+    private const val KEY_MIGRATION_V21_DONE = "migration_v21_done"
 
     data class State(
         val count: Int,
@@ -173,14 +173,6 @@ object Streak {
         return try { MascotLevel.valueOf(fromName) } catch (_: Exception) { null }
     }
 
-    /** Lee el ultimo estado conocido del servicio (para detectar transiciones). */
-    fun wasServiceEnabled(ctx: Context): Boolean =
-        prefs(ctx).getBoolean(KEY_LAST_SEEN_ENABLED, false)
-
-    fun setServiceEnabledSeen(ctx: Context, enabled: Boolean) {
-        prefs(ctx).edit().putBoolean(KEY_LAST_SEEN_ENABLED, enabled).apply()
-    }
-
     /**
      * Devuelve true si la app realmente está protegiendo al usuario:
      * servicio de accesibilidad activo Y TODAS las apps instaladas de
@@ -202,5 +194,23 @@ object Streak {
 
     fun setProtectingSeen(ctx: Context, protecting: Boolean) {
         prefs(ctx).edit().putBoolean(KEY_LAST_SEEN_PROTECTING, protecting).apply()
+    }
+
+    /**
+     * One-shot al actualizar a la versión que baja la graduación a día 21.
+     * Si el usuario ya estaba en una racha ≥ 21 con la regla antigua (30),
+     * marca graduación pendiente inmediata para que vea la celebración al
+     * abrir la app. Idempotente: se marca un flag en prefs y no vuelve a
+     * ejecutarse.
+     */
+    fun migrateToV21IfNeeded(ctx: Context) {
+        val p = prefs(ctx)
+        if (p.getBoolean(KEY_MIGRATION_V21_DONE, false)) return
+        val count = p.getInt(KEY_COUNT, 0)
+        if (count >= MascotLevel.ADULT.minDays && Collection.pendingGraduation(ctx) == null) {
+            Collection.markPendingGraduation(ctx, Collection.currentSpecies(ctx))
+            Log.d(TAG, "migrateToV21IfNeeded: count=$count → graduación inmediata")
+        }
+        p.edit().putBoolean(KEY_MIGRATION_V21_DONE, true).apply()
     }
 }

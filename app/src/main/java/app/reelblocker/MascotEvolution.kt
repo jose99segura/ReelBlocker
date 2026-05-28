@@ -60,52 +60,20 @@ enum class MascotLevel(
         accentColor = Color(0xFFF59E0B)
     ),
     HATCHLING(
-        minDays = 7,
+        minDays = 8,
         displayNameRes = R.string.mascot_level_hatchling,
         gradientStart = Color(0xFFFCE7F3),
         gradientEnd = Color(0xFFFFE4E6),
         bodyColor = Color(0xFFFDE68A),
         accentColor = Color(0xFFF59E0B)
     ),
-    JUVENILE(
-        minDays = 14,
-        displayNameRes = R.string.mascot_level_juvenile,
-        gradientStart = Color(0xFFFFEDD5),
-        gradientEnd = Color(0xFFFED7AA),
-        bodyColor = Color(0xFFFB923C),
-        accentColor = Color(0xFFEA580C)
-    ),
     ADULT(
-        minDays = 30,
+        minDays = 21,
         displayNameRes = R.string.mascot_level_adult,
         gradientStart = Color(0xFFFED7AA),
         gradientEnd = Color(0xFFFCA5A5),
         bodyColor = Color(0xFFF97316),
         accentColor = Color(0xFFC2410C)
-    ),
-    CRESTED(
-        minDays = 60,
-        displayNameRes = R.string.mascot_level_crested,
-        gradientStart = Color(0xFFFCA5A5),
-        gradientEnd = Color(0xFFF87171),
-        bodyColor = Color(0xFFEF4444),
-        accentColor = Color(0xFF991B1B)
-    ),
-    LEGENDARY(
-        minDays = 100,
-        displayNameRes = R.string.mascot_level_legendary,
-        gradientStart = Color(0xFFDC2626),
-        gradientEnd = Color(0xFF7C2D12),
-        bodyColor = Color(0xFFB91C1C),
-        accentColor = Color(0xFFFCD34D)
-    ),
-    GOLDEN(
-        minDays = 365,
-        displayNameRes = R.string.mascot_level_golden,
-        gradientStart = Color(0xFFFCD34D),
-        gradientEnd = Color(0xFFD97706),
-        bodyColor = Color(0xFFFBBF24),
-        accentColor = Color(0xFF78350F)
     );
 
     companion object {
@@ -210,12 +178,8 @@ private fun DrawScope.drawMascot(
 
 private fun DrawScope.drawClasicaCreature(level: MascotLevel, sad: Boolean, eyeOpenness: Float) {
     when (level) {
-        MascotLevel.HATCHLING -> drawCreature(level, hasWings = false, hasCrest = false, hasHorns = false, sad = sad, eyeOpenness = eyeOpenness)
-        MascotLevel.JUVENILE -> drawCreature(level, hasWings = true, hasCrest = false, hasHorns = false, sad = sad, eyeOpenness = eyeOpenness)
-        MascotLevel.ADULT -> drawCreature(level, hasWings = true, hasCrest = true, hasHorns = false, sad = sad, eyeOpenness = eyeOpenness)
-        MascotLevel.CRESTED -> drawCreature(level, hasWings = true, hasCrest = true, hasHorns = false, big = true, sad = sad, eyeOpenness = eyeOpenness)
-        MascotLevel.LEGENDARY -> drawCreature(level, hasWings = true, hasCrest = true, hasHorns = true, big = true, sad = sad, eyeOpenness = eyeOpenness)
-        MascotLevel.GOLDEN -> drawCreature(level, hasWings = true, hasCrest = true, hasHorns = true, big = true, golden = true, sad = sad, eyeOpenness = eyeOpenness)
+        MascotLevel.HATCHLING -> drawCreature(level, hasWings = false, hasCrest = false, sad = sad, eyeOpenness = eyeOpenness)
+        MascotLevel.ADULT -> drawCreature(level, hasWings = true, hasCrest = true, sad = sad, eyeOpenness = eyeOpenness)
         else -> { /* EGG/CRACKING ya manejados arriba */ }
     }
 }
@@ -354,9 +318,6 @@ private fun DrawScope.drawCreature(
     level: MascotLevel,
     hasWings: Boolean,
     hasCrest: Boolean,
-    hasHorns: Boolean,
-    big: Boolean = false,
-    golden: Boolean = false,
     sad: Boolean = false,
     eyeOpenness: Float = 1f
 ) {
@@ -365,7 +326,7 @@ private fun DrawScope.drawCreature(
     val cx = w / 2f
     val cy = h * 0.55f
 
-    val bodySize = if (big) w * 0.62f else w * 0.52f
+    val bodySize = w * 0.52f
     val body = level.bodyColor
     val accent = level.accentColor
 
@@ -386,25 +347,6 @@ private fun DrawScope.drawCreature(
             close()
         }
         drawPath(crestPath, color = accent)
-    }
-
-    // Horns (cuernos) — solo legendary/golden.
-    if (hasHorns) {
-        val hornColor = if (golden) Color(0xFFFEF3C7) else Color(0xFF44403C)
-        val leftHorn = Path().apply {
-            moveTo(cx - bodySize * 0.30f, cy - bodySize * 0.45f)
-            quadraticBezierTo(cx - bodySize * 0.55f, cy - bodySize * 0.75f, cx - bodySize * 0.40f, cy - bodySize * 0.90f)
-            lineTo(cx - bodySize * 0.22f, cy - bodySize * 0.50f)
-            close()
-        }
-        val rightHorn = Path().apply {
-            moveTo(cx + bodySize * 0.30f, cy - bodySize * 0.45f)
-            quadraticBezierTo(cx + bodySize * 0.55f, cy - bodySize * 0.75f, cx + bodySize * 0.40f, cy - bodySize * 0.90f)
-            lineTo(cx + bodySize * 0.22f, cy - bodySize * 0.50f)
-            close()
-        }
-        drawPath(leftHorn, color = hornColor)
-        drawPath(rightHorn, color = hornColor)
     }
 
     // Wings (alas) — detras del cuerpo.
@@ -450,12 +392,10 @@ private fun DrawScope.drawCreature(
     )
     drawCircle(brush = bodyBrush, radius = bodySize * 0.5f, center = Offset(cx, cy))
 
-    // Mejillas (rubor) — solo en niveles tempranos.
-    if (level.ordinal <= MascotLevel.ADULT.ordinal) {
-        val blush = Color(0xFFFB7185).copy(alpha = 0.45f)
-        drawCircle(color = blush, radius = bodySize * 0.07f, center = Offset(cx - bodySize * 0.22f, cy + bodySize * 0.05f))
-        drawCircle(color = blush, radius = bodySize * 0.07f, center = Offset(cx + bodySize * 0.22f, cy + bodySize * 0.05f))
-    }
+    // Mejillas (rubor).
+    val blush = Color(0xFFFB7185).copy(alpha = 0.45f)
+    drawCircle(color = blush, radius = bodySize * 0.07f, center = Offset(cx - bodySize * 0.22f, cy + bodySize * 0.05f))
+    drawCircle(color = blush, radius = bodySize * 0.07f, center = Offset(cx + bodySize * 0.22f, cy + bodySize * 0.05f))
 
     // Ojos.
     val eyeY = cy - bodySize * 0.08f
@@ -491,45 +431,15 @@ private fun DrawScope.drawCreature(
             style = Stroke(width = bodySize * 0.025f, cap = StrokeCap.Round)
         )
     } else {
-        // Pico naranja/dorado pequeno.
-        val beakColor = if (golden) Color(0xFF78350F) else Color(0xFFEA580C)
+        // Pico naranja pequeno.
         val beakPath = Path().apply {
             moveTo(cx - bodySize * 0.05f, cy + bodySize * 0.08f)
             lineTo(cx + bodySize * 0.05f, cy + bodySize * 0.08f)
             lineTo(cx, cy + bodySize * 0.16f)
             close()
         }
-        drawPath(beakPath, color = beakColor)
+        drawPath(beakPath, color = Color(0xFFEA580C))
     }
-
-    // Sparkles dorados — solo nivel GOLDEN.
-    if (golden) {
-        val sparkleColor = Color(0xFFFEF3C7)
-        listOf(
-            Offset(cx - bodySize * 0.45f, cy - bodySize * 0.30f) to (w * 0.012f),
-            Offset(cx + bodySize * 0.50f, cy - bodySize * 0.10f) to (w * 0.015f),
-            Offset(cx + bodySize * 0.40f, cy + bodySize * 0.40f) to (w * 0.010f),
-            Offset(cx - bodySize * 0.50f, cy + bodySize * 0.35f) to (w * 0.013f)
-        ).forEach { (pos, r) ->
-            drawSparkle(pos, r, sparkleColor)
-        }
-    }
-}
-
-private fun DrawScope.drawSparkle(center: Offset, radius: Float, color: Color) {
-    // Estrella de 4 puntas hecha con dos triangulos.
-    val path = Path().apply {
-        moveTo(center.x, center.y - radius * 1.6f)
-        lineTo(center.x + radius * 0.3f, center.y - radius * 0.3f)
-        lineTo(center.x + radius * 1.6f, center.y)
-        lineTo(center.x + radius * 0.3f, center.y + radius * 0.3f)
-        lineTo(center.x, center.y + radius * 1.6f)
-        lineTo(center.x - radius * 0.3f, center.y + radius * 0.3f)
-        lineTo(center.x - radius * 1.6f, center.y)
-        lineTo(center.x - radius * 0.3f, center.y - radius * 0.3f)
-        close()
-    }
-    drawPath(path, color = color)
 }
 
 internal fun Color.lighten(amount: Float): Color = Color(

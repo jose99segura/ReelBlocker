@@ -55,7 +55,7 @@ object Collection {
                         CollectedMascot(
                             species = species,
                             acquiredDate = obj.optString("date"),
-                            daysToReach = obj.optInt("days", 30)
+                            daysToReach = obj.optInt("days", 21)
                         )
                     )
                 }
@@ -131,22 +131,43 @@ object Collection {
     private fun pickNext(ctx: Context, justArchived: MascotSpecies): MascotSpecies {
         val collected = read(ctx).map { it.species }.toSet()
         val isPro = Premium.isPro(ctx)
-        val pool = if (isPro) MascotSpecies.entries else MascotSpecies.freeSpecies()
-        val uncollected = pool.filter { it !in collected && it != justArchived }
-        if (uncollected.isNotEmpty()) {
-            return uncollected.random()
-        }
-        // Free user que ya completó su tier → disparar paywall en la UI.
-        if (!isPro) {
+        val result = selectNextSpecies(collected, justArchived, isPro)
+        if (result.markPendingProUnlock) {
             prefs(ctx).edit().putBoolean(KEY_PENDING_PRO_UNLOCK, true).apply()
             Log.d(TAG, "pickNext: free tier agotado → pending_pro_unlock=true")
         }
+        return result.next
+    }
+
+    /**
+     * Lógica pura de selección, extraída para tests JVM. No toca prefs ni
+     * Context. El caller ([pickNext]) decide qué hacer con
+     * `markPendingProUnlock`.
+     */
+    internal data class SelectResult(
+        val next: MascotSpecies,
+        val markPendingProUnlock: Boolean
+    )
+
+    internal fun selectNextSpecies(
+        collected: Set<MascotSpecies>,
+        justArchived: MascotSpecies,
+        isPro: Boolean,
+        random: kotlin.random.Random = kotlin.random.Random.Default
+    ): SelectResult {
+        val pool = if (isPro) MascotSpecies.entries.toList() else MascotSpecies.freeSpecies()
+        val uncollected = pool.filter { it !in collected && it != justArchived }
+        if (uncollected.isNotEmpty()) {
+            return SelectResult(uncollected.random(random), markPendingProUnlock = false)
+        }
+        val mark = !isPro
         val fallback = pool.filter { it != justArchived }
-        return when {
-            fallback.isNotEmpty() -> fallback.random()
-            pool.isNotEmpty() -> pool.random()
+        val next = when {
+            fallback.isNotEmpty() -> fallback.random(random)
+            pool.isNotEmpty() -> pool.random(random)
             else -> justArchived
         }
+        return SelectResult(next, markPendingProUnlock = mark)
     }
 
     /** ¿Hay un paywall pendiente por agotar las especies free? */

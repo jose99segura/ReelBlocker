@@ -79,9 +79,9 @@
     <string name="howitworks_section_streak_title">The Thread</string>
     <string name="howitworks_section_streak_body">Each day with the service active adds a day to your streak. If you disable it or skip a full day, it goes back to 0. Your all-time record is kept even if you break the streak.</string>
     <string name="howitworks_section_grows_title">Your mascot grows</string>
-    <string name="howitworks_section_grows_body">The mascot evolves with you:\n  · Day 0  →  Egg\n  · Day 3  →  Cracking\n  · Day 7  →  Hatchling\n  · Day 14 →  Juvenile\n  · Day 30 →  Adult</string>
-    <string name="howitworks_section_graduation_title">Graduation at day 30</string>
-    <string name="howitworks_section_graduation_body">When you reach day 30, your mascot graduates: it\'s saved in your inventory and a new egg of a different species appears. There are 5 species in total (Classic, Dragon, Turtle, Wolf, Owl). The reset only happens at graduation — if you break the streak before, you keep the same species.</string>
+    <string name="howitworks_section_grows_body">The mascot evolves with you:\n  · Day 0  →  Egg\n  · Day 3  →  Cracking\n  · Day 8  →  Hatchling\n  · Day 21 →  Adult</string>
+    <string name="howitworks_section_graduation_title">Graduation at day 21</string>
+    <string name="howitworks_section_graduation_body">When you reach day 21, your mascot graduates: it\'s saved in your inventory and a new egg of a different species appears. There are 5 species in total (Classic, Dragon, Turtle, Wolf, Owl). The reset only happens at graduation — if you break the streak before, you keep the same species.</string>
     <string name="howitworks_section_inventory_title">The Bestiary</string>
     <string name="howitworks_section_inventory_body">The paw icon 🐾 in the bottom bar opens your collection. You\'ll see the mascots you\'ve graduated, the ones you still need, and how many days the active one has been with you.</string>
     <string name="howitworks_section_important_title">Important</string>
@@ -135,17 +135,17 @@
     <string name="inventory_title">The Bestiary</string>
     <string name="inventory_hero_label">Species</string>
     <string name="inventory_hero_value">%1$d / %2$d</string>
-    <string name="inventory_hero_subtitle_progress">Reach day 30 with the streak active to graduate a mascot.</string>
+    <string name="inventory_hero_subtitle_progress">Reach day 21 with the streak active to graduate a mascot.</string>
     <string name="inventory_hero_subtitle_complete">You\'ve collected all 5 species. New ones can repeat.</string>
     <string name="inventory_empty_title">You haven\'t graduated any mascot yet</string>
-    <string name="inventory_empty_body">Your first graduation arrives at day 30 of an active streak.</string>
+    <string name="inventory_empty_body">Your first graduation arrives at day 21 of an active streak.</string>
     <string name="inventory_active_now">Active now</string>
     <string name="inventory_active_species_level">%1$s · %2$s</string>
     <string name="inventory_active_day_progress">Day %1$d / %2$d</string>
     <string name="inventory_active_waiting">Waiting for first day</string>
     <string name="inventory_slot_locked_name">—</string>
     <string name="inventory_slot_locked_caption">To discover</string>
-    <string name="inventory_slot_pro_caption">Pro · tap to unlock</string>
+    <string name="inventory_slot_pro_caption">Unlock with Pro</string>
     <string name="cd_inventory_slot_locked_pro">%1$s locked. Tap to unlock with Pro.</string>
     <string name="inventory_repeats_singular">You\'ve also graduated 1 repeated mascot.</string>
     <string name="inventory_repeats_plural">You\'ve also graduated %1$d repeated mascots.</string>
@@ -154,7 +154,7 @@
     <string name="onboarding_p1_title">Basta!</string>
     <string name="onboarding_p1_body">95 min/day. That\'s the average we lose on Reels and Shorts. Almost an hour and a half. Every day.\n\nWhen you go in, this app pulls you out. No motivational coaches, no lectures.</string>
     <string name="onboarding_p2_title">Meet your Companion</string>
-    <string name="onboarding_p2_body">Every day with Basta! active, your mascot grows. At day 30 it graduates and gets saved in your inventory, and an egg of a different species appears. There are 5 to collect.</string>
+    <string name="onboarding_p2_body">Every day with Basta! active, your mascot grows. At day 21 it graduates and gets saved in your inventory, and an egg of a different species appears. There are 5 to collect.</string>
     <string name="onboarding_p3_title">Turn on the service</string>
     <string name="onboarding_p3_body">It\'s the only way Android can detect Reels. It only reads screen identifiers, never the content of your messages.</string>
     <string name="onboarding_p3_granted">Service enabled</string>
@@ -171,6 +171,13 @@
 
     <!-- ==================== Settings ==================== -->
     <string name="settings_title">Settings</string>
+    <string name="settings_status_protected_title">You\'re protected</string>
+    <string name="settings_status_protected_sub">Reels and Shorts close on their own</string>
+    <string name="settings_status_battery_title">Protected — but at risk</string>
+    <string name="settings_status_battery_sub">Exclude Basta! from battery optimization so the system can\'t stop the service</string>
+    <string name="settings_status_off_title">You\'re not protected</string>
+    <string name="settings_status_off_sub_service">Enable the accessibility service to start</string>
+    <string name="settings_status_off_sub_app">Turn your blocked apps back on to resume protection</string>
     <string name="settings_section_apps">The perimeter</string>
     <string name="settings_section_protection">Protection</string>
     <string name="settings_section_pro">Basta! Pro</string>
@@ -273,7 +280,7 @@
 
     <string name="ppw_cta_trial">Start 7-day free trial</string>
     <string name="ppw_cta_buy">Unlock Pro</string>
-    <string name="ppw_secondary_continue_free">Continue free with another Classic</string>
+    <string name="ppw_secondary_continue_free">Continue free with another %1$s</string>
     <string name="ppw_secondary_close">Maybe later</string>
     <string name="ppw_restore">Restore purchase</string>
     <string name="ppw_play_disclaimer">Managed by Google Play. Cancel anytime in the Play Store.</string>
@@ -302,11 +309,7 @@
     <string name="mascot_level_egg">Egg</string>
     <string name="mascot_level_cracking">Cracking</string>
     <string name="mascot_level_hatchling">Hatchling</string>
-    <string name="mascot_level_juvenile">Juvenile</string>
     <string name="mascot_level_adult">Adult</string>
-    <string name="mascot_level_crested">Crested</string>
-    <string name="mascot_level_legendary">Legendary</string>
-    <string name="mascot_level_golden">Golden</string>
 
     <!-- ==================== Mascot species ==================== -->
     <string name="mascot_species_classic">Classic</string>

@@ -337,8 +337,6 @@ private fun MascotIntroVisual() {
             EvolutionArrow()
             EvolutionPreview(level = MascotLevel.HATCHLING)
             EvolutionArrow()
-            EvolutionPreview(level = MascotLevel.JUVENILE)
-            EvolutionArrow()
             EvolutionPreview(level = MascotLevel.ADULT)
         }
     }
@@ -357,10 +355,8 @@ private fun EvolutionPreview(level: MascotLevel) {
             text = when (level) {
                 MascotLevel.EGG -> stringResource(R.string.onboarding_day_label, 0)
                 MascotLevel.CRACKING -> stringResource(R.string.onboarding_day_label, 3)
-                MascotLevel.HATCHLING -> stringResource(R.string.onboarding_day_label, 7)
-                MascotLevel.JUVENILE -> stringResource(R.string.onboarding_day_label, 14)
-                MascotLevel.ADULT -> stringResource(R.string.onboarding_day_label, 30)
-                else -> ""
+                MascotLevel.HATCHLING -> stringResource(R.string.onboarding_day_label, 8)
+                MascotLevel.ADULT -> stringResource(R.string.onboarding_day_label, 21)
             },
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant

@@ -95,4 +95,7 @@ dependencies {
 
     // Tests JVM unitarios (sin device/emulador): logica pura.
     testImplementation 'junit:junit:4.13.2'
+    // org.json real para tests JVM (el de android.jar es un stub que lanza
+    // "not mocked"). Necesario para testear HintConfig.parse().
+    testImplementation 'org.json:json:20240303'
 }

@@ -365,4 +365,12 @@
         <item>Question: whose was the last reel you saw? Exactly.</item>
         <item>Before grabbing the phone, breathe three times. Sometimes the urge passes.</item>
     </string-array>
+
+    <!-- ==================== Health / self-diagnosis notifications ==================== -->
+    <string name="health_channel_name">Protection alerts</string>
+    <string name="health_channel_desc">Warns you if Basta! stops blocking Reels and Shorts.</string>
+    <string name="health_protection_off_title">Protection turned off</string>
+    <string name="health_protection_off_body">Basta! is no longer blocking Reels and Shorts. Tap to turn it back on.</string>
+    <string name="health_breakage_title">Is Basta! still working?</string>
+    <string name="health_breakage_body">We haven\'t blocked anything in a while even though you keep using these apps. An update may have broken detection — open Basta! to check or report it.</string>
 </resources>

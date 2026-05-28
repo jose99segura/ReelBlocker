@@ -1,11 +1,13 @@
 package app.reelblocker
 
+import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.PowerManager
 import android.provider.Settings
@@ -55,8 +57,6 @@ import androidx.compose.material3.BadgedBox
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.core.graphics.drawable.toBitmap
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -93,6 +93,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -113,6 +115,29 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        // Refrescar los hints de detección desde remoto (throttled internamente).
+        HintConfig.maybeFetch(applicationContext)
+        // Pedir permiso de notificaciones una vez (Android 13+), para poder
+        // avisar si la protección deja de funcionar.
+        maybeRequestNotificationPermission()
+    }
+
+    private fun maybeRequestNotificationPermission() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
+        val granted = ContextCompat.checkSelfPermission(
+            this, Manifest.permission.POST_NOTIFICATIONS
+        ) == PackageManager.PERMISSION_GRANTED
+        if (granted) return
+        val prefs = getSharedPreferences("reelblocker_prefs", MODE_PRIVATE)
+        if (prefs.getBoolean("notif_perm_asked", false)) return
+        prefs.edit().putBoolean("notif_perm_asked", true).apply()
+        ActivityCompat.requestPermissions(
+            this, arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1001
+        )
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         // Solo cerrar Billing cuando la Activity termina de verdad, no en
@@ -130,7 +155,7 @@ private fun Root() {
         val actions = remember {
             object : OnboardingActions {
                 override fun openAccessibility() {
-                    ctx.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+                    openAccessibilitySettings(ctx)
                 }
                 override fun requestBatteryExemption() {
                     requestBatteryExemption(ctx)
@@ -318,6 +343,10 @@ private fun HomeScreen(
 
     val serviceEnabled = remember(refreshKey) { isAccessibilityEnabled(ctx) }
     val batteryExempt = remember(refreshKey) { isBatteryExempt(ctx) }
+    // Modelo estricto: protegido = accesibilidad ON y todas las apps activas.
+    // fullyProtected añade la exención de batería (estado "sano" del todo).
+    val protecting = remember(refreshKey) { Streak.shouldBeProtecting(ctx) }
+    val fullyProtected = protecting && batteryExempt
     val isPro = Premium.isProLive
     val streakState = remember(refreshKey) { Streak.current(ctx) }
     val today = remember(refreshKey) { Stats.read(ctx) }
@@ -360,31 +389,25 @@ private fun HomeScreen(
                 .padding(padding)
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            // (Las apps activas se muestran ahora abajo en el StatusFooter,
-            // unidas al punto verde — una sola fila discreta.)
+            Spacer(Modifier.height(4.dp))
 
-            // Alertas accion requerida (servicio/bateria) — solo si aplica.
-            if (!serviceEnabled) {
-                Box(modifier = Modifier.padding(horizontal = 24.dp)) {
-                    ActionRequiredCard(
-                        title = stringResource(R.string.home_action_accessibility_title),
-                        body = stringResource(R.string.home_action_accessibility_body),
-                        actionLabel = stringResource(R.string.home_action_accessibility_cta),
-                        onAction = { ctx.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)) }
-                    )
+            // ===== ESTADO — tarjeta tonal solo cuando NO está del todo protegido.
+            // Sustituye a las dos cards rojas apiladas; comparte el lenguaje de
+            // Ajustes (StatusHeroCard). Protegido del todo → nada, aire limpio.
+            if (!fullyProtected) {
+                val heroClick: (() -> Unit)? = when {
+                    !serviceEnabled -> { { openAccessibilitySettings(ctx) } }
+                    !protecting -> null            // app apagada → se arregla abajo / en Ajustes
+                    else -> { { requestBatteryExemption(ctx) } }  // !batteryExempt
                 }
-            }
-            if (serviceEnabled && !batteryExempt) {
-                Box(modifier = Modifier.padding(horizontal = 24.dp)) {
-                    ActionRequiredCard(
-                        title = stringResource(R.string.home_action_battery_title),
-                        body = stringResource(R.string.home_action_battery_body),
-                        actionLabel = stringResource(R.string.home_action_battery_cta),
-                        onAction = { requestBatteryExemption(ctx) }
-                    )
-                }
+                StatusHeroCard(
+                    serviceEnabled = serviceEnabled,
+                    protecting = protecting,
+                    batteryExempt = batteryExempt,
+                    onClick = heroClick
+                )
             }
             // ExternalDisableDialog se renderiza al final de HomeScreen como
             // modal — no consume espacio aquí dentro del scroll.
@@ -396,15 +419,12 @@ private fun HomeScreen(
                 breakRemainingMs = breakRemainingMs
             )
 
-            // ===== STRIP — metricas resumen (sin nav: para detalle vía bottom nav) =====
-            Box(modifier = Modifier.padding(horizontal = 24.dp)) {
-                MetricsStrip(
-                    today = today.total,
-                    totalBlocks = totalBlocks,
-                    record = streakState.record,
-                    onClick = null
-                )
-            }
+            // ===== MÉTRICAS — tarjeta premium: Récord · Hoy · Recuperado =====
+            MetricsCard(
+                record = streakState.record,
+                today = today.total,
+                totalBlocks = totalBlocks
+            )
 
             // ===== TIP cita =====
             TipQuote(
@@ -412,11 +432,15 @@ private fun HomeScreen(
                     .padding(horizontal = 24.dp, vertical = 4.dp)
             )
 
-            // ===== FOOTER fino — solo estado, sin acciones destructivas =====
-            StatusFooter(
-                serviceEnabled = serviceEnabled,
-                refreshKey = refreshKey
-            )
+            // ===== FOOTER fino — único indicador del estado sano =====
+            if (fullyProtected) {
+                StatusFooter(
+                    serviceEnabled = serviceEnabled,
+                    refreshKey = refreshKey
+                )
+            }
+
+            Spacer(Modifier.height(24.dp))
         }
     }
 
@@ -496,60 +520,67 @@ private fun UpgradeChip(onClick: () -> Unit) {
     }
 }
 
-// ===== Metrics strip =====
+// ===== Metrics card =====
 
+/**
+ * Tarjeta premium de métricas: Récord · Hoy · Recuperado. Números en tamaño
+ * héroe (headlineSmall) con separadores verticales finos. Sin navegación.
+ */
 @Composable
-private fun MetricsStrip(
-    today: Int,
-    totalBlocks: Int,
-    record: Int,
-    onClick: (() -> Unit)?
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .then(if (onClick != null) Modifier.clickable { onClick() } else Modifier)
-            .padding(vertical = 8.dp, horizontal = 4.dp),
-        horizontalArrangement = Arrangement.SpaceEvenly,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        MetricItem(label = stringResource(R.string.metric_today), value = today.toString())
-        VerticalDot()
-        MetricItem(label = stringResource(R.string.metric_recovered), value = formatRecoveredShort(totalBlocks))
-        VerticalDot()
-        MetricItem(
-            label = stringResource(R.string.metric_record),
-            value = if (record == 0) stringResource(R.string.metric_dash)
-                    else stringResource(R.string.metric_record_days, record)
-        )
+private fun MetricsCard(record: Int, today: Int, totalBlocks: Int) {
+    SettingsCard {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 18.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            MetricColumn(
+                value = if (record == 0) stringResource(R.string.metric_dash)
+                        else stringResource(R.string.metric_record_days, record),
+                label = stringResource(R.string.metric_record)
+            )
+            MetricVerticalDivider()
+            MetricColumn(
+                value = today.toString(),
+                label = stringResource(R.string.metric_today)
+            )
+            MetricVerticalDivider()
+            MetricColumn(
+                value = formatRecoveredShort(totalBlocks),
+                label = stringResource(R.string.metric_recovered)
+            )
+        }
     }
 }
 
 @Composable
-private fun MetricItem(label: String, value: String) {
+private fun MetricColumn(value: String, label: String) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             text = value,
-            style = MaterialTheme.typography.titleMedium,
+            style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface
         )
+        Spacer(Modifier.height(2.dp))
         Text(
-            text = label,
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            text = label.uppercase(),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            letterSpacing = 0.5.sp
         )
     }
 }
 
 @Composable
-private fun VerticalDot() {
+private fun MetricVerticalDivider() {
     Box(
         modifier = Modifier
-            .size(3.dp)
-            .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f))
+            .height(32.dp)
+            .width(1.dp)
+            .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f))
     )
 }
 
@@ -564,40 +595,7 @@ private fun formatRecoveredShort(blocks: Int): String {
     }
 }
 
-// ===== Action required & external disable cards (siguen siendo de home) =====
-
-@Composable
-private fun ActionRequiredCard(
-    title: String,
-    body: String,
-    actionLabel: String,
-    onAction: () -> Unit
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.errorContainer
-        )
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onErrorContainer
-            )
-            Spacer(Modifier.height(4.dp))
-            Text(
-                text = body,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onErrorContainer
-            )
-            Spacer(Modifier.height(12.dp))
-            Button(onClick = onAction, modifier = Modifier.fillMaxWidth()) {
-                Text(actionLabel)
-            }
-        }
-    }
-}
+// ===== External disable dialog (sigue siendo de home) =====
 
 /**
  * Modal post-fact que aparece al volver a la app tras desactivar el servicio
@@ -673,7 +671,7 @@ private fun StatusFooter(
     ) {
         Box(
             modifier = Modifier
-                .size(6.dp)
+                .size(7.dp)
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.tertiary)
         )
@@ -690,7 +688,7 @@ private fun StatusFooter(
                 label = label,
                 refreshKey = refreshKey,
                 onClick = {
-                    ctx.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+                    openAccessibilitySettings(ctx)
                 }
             )
             Spacer(Modifier.width(6.dp))
@@ -768,6 +766,18 @@ internal fun isAccessibilityEnabled(ctx: Context): Boolean {
 internal fun isBatteryExempt(ctx: Context): Boolean {
     val pm = ctx.getSystemService(Context.POWER_SERVICE) as PowerManager
     return pm.isIgnoringBatteryOptimizations(ctx.packageName)
+}
+
+/**
+ * Abre Ajustes de accesibilidad. Suprime el aviso de "protección desactivada"
+ * durante unos minutos: si el usuario va a Ajustes y apaga el servicio es una
+ * acción deliberada, no un fallo que debamos notificar. (Para activar no pasa
+ * nada: no hay onUnbind al encender.)
+ */
+internal fun openAccessibilitySettings(ctx: Context) {
+    HealthCheck.suppressProtectionOffNotice(ctx)
+    val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+    ctx.startActivity(intent)
 }
 
 @Suppress("BatteryLife")

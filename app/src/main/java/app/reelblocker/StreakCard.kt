@@ -115,7 +115,7 @@ fun StreakCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 8.dp, bottom = 4.dp),
+                .padding(top = 12.dp, bottom = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // Nivel — micro-label arriba, accent color, letter-spaced.
@@ -124,10 +124,10 @@ fun StreakCard(
                 style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.Bold,
                 color = state.level.accentColor,
-                letterSpacing = 3.sp
+                letterSpacing = 2.sp
             )
 
-            Spacer(Modifier.height(4.dp))
+            Spacer(Modifier.height(6.dp))
 
             // Mascota dentro del anillo, posada sobre la isla flotante.
             // El tap aqui dispara solo la animacion de bounce.
@@ -144,7 +144,7 @@ fun StreakCard(
                 }
             )
 
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(4.dp))
 
             // Numero gigante (rolodex animation).
             AnimatedContent(
@@ -174,7 +174,7 @@ fun StreakCard(
                 }
             }
 
-            Spacer(Modifier.height(2.dp))
+            Spacer(Modifier.height(6.dp))
 
             val graduationGoal = MascotLevel.ADULT.minDays
             val subtext: String

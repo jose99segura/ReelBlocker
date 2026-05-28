@@ -30,18 +30,10 @@ class BlockerService : AccessibilityService() {
         private const val PKG_YOUTUBE = "com.google.android.youtube"
         private const val PKG_FACEBOOK = "com.facebook.katana"
 
-        // Reels publicos (TikTok-like). Bloquear siempre si IG esta activo.
-        private val INSTAGRAM_REELS_HINTS = listOf(
-            "clips_viewer",
-            "clips_swipe_refresh"
-        )
-
-        // HISTORIAS. Instagram las llama "reel" internamente (legacy 2016).
-        // Bloquear solo si el usuario activa el sub-switch.
-        private val INSTAGRAM_STORIES_HINTS = listOf(
-            "reel_viewer",
-            "story_viewer"
-        )
+        // Los hints de Reels/Stories/Shorts viven ahora en [HintConfig]
+        // (defaults baked-in + override remoto por JSON). El servicio solo lee
+        // la cache. Las listas de DM/exit de abajo siguen aqui: son estables y
+        // no se gestionan en remoto.
 
         // Hints en el ARBOL: solo se usan para elevar el flag a true en
         // eventos de contenido. Tienen que ser muy especificos para no
@@ -73,13 +65,6 @@ class BlockerService : AccessibilityService() {
             "MainTabActivity"
         )
 
-        private val YOUTUBE_SHORTS_HINTS = listOf(
-            "reel_watch_player",
-            "reel_watch_fragment_root",
-            "reel_player_page_container",
-            "reel_recycler"
-        )
-
         private const val MIN_INTERVAL_MS = 600L
         private const val POST_EXIT_GRACE_MS = 1500L
         private const val FULLSCREEN_FRACTION = 0.6
@@ -95,6 +80,10 @@ class BlockerService : AccessibilityService() {
         // reel que se acaba de detectar viene de un DM. Cubre la transicion
         // DM thread -> reel viewer (< 500 ms tipicamente).
         private const val DM_RECENCY_MS = 2500L
+
+        // Cada cuanto, como maximo, corremos el chequeo de "deteccion rota"
+        // ante actividad de IG/YT. Barato pero no en cada evento.
+        private const val HEALTH_CHECK_INTERVAL_MS = 30L * 60 * 1000
     }
 
     private var lastActionTime = 0L
@@ -114,6 +103,8 @@ class BlockerService : AccessibilityService() {
     private var lastSeenDmTimestamp = 0L
     // Rate-limit del volcado diagnostico de Facebook.
     private var lastFbDumpTime = 0L
+    // Rate-limit del chequeo de salud (deteccion rota) ante actividad IG/YT.
+    private var lastHealthCheck = 0L
 
     override fun onServiceConnected() {
         super.onServiceConnected()
@@ -173,14 +164,23 @@ class BlockerService : AccessibilityService() {
             lastSeenDmTimestamp = SystemClock.elapsedRealtime()
         }
 
+        // Salud: el usuario esta usando IG/YT ahora mismo. Si antes
+        // bloqueabamos pero llevamos demasiado sin un solo bloqueo, los hints
+        // probablemente se rompieron → avisar. Throttled.
+        val nowWall = System.currentTimeMillis()
+        if (nowWall - lastHealthCheck >= HEALTH_CHECK_INTERVAL_MS) {
+            lastHealthCheck = nowWall
+            HealthCheck.maybeWarnBreakage(this)
+        }
+
         val hints = when (pkg) {
             PKG_INSTAGRAM -> {
-                val list = ArrayList<String>(4)
-                list.addAll(INSTAGRAM_REELS_HINTS)
-                if (Stats.effectiveStoriesBlocked(this)) list.addAll(INSTAGRAM_STORIES_HINTS)
+                val list = ArrayList<String>()
+                list.addAll(HintConfig.instagramReels(this))
+                if (Stats.effectiveStoriesBlocked(this)) list.addAll(HintConfig.instagramStories(this))
                 list
             }
-            PKG_YOUTUBE -> YOUTUBE_SHORTS_HINTS
+            PKG_YOUTUBE -> HintConfig.youtubeShorts(this)
             else -> return
         }
 
@@ -357,8 +357,18 @@ class BlockerService : AccessibilityService() {
         Log.d(TAG, "performGlobalAction(BACK) = $ok")
         if (ok) {
             Stats.increment(this, pkg)
+            HealthCheck.recordBlock(this)
             Toast.makeText(this, R.string.toast_blocked, Toast.LENGTH_SHORT).show()
         }
+    }
+
+    override fun onUnbind(intent: android.content.Intent?): Boolean {
+        // La accesibilidad se desvincula: el sistema nos mato o el usuario
+        // apago el servicio. Avisar (salvo desactivacion deliberada reciente),
+        // porque a partir de ahora los Reels dejan de bloquearse.
+        Log.d(TAG, "Servicio desvinculado")
+        HealthCheck.notifyProtectionOff(this)
+        return super.onUnbind(intent)
     }
 
     override fun onInterrupt() {

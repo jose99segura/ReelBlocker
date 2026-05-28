@@ -375,4 +375,12 @@
         <item>Pregunta: ¿de quién era el último reel que viste? Exacto.</item>
         <item>Antes de coger el móvil, respira tres veces. A veces se te quita.</item>
     </string-array>
+
+    <!-- ==================== Salud / notificaciones de autodiagnóstico ==================== -->
+    <string name="health_channel_name">Avisos de protección</string>
+    <string name="health_channel_desc">Te avisa si Basta! deja de bloquear Reels y Shorts.</string>
+    <string name="health_protection_off_title">Protección desactivada</string>
+    <string name="health_protection_off_body">Basta! ya no está bloqueando Reels ni Shorts. Toca para volver a activarlo.</string>
+    <string name="health_breakage_title">¿Sigue funcionando Basta!?</string>
+    <string name="health_breakage_body">Llevamos un tiempo sin bloquear nada aunque sigues usando estas apps. Puede que una actualización haya roto la detección — abre Basta! para comprobarlo o avisarnos.</string>
 </resources>

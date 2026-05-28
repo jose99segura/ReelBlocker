@@ -4,6 +4,12 @@
     <!-- Para que el accesibilidad no muera tras horas: pedir exencion. -->
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
 
+    <!-- Descargar el JSON remoto de hints de deteccion (HintConfig). -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- Avisar cuando la proteccion deja de funcionar (HealthCheck). -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
     <!-- Android 11+ exige declarar explicitamente que paquetes podemos
          consultar via PackageManager. Sin esto, getPackageInfo() devuelve
          "no instalada" aunque la app este instalada. -->

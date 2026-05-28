@@ -3,8 +3,11 @@ package app.reelblocker
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -16,7 +19,6 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -83,7 +85,6 @@ fun StreakCard(
     val state = remember(refreshKey) { Streak.current(ctx) }
     val species = remember(refreshKey) { Collection.currentSpecies(ctx) }
     val haptic = LocalHapticFeedback.current
-    val isDark = isSystemInDarkTheme()
 
     var celebrating by remember { mutableStateOf(false) }
     LaunchedEffect(refreshKey) {
@@ -133,9 +134,9 @@ fun StreakCard(
             MascotWithRing(
                 level = state.level,
                 species = species,
-                progress = state.progressInLevel,
+                days = state.count,
+                goal = MascotLevel.ADULT.minDays,
                 animate = state.count > 0 && serviceEnabled,
-                isDark = isDark,
                 tapTrigger = tapTrigger,
                 onTap = {
                     tapTrigger++
@@ -157,11 +158,11 @@ fun StreakCard(
                 Row(verticalAlignment = Alignment.Bottom) {
                     Text(
                         text = count.toString(),
-                        fontSize = 80.sp,
+                        fontSize = 64.sp,
                         fontWeight = FontWeight.Black,
                         color = MaterialTheme.colorScheme.onSurface,
                         letterSpacing = (-3).sp,
-                        lineHeight = 80.sp
+                        lineHeight = 64.sp
                     )
                     Spacer(Modifier.width(8.dp))
                     Text(
@@ -258,17 +259,37 @@ fun StreakCard(
 private fun MascotWithRing(
     level: MascotLevel,
     species: MascotSpecies,
-    progress: Float,
+    days: Int,
+    goal: Int,
     animate: Boolean,
-    isDark: Boolean,
     tapTrigger: Int,
     onTap: () -> Unit
 ) {
-    val animatedProgress by animateFloatAsState(
-        targetValue = progress,
-        animationSpec = tween(durationMillis = 900, easing = FastOutSlowInEasing),
-        label = "ring-progress"
+
+    // Levitación mística — la mascota flota por encima del nido,
+    // oscilando suavemente, con un halo que palpita detrás.
+    val mysticTransition = rememberInfiniteTransition(label = "mystic")
+    val floatY by mysticTransition.animateFloat(
+        initialValue = -6f,
+        targetValue = 6f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(2800, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "float-y"
     )
+    val haloPulse by mysticTransition.animateFloat(
+        initialValue = 0.55f,
+        targetValue = 1.0f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(2200, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "halo-pulse"
+    )
+
+    // Sin lift: la mascota se posa dentro del nido (la oscilación sigue dando vida).
+    val lift = 0.dp
 
     // Animacion de bounce / wobble — solo afecta a la mascota interna.
     val bounceScale = remember { Animatable(1f) }
@@ -301,69 +322,85 @@ private fun MascotWithRing(
 
     val mascotTapDescription = stringResource(R.string.cd_mascot_tap)
     Box(
-        modifier = Modifier.size(width = 260.dp, height = 280.dp),
+        modifier = Modifier.size(width = 280.dp, height = 280.dp),
         contentAlignment = Alignment.TopCenter
     ) {
-        // Isla flotante — elipse difusa pegada a la base del anillo.
+        // 1) Anillo segmentado — un puntito por día (30 hacia la graduación).
+        //    Los días completados se encienden con el accent color de la especie;
+        //    los pendientes quedan como track tenue. Feedback claro desde día 1.
+        val trackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.14f)
+        val litColor = level.accentColor
+        val segments = goal
+        val litCount = days.coerceIn(0, segments)
+        val gapDeg = 3f
+        val segDeg = (360f / segments) - gapDeg
+        // El offset Y compensa que el dibujo de la mascota deja huecos en la
+        // parte superior del Canvas; sin esto el ring queda visualmente alto.
         Canvas(
             modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .size(width = 200.dp, height = 36.dp)
+                .size(280.dp)
+                .align(Alignment.Center)
+                .graphicsLayer { translationY = 18.dp.toPx() }
         ) {
-            val intensity = if (isDark) 0.38f else 0.28f
-            drawOval(
-                brush = Brush.radialGradient(
-                    colors = listOf(
-                        level.accentColor.copy(alpha = intensity),
-                        level.gradientEnd.copy(alpha = intensity * 0.4f),
-                        Color.Transparent
-                    ),
-                    center = Offset(size.width / 2f, size.height / 2f),
-                    radius = size.width / 2f
-                )
-            )
-        }
-
-        // Anillo + mascota apilados sobre la isla.
-        Box(
-            modifier = Modifier.size(260.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            // Anillo delicado — sin track de fondo prominente, solo el arco.
-            // El anillo NO se anima con el bounce (queda como marco estable).
-            Canvas(modifier = Modifier.fillMaxSize()) {
-                val strokeWidth = 8.dp.toPx()
-                val inset = strokeWidth / 2f + 4.dp.toPx()
-
+            val strokeWidth = 6.dp.toPx()
+            val inset = strokeWidth / 2f + 4.dp.toPx()
+            val arcSize = Size(size.width - 2 * inset, size.height - 2 * inset)
+            val topLeft = Offset(inset, inset)
+            for (i in 0 until segments) {
+                val startAngle = -90f + i * (360f / segments) + gapDeg / 2f
                 drawArc(
-                    color = Color.Black.copy(alpha = 0.06f),
-                    startAngle = -90f,
-                    sweepAngle = 360f,
+                    color = if (i < litCount) litColor else trackColor,
+                    startAngle = startAngle,
+                    sweepAngle = segDeg,
                     useCenter = false,
-                    topLeft = Offset(inset, inset),
-                    size = Size(size.width - 2 * inset, size.height - 2 * inset),
-                    style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
-                )
-
-                drawArc(
-                    brush = Brush.sweepGradient(
-                        colors = listOf(
-                            level.gradientStart,
-                            level.accentColor,
-                            level.gradientEnd,
-                            level.gradientStart
-                        )
-                    ),
-                    startAngle = -90f,
-                    sweepAngle = 360f * animatedProgress,
-                    useCenter = false,
-                    topLeft = Offset(inset, inset),
-                    size = Size(size.width - 2 * inset, size.height - 2 * inset),
+                    topLeft = topLeft,
+                    size = arcSize,
                     style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
                 )
             }
+        }
 
-            // La mascota — clickeable, anima con bounce/wobble.
+        // 2) Isla flotante — pedestal achatado, delante del anillo.
+        //    Padding inferior para que el ring tenga margen por debajo.
+        androidx.compose.foundation.Image(
+            painter = androidx.compose.ui.res.painterResource(R.drawable.pedestal_island),
+            contentDescription = null,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 12.dp)
+                .size(width = 180.dp, height = 120.dp),
+            contentScale = androidx.compose.ui.layout.ContentScale.FillBounds
+        )
+
+        // 3) Halo + mascota delante de la isla (el huevo se posa sobre el nido).
+        Box(
+            modifier = Modifier.size(220.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            // Halo místico detrás de la mascota — palpita y flota con ella.
+            Canvas(
+                modifier = Modifier
+                    .size(200.dp)
+                    .graphicsLayer {
+                        translationY = floatY.dp.toPx() - lift.toPx()
+                    }
+            ) {
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(
+                            level.accentColor.copy(alpha = 0.42f * haloPulse),
+                            level.gradientEnd.copy(alpha = 0.18f * haloPulse),
+                            Color.Transparent
+                        ),
+                        center = Offset(size.width / 2f, size.height / 2f),
+                        radius = size.minDimension / 2f
+                    ),
+                    radius = size.minDimension / 2f,
+                    center = Offset(size.width / 2f, size.height / 2f)
+                )
+            }
+
+            // La mascota — clickeable, anima con bounce/wobble + flotación mística.
             AnimatedContent(
                 targetState = level,
                 transitionSpec = {
@@ -372,27 +409,41 @@ private fun MascotWithRing(
                 },
                 label = "mascot-evolution"
             ) { currentLevel ->
-                MascotCanvas(
-                    level = currentLevel,
-                    species = species,
-                    animate = animate,
-                    modifier = Modifier
-                        .size(220.dp)
-                        .graphicsLayer {
-                            scaleX = bounceScale.value
-                            scaleY = bounceScale.value
-                            rotationZ = bounceRotation.value
-                        }
-                        .semantics {
-                            role = Role.Button
-                            contentDescription = mascotTapDescription
-                        }
-                        .clickable(
-                            interactionSource = remember { MutableInteractionSource() },
-                            indication = null,
-                            onClick = onTap
-                        )
-                )
+                val ctxLocal = androidx.compose.ui.platform.LocalContext.current
+                val useLilaPreview = currentLevel == MascotLevel.EGG &&
+                    Stats.isDevLilaEggEnabled(ctxLocal)
+                val mascotModifier = Modifier
+                    .size(180.dp)
+                    .graphicsLayer {
+                        scaleX = bounceScale.value
+                        scaleY = bounceScale.value
+                        rotationZ = bounceRotation.value
+                        translationY = floatY.dp.toPx() - lift.toPx()
+                    }
+                    .semantics {
+                        role = Role.Button
+                        contentDescription = mascotTapDescription
+                    }
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        onClick = onTap
+                    )
+                if (useLilaPreview) {
+                    androidx.compose.foundation.Image(
+                        painter = androidx.compose.ui.res.painterResource(R.drawable.egg_lila_preview),
+                        contentDescription = null,
+                        modifier = mascotModifier,
+                        contentScale = androidx.compose.ui.layout.ContentScale.Fit
+                    )
+                } else {
+                    MascotCanvas(
+                        level = currentLevel,
+                        species = species,
+                        animate = animate,
+                        modifier = mascotModifier
+                    )
+                }
             }
         }
     }

@@ -9,6 +9,9 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 
+/** Tier de monetización de una especie. */
+enum class Tier { FREE, PRO }
+
 /**
  * Especies coleccionables. Cada una tiene una silueta distinta en HATCHLING/
  * JUVENILE/ADULT. EGG y CRACKING son los mismos primitivos con un tinte
@@ -18,39 +21,50 @@ enum class MascotSpecies(
     val id: String,
     @androidx.annotation.StringRes val displayNameRes: Int,
     /** Color de acento aplicado al huevo y a detalles menores. */
-    val accentTint: Color
+    val accentTint: Color,
+    val tier: Tier
 ) {
     CLASICA(
         id = "clasica",
         displayNameRes = R.string.mascot_species_classic,
-        accentTint = Color(0xFFFB923C)
+        accentTint = Color(0xFFFB923C),
+        tier = Tier.FREE
     ),
     DRAGON(
         id = "dragon",
         displayNameRes = R.string.mascot_species_dragon,
-        accentTint = Color(0xFF7C3AED)
+        accentTint = Color(0xFF7C3AED),
+        tier = Tier.FREE
     ),
     TORTUGA(
         id = "tortuga",
         displayNameRes = R.string.mascot_species_turtle,
-        accentTint = Color(0xFF059669)
+        accentTint = Color(0xFF059669),
+        tier = Tier.PRO
     ),
     LOBO(
         id = "lobo",
         displayNameRes = R.string.mascot_species_wolf,
-        accentTint = Color(0xFF475569)
+        accentTint = Color(0xFF475569),
+        tier = Tier.PRO
     ),
     BUHO(
         id = "buho",
         displayNameRes = R.string.mascot_species_owl,
-        accentTint = Color(0xFFA16207)
+        accentTint = Color(0xFFA16207),
+        tier = Tier.PRO
     );
+
+    val isPro: Boolean get() = tier == Tier.PRO
 
     companion object {
         fun fromIdOrNull(id: String?): MascotSpecies? =
             entries.firstOrNull { it.id == id }
 
         val DEFAULT: MascotSpecies = CLASICA
+
+        fun freeSpecies(): List<MascotSpecies> = entries.filter { it.tier == Tier.FREE }
+        fun proSpecies(): List<MascotSpecies> = entries.filter { it.tier == Tier.PRO }
     }
 }
 
@@ -59,7 +73,7 @@ enum class MascotSpecies(
 //   membranosas desde JUVENILE, cola corta.
 // ============================================================
 
-internal fun DrawScope.drawDragonBody(level: MascotLevel, sad: Boolean) {
+internal fun DrawScope.drawDragonBody(level: MascotLevel, sad: Boolean, eyeOpenness: Float = 1f) {
     val w = size.width
     val h = size.height
     val cx = w / 2f
@@ -120,14 +134,14 @@ internal fun DrawScope.drawDragonBody(level: MascotLevel, sad: Boolean) {
         drawPath(tri, color = spikeColor)
     }
 
-    drawFace(cx, cy, bodySize, level = level, sad = sad)
+    drawFace(cx, cy, bodySize, level = level, sad = sad, eyeOpenness = eyeOpenness)
 }
 
 // ============================================================
 //   Tortuga — cuerpo bajo y ancho con caparazón segmentado.
 // ============================================================
 
-internal fun DrawScope.drawTortugaBody(level: MascotLevel, sad: Boolean) {
+internal fun DrawScope.drawTortugaBody(level: MascotLevel, sad: Boolean, eyeOpenness: Float = 1f) {
     val w = size.width
     val h = size.height
     val cx = w / 2f
@@ -203,7 +217,8 @@ internal fun DrawScope.drawTortugaBody(level: MascotLevel, sad: Boolean) {
         cy = cy + bodyH * 0.05f,
         bodySize = bodyW * 0.30f,
         level = level,
-        sad = sad
+        sad = sad,
+        eyeOpenness = eyeOpenness
     )
 }
 
@@ -211,7 +226,7 @@ internal fun DrawScope.drawTortugaBody(level: MascotLevel, sad: Boolean) {
 //   Lobo — cuerpo redondo con orejas triangulares + hocico.
 // ============================================================
 
-internal fun DrawScope.drawLoboBody(level: MascotLevel, sad: Boolean) {
+internal fun DrawScope.drawLoboBody(level: MascotLevel, sad: Boolean, eyeOpenness: Float = 1f) {
     val w = size.width
     val h = size.height
     val cx = w / 2f
@@ -266,14 +281,14 @@ internal fun DrawScope.drawLoboBody(level: MascotLevel, sad: Boolean) {
         size = Size(bodySize * 0.36f, bodySize * 0.26f)
     )
 
-    drawFace(cx, cy, bodySize, level = level, sad = sad, customNose = true)
+    drawFace(cx, cy, bodySize, level = level, sad = sad, customNose = true, eyeOpenness = eyeOpenness)
 }
 
 // ============================================================
 //   Búho — cuerpo muy redondo, ojos enormes, plumas/penacho.
 // ============================================================
 
-internal fun DrawScope.drawBuhoBody(level: MascotLevel, sad: Boolean) {
+internal fun DrawScope.drawBuhoBody(level: MascotLevel, sad: Boolean, eyeOpenness: Float = 1f) {
     val w = size.width
     val h = size.height
     val cx = w / 2f
@@ -336,21 +351,21 @@ internal fun DrawScope.drawBuhoBody(level: MascotLevel, sad: Boolean) {
     val eyeY = cy - bodySize * 0.05f
     val eyeOffset = bodySize * 0.15f
     val eyeR = bodySize * 0.11f
-    drawCircle(color = Color.White, radius = eyeR, center = Offset(cx - eyeOffset, eyeY))
-    drawCircle(color = Color.White, radius = eyeR, center = Offset(cx + eyeOffset, eyeY))
     val pupilColor = Color(0xFF1F2937)
     val pupilOffsetY = if (sad) eyeR * 0.3f else 0f
-    drawCircle(color = pupilColor, radius = eyeR * 0.55f, center = Offset(cx - eyeOffset, eyeY + pupilOffsetY))
-    drawCircle(color = pupilColor, radius = eyeR * 0.55f, center = Offset(cx + eyeOffset, eyeY + pupilOffsetY))
-    drawCircle(
-        color = Color.White,
-        radius = eyeR * 0.20f,
-        center = Offset(cx - eyeOffset + eyeR * 0.25f, eyeY + pupilOffsetY - eyeR * 0.25f)
+    drawEye(
+        center = Offset(cx - eyeOffset, eyeY),
+        eyeR = eyeR,
+        pupilColor = pupilColor,
+        pupilOffsetY = pupilOffsetY,
+        openness = eyeOpenness
     )
-    drawCircle(
-        color = Color.White,
-        radius = eyeR * 0.20f,
-        center = Offset(cx + eyeOffset + eyeR * 0.25f, eyeY + pupilOffsetY - eyeR * 0.25f)
+    drawEye(
+        center = Offset(cx + eyeOffset, eyeY),
+        eyeR = eyeR,
+        pupilColor = pupilColor,
+        pupilOffsetY = pupilOffsetY,
+        openness = eyeOpenness
     )
 
     // Pico pequeño triangular hacia abajo.
@@ -363,8 +378,8 @@ internal fun DrawScope.drawBuhoBody(level: MascotLevel, sad: Boolean) {
     }
     drawPath(beak, color = beakColor)
 
-    if (sad) {
-        // Mini ceño caído sobre cada ojo.
+    if (sad && eyeOpenness > 0.5f) {
+        // Mini ceño caído sobre cada ojo (solo si los ojos están abiertos).
         val brow = Stroke(width = bodySize * 0.022f, cap = StrokeCap.Round)
         val leftBrow = Path().apply {
             moveTo(cx - eyeOffset - eyeR, eyeY - eyeR * 1.4f)
@@ -458,7 +473,8 @@ internal fun DrawScope.drawFace(
     bodySize: Float,
     level: MascotLevel,
     sad: Boolean,
-    customNose: Boolean = false
+    customNose: Boolean = false,
+    eyeOpenness: Float = 1f
 ) {
     if (level.ordinal <= MascotLevel.ADULT.ordinal) {
         val blush = Color(0xFFFB7185).copy(alpha = 0.45f)
@@ -477,29 +493,21 @@ internal fun DrawScope.drawFace(
     val eyeY = cy - bodySize * 0.08f
     val eyeOffset = bodySize * 0.15f
     val eyeR = bodySize * 0.07f
-    drawCircle(color = Color.White, radius = eyeR, center = Offset(cx - eyeOffset, eyeY))
-    drawCircle(color = Color.White, radius = eyeR, center = Offset(cx + eyeOffset, eyeY))
     val pupilColor = Color(0xFF1F2937)
     val pupilOffsetY = if (sad) eyeR * 0.3f else -eyeR * 0.1f
-    drawCircle(
-        color = pupilColor,
-        radius = eyeR * 0.55f,
-        center = Offset(cx - eyeOffset, eyeY + pupilOffsetY)
+    drawEye(
+        center = Offset(cx - eyeOffset, eyeY),
+        eyeR = eyeR,
+        pupilColor = pupilColor,
+        pupilOffsetY = pupilOffsetY,
+        openness = eyeOpenness
     )
-    drawCircle(
-        color = pupilColor,
-        radius = eyeR * 0.55f,
-        center = Offset(cx + eyeOffset, eyeY + pupilOffsetY)
-    )
-    drawCircle(
-        color = Color.White,
-        radius = eyeR * 0.22f,
-        center = Offset(cx - eyeOffset + eyeR * 0.2f, eyeY + pupilOffsetY - eyeR * 0.2f)
-    )
-    drawCircle(
-        color = Color.White,
-        radius = eyeR * 0.22f,
-        center = Offset(cx + eyeOffset + eyeR * 0.2f, eyeY + pupilOffsetY - eyeR * 0.2f)
+    drawEye(
+        center = Offset(cx + eyeOffset, eyeY),
+        eyeR = eyeR,
+        pupilColor = pupilColor,
+        pupilOffsetY = pupilOffsetY,
+        openness = eyeOpenness
     )
 
     if (sad) {

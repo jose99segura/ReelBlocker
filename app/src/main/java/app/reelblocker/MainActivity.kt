@@ -80,8 +80,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -148,7 +151,11 @@ private fun Root() {
 @Composable
 private fun ReelBlockerTheme(content: @Composable () -> Unit) {
     val colors = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()
-    MaterialTheme(colorScheme = colors, content = content)
+    MaterialTheme(
+        colorScheme = colors,
+        typography = BastaTypography,
+        content = content
+    )
 }
 
 @Composable
@@ -156,57 +163,84 @@ private fun AppRoot(onResetOnboarding: () -> Unit) {
     val ctx = LocalContext.current
     var currentScreen: Screen by remember { mutableStateOf<Screen>(Screen.Home) }
     var showPaywall by remember { mutableStateOf(false) }
-    var pendingGraduationVisible by remember { mutableStateOf(Collection.pendingGraduation(ctx) != null) }
+    var pendingGraduation by remember { mutableStateOf<MascotSpecies?>(Collection.pendingGraduation(ctx)) }
+    val pendingGraduationVisible = pendingGraduation != null
 
-    BackHandler(enabled = currentScreen != Screen.Home) {
+    BackHandler(enabled = currentScreen != Screen.Home && !showPaywall) {
         currentScreen = Screen.Home
     }
 
-    Scaffold(
-        bottomBar = {
-            BottomNavBar(
+    Box(modifier = Modifier.fillMaxSize()) {
+        Scaffold(
+            bottomBar = {
+                BottomNavBar(
+                    current = currentScreen,
+                    inventoryBadge = pendingGraduationVisible,
+                    onSelect = { tab -> currentScreen = tab }
+                )
+            }
+        ) { outerPadding ->
+            ScreenContainer(
                 current = currentScreen,
-                inventoryBadge = pendingGraduationVisible,
-                onSelect = { tab -> currentScreen = tab }
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(outerPadding)
+            ) { screen ->
+                when (screen) {
+                    is Screen.Home -> HomeScreen(
+                        onOpenPaywall = { showPaywall = true },
+                        onPendingGraduationChanged = { pendingGraduation = it }
+                    )
+                    is Screen.Stats -> StatsScreen(
+                        onOpenPaywall = { showPaywall = true }
+                    )
+                    is Screen.Settings -> SettingsScreen(
+                        onOpenPaywall = { showPaywall = true },
+                        onResetOnboarding = onResetOnboarding
+                    )
+                    is Screen.Inventory -> InventoryScreen(
+                        onOpenPaywall = { showPaywall = true }
+                    )
+                }
+            }
+        }
+
+        if (showPaywall) {
+            // Hasta que Fase 1 entregue ProTier multi-SKU, todos los tiers
+            // disparan el flujo existente single-SKU. La selección visual del
+            // tier solo sirve para que el usuario *vea* el modelo de pricing.
+            PremiumPaywallScreen(
+                onClose = { showPaywall = false },
+                onContinueFree = { showPaywall = false },
+                onPurchase = { _ ->
+                    (ctx as? Activity)?.let { Premium.launchPurchase(it) }
+                    showPaywall = false
+                },
+                onRestore = {
+                    Premium.restore(ctx)
+                    Toast.makeText(ctx, ctx.getString(R.string.toast_checking_purchases), Toast.LENGTH_SHORT).show()
+                }
             )
         }
-    ) { outerPadding ->
-        ScreenContainer(
-            current = currentScreen,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(outerPadding)
-        ) { screen ->
-            when (screen) {
-                is Screen.Home -> HomeScreen(
-                    onOpenPaywall = { showPaywall = true },
-                    onPendingGraduationChanged = { pendingGraduationVisible = it }
-                )
-                is Screen.Stats -> StatsScreen(
-                    onOpenPaywall = { showPaywall = true }
-                )
-                is Screen.Settings -> SettingsScreen(
-                    onOpenPaywall = { showPaywall = true },
-                    onResetOnboarding = onResetOnboarding
-                )
-                is Screen.Inventory -> InventoryScreen()
-            }
-        }
-    }
 
-    if (showPaywall) {
-        PaywallSheet(
-            priceLabel = Premium.priceLabel ?: Premium.PRO_PRICE,
-            onDismiss = { showPaywall = false },
-            onPurchase = {
-                (ctx as? Activity)?.let { Premium.launchPurchase(it) }
-                showPaywall = false
-            },
-            onRestore = {
-                Premium.restore(ctx)
-                Toast.makeText(ctx, ctx.getString(R.string.toast_checking_purchases), Toast.LENGTH_SHORT).show()
-            }
-        )
+        // Celebración día 30 — sustituye al GraduationDialog modal. Se renderiza
+        // al nivel del AppRoot Box para cubrir el bottom nav y dar sensación
+        // ceremonial. El consume del flag + posible trigger del paywall sucede
+        // dentro del onContinue, no en HomeScreen.
+        pendingGraduation?.let { graduated ->
+            GraduationCelebrationScreen(
+                graduatedSpecies = graduated,
+                daysReached = MascotLevel.ADULT.minDays,
+                onContinue = {
+                    Collection.consumePendingGraduation(ctx, daysReached = MascotLevel.ADULT.minDays)
+                    pendingGraduation = null
+                    if (Collection.pendingProUnlock(ctx)) {
+                        Collection.consumeProUnlock(ctx)
+                        showPaywall = true
+                    }
+                }
+            )
+        }
     }
 }
 
@@ -214,14 +248,13 @@ private fun AppRoot(onResetOnboarding: () -> Unit) {
 @Composable
 private fun HomeScreen(
     onOpenPaywall: () -> Unit,
-    onPendingGraduationChanged: (Boolean) -> Unit
+    onPendingGraduationChanged: (MascotSpecies?) -> Unit
 ) {
     val ctx = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
 
     var refreshKey by remember { mutableIntStateOf(0) }
     var externalDisableInfo by remember { mutableStateOf<ExternalDisableInfo?>(null) }
-    var pendingGraduation by remember { mutableStateOf<MascotSpecies?>(null) }
     var breakRemainingMs by remember { mutableStateOf(Breaks.millisRemaining(ctx)) }
     DisposableEffect(lifecycleOwner) {
         val obs = LifecycleEventObserver { _, e ->
@@ -245,8 +278,7 @@ private fun HomeScreen(
                 }
                 Streak.setServiceEnabledSeen(ctx, enabledNow)
                 Streak.setProtectingSeen(ctx, nowProtecting)
-                pendingGraduation = Collection.pendingGraduation(ctx)
-                onPendingGraduationChanged(pendingGraduation != null)
+                onPendingGraduationChanged(Collection.pendingGraduation(ctx))
                 breakRemainingMs = Breaks.millisRemaining(ctx)
                 refreshKey++
             }
@@ -373,17 +405,10 @@ private fun HomeScreen(
         }
     }
 
-    pendingGraduation?.let { graduated ->
-        GraduationDialog(
-            graduatedSpecies = graduated,
-            daysReached = streakState.count.coerceAtLeast(MascotLevel.ADULT.minDays),
-            onConfirm = {
-                Collection.consumePendingGraduation(ctx, daysReached = MascotLevel.ADULT.minDays)
-                pendingGraduation = null
-                refreshKey++
-            }
-        )
-    }
+    // El GraduationDialog antiguo se sustituye por la pantalla ceremonial
+    // GraduationCelebrationScreen, renderizada al nivel del AppRoot Box
+    // para cubrir el bottom nav. La detección sigue aquí (ON_RESUME →
+    // onPendingGraduationChanged), pero el render y consume se mueven arriba.
 
     externalDisableInfo?.let { info ->
         ExternalDisableDialog(
@@ -598,8 +623,9 @@ private fun ExternalDisableDialog(info: ExternalDisableInfo, onDismiss: () -> Un
                 )
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    text = stringResource(
-                        R.string.external_disable_dialog_body,
+                    text = pluralStringResource(
+                        R.plurals.external_disable_dialog_body,
+                        info.priorCount,
                         info.priorCount,
                         speciesName
                     ),

@@ -78,8 +78,6 @@ fun StatsScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(28.dp)
         ) {
-            Spacer(Modifier.height(4.dp))
-
             // ===== HERO — Hoy =====
             HeroToday(today = today.total)
 

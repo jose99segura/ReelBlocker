@@ -107,6 +107,35 @@ object Streak {
         return newCount
     }
 
+    /**
+     * Dev-only: fija la racha a [days] sin esperar el paso real del tiempo.
+     * Actualiza last_valid_date a hoy y marca evolucion/graduacion pendientes
+     * igual que hace [tick]. NO llamar desde flujo normal.
+     */
+    fun devSetDays(ctx: Context, days: Int) {
+        val p = prefs(ctx)
+        val today = today()
+        val currentCount = p.getInt(KEY_COUNT, 0)
+        val oldLevel = MascotLevel.forDays(currentCount)
+        val newLevel = MascotLevel.forDays(days)
+        val editor = p.edit()
+            .putInt(KEY_COUNT, days)
+            .putString(KEY_LAST_DATE, today.toString())
+        val record = p.getInt(KEY_RECORD, 0)
+        if (days > record) {
+            editor.putInt(KEY_RECORD, days)
+                .putString(KEY_RECORD_DATE, today.toString())
+        }
+        if (newLevel.ordinal > oldLevel.ordinal) {
+            editor.putString(KEY_PENDING_EVOLUTION_FROM, oldLevel.name)
+        }
+        editor.apply()
+        if (newLevel == MascotLevel.ADULT && oldLevel != MascotLevel.ADULT) {
+            Collection.markPendingGraduation(ctx, Collection.currentSpecies(ctx))
+        }
+        Log.d(TAG, "devSetDays: $currentCount -> $days (${newLevel.name})")
+    }
+
     /** Rompe la racha (a 0). Conserva el record. */
     fun breakStreak(ctx: Context, reason: String) {
         val p = prefs(ctx)
@@ -154,17 +183,17 @@ object Streak {
 
     /**
      * Devuelve true si la app realmente está protegiendo al usuario:
-     * servicio de accesibilidad activo Y al menos una app instalada de
-     * BLOCKABLE_APPS está habilitada en los toggles del usuario.
+     * servicio de accesibilidad activo Y TODAS las apps instaladas de
+     * BLOCKABLE_APPS están habilitadas en los toggles.
      *
-     * Modelo estricto: si el usuario apaga todos los toggles (o el único
-     * instalado), no está protegiendo nada → racha se rompe.
+     * Modelo estricto per-app: apagar cualquier toggle (IG o YT) ya cuenta
+     * como dejar de proteger → la racha se rompe.
      */
     fun shouldBeProtecting(ctx: Context): Boolean {
         if (!isAccessibilityEnabled(ctx)) return false
-        return Stats.BLOCKABLE_APPS.any { (pkg, _) ->
-            isAppInstalled(ctx, pkg) && Stats.isAppEnabled(ctx, pkg)
-        }
+        val installed = Stats.BLOCKABLE_APPS.filter { (pkg, _) -> isAppInstalled(ctx, pkg) }
+        if (installed.isEmpty()) return false
+        return installed.all { (pkg, _) -> Stats.isAppEnabled(ctx, pkg) }
     }
 
     /** Último estado de protección observado, para detectar transiciones. */

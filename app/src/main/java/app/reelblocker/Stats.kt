@@ -51,6 +51,16 @@ object Stats {
         prefs(ctx).edit().putBoolean(KEY_ALLOW_IG_DM, allowed).apply()
     }
 
+    // Dev-only: usar el PNG del huevo lila como preview en vez del Canvas.
+    private const val KEY_DEV_USE_LILA_EGG = "dev_use_lila_egg"
+
+    fun isDevLilaEggEnabled(ctx: Context): Boolean =
+        prefs(ctx).getBoolean(KEY_DEV_USE_LILA_EGG, false)
+
+    fun setDevLilaEggEnabled(ctx: Context, enabled: Boolean) {
+        prefs(ctx).edit().putBoolean(KEY_DEV_USE_LILA_EGG, enabled).apply()
+    }
+
     private const val KEY_BLOCK_IG_STORIES = "block_ig_stories"
 
     fun isStoriesBlocked(ctx: Context): Boolean =

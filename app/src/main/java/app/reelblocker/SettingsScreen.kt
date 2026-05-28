@@ -64,6 +64,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -104,7 +105,7 @@ fun SettingsScreen(
                 .padding(padding)
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(vertical = 8.dp)
+                .padding(bottom = 8.dp)
         ) {
             // ===== Apps a bloquear =====
             SectionHeader(stringResource(R.string.settings_section_apps))
@@ -232,8 +233,24 @@ fun SettingsScreen(
 
             SectionDivider()
 
+            // ===== Tu privacidad — visible, no escondida =====
+            SectionHeader(stringResource(R.string.privacy_promise_heading))
+            Spacer(Modifier.height(8.dp))
+            PrivacyPromiseBlock()
+            Spacer(Modifier.height(12.dp))
+
+            SectionDivider()
+
             // ===== Acerca de =====
             SectionHeader(stringResource(R.string.settings_section_about))
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = stringResource(R.string.about_manifesto),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
+            Spacer(Modifier.height(16.dp))
             val versionName = remember {
                 try {
                     ctx.packageManager.getPackageInfo(ctx.packageName, 0).versionName ?: "1.0"
@@ -261,6 +278,61 @@ fun SettingsScreen(
                     )
                 }
             )
+
+            // ===== Dev tools (solo builds debug) =====
+            if (BuildConfig.DEBUG) {
+                Spacer(Modifier.height(16.dp))
+                SectionHeader("Dev tools")
+                var lilaEgg by remember { mutableStateOf(Stats.isDevLilaEggEnabled(ctx)) }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Huevo lila (preview)",
+                        modifier = Modifier.weight(1f),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Switch(
+                        checked = lilaEgg,
+                        onCheckedChange = {
+                            Stats.setDevLilaEggEnabled(ctx, it)
+                            lilaEgg = it
+                            refreshKey++
+                        }
+                    )
+                }
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    DevButton("+1 día") {
+                        Streak.devSetDays(ctx, streakState.count + 1)
+                        refreshKey++
+                    }
+                    DevButton("+7 días") {
+                        Streak.devSetDays(ctx, streakState.count + 7)
+                        refreshKey++
+                    }
+                    DevButton("Forzar día 30 (graduación)") {
+                        Streak.devSetDays(ctx, MascotLevel.ADULT.minDays)
+                        refreshKey++
+                    }
+                    DevButton("Reset racha a 0") {
+                        Streak.breakStreak(ctx, reason = "dev_reset")
+                        refreshKey++
+                    }
+                    DevButton("Vaciar Pokédex") {
+                        Collection.devClear(ctx)
+                        refreshKey++
+                    }
+                }
+                Spacer(Modifier.height(8.dp))
+            }
 
             // Debug: 5 taps abajo en una zona oculta alternan Pro debug.
             if (BuildConfig.DEBUG) {
@@ -359,6 +431,16 @@ private fun SectionHeader(text: String) {
         fontWeight = FontWeight.Bold,
         modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 8.dp)
     )
+}
+
+@Composable
+private fun DevButton(label: String, onClick: () -> Unit) {
+    androidx.compose.material3.OutlinedButton(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Text(label, style = MaterialTheme.typography.labelLarge)
+    }
 }
 
 @Composable
@@ -552,7 +634,7 @@ private fun AppRow(
                 val breakAvailable = isPro && Breaks.isAvailableToday(ctx) && !Breaks.isOnBreak(ctx)
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        text = stringResource(R.string.app_disable_confirm_body, label, streakCount),
+                        text = pluralStringResource(R.plurals.app_disable_confirm_body, streakCount, label, streakCount),
                         textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                         modifier = Modifier.fillMaxWidth(),
                         style = MaterialTheme.typography.bodyMedium
@@ -579,6 +661,9 @@ private fun AppRow(
             dismissButton = {
                 androidx.compose.material3.TextButton(
                     onClick = {
+                        if (Streak.current(ctx).count > 0) {
+                            Streak.breakStreak(ctx, reason = "app_disabled_$pkg")
+                        }
                         Stats.setAppEnabled(ctx, pkg, false)
                         onChanged()
                         showDisableConfirm = false

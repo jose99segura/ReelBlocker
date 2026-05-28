@@ -1,5 +1,6 @@
 package app.reelblocker
 
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -8,7 +9,9 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -21,8 +24,10 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.scale
+import kotlinx.coroutines.delay
 import kotlin.math.PI
 import kotlin.math.sin
+import kotlin.random.Random
 
 /**
  * Niveles de la mascota de la racha. Cada nivel se dibuja en Canvas con
@@ -143,7 +148,7 @@ fun MascotCanvas(
         initialValue = 0f,
         targetValue = if (animate) 1f else 0f,
         animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 2200, easing = LinearEasing),
+            animation = tween(durationMillis = 3200, easing = LinearEasing),
             repeatMode = RepeatMode.Reverse
         ),
         label = "breath"
@@ -158,40 +163,112 @@ fun MascotCanvas(
         label = "sway"
     )
 
+    // Parpadeo: el ojo se cierra 80ms, se abre 90ms, cada 3.5-7s aleatoriamente.
+    // Solo cuando animate=true (en static contexts como paywall hero el ojo
+    // se queda abierto para no distraer).
+    val blink = remember { Animatable(1f) }
+    LaunchedEffect(animate, sad) {
+        if (!animate || sad) {
+            blink.snapTo(1f)
+            return@LaunchedEffect
+        }
+        while (true) {
+            delay(Random.nextLong(3500L, 7000L))
+            blink.animateTo(0f, tween(80, easing = LinearEasing))
+            blink.animateTo(1f, tween(90, easing = LinearEasing))
+        }
+    }
+
     Canvas(modifier = modifier) {
-        val scaleFactor = 1f + 0.03f * sin(breath * PI).toFloat()
+        val scaleFactor = 1f + 0.028f * sin(breath * PI).toFloat()
         scale(scaleFactor) {
             rotate(if (sad) sway * 4f else 0f) {
-                drawMascot(species, level, sad)
+                drawMascot(species, level, sad, eyeOpenness = blink.value)
             }
         }
     }
 }
 
-private fun DrawScope.drawMascot(species: MascotSpecies, level: MascotLevel, sad: Boolean) {
+private fun DrawScope.drawMascot(
+    species: MascotSpecies,
+    level: MascotLevel,
+    sad: Boolean,
+    eyeOpenness: Float
+) {
     when (level) {
         MascotLevel.EGG -> drawEgg(species = species, cracked = false)
         MascotLevel.CRACKING -> drawEgg(species = species, cracked = true)
         else -> when (species) {
-            MascotSpecies.CLASICA -> drawClasicaCreature(level, sad)
-            MascotSpecies.DRAGON -> drawDragonBody(level, sad)
-            MascotSpecies.TORTUGA -> drawTortugaBody(level, sad)
-            MascotSpecies.LOBO -> drawLoboBody(level, sad)
-            MascotSpecies.BUHO -> drawBuhoBody(level, sad)
+            MascotSpecies.CLASICA -> drawClasicaCreature(level, sad, eyeOpenness)
+            MascotSpecies.DRAGON -> drawDragonBody(level, sad, eyeOpenness)
+            MascotSpecies.TORTUGA -> drawTortugaBody(level, sad, eyeOpenness)
+            MascotSpecies.LOBO -> drawLoboBody(level, sad, eyeOpenness)
+            MascotSpecies.BUHO -> drawBuhoBody(level, sad, eyeOpenness)
         }
     }
 }
 
-private fun DrawScope.drawClasicaCreature(level: MascotLevel, sad: Boolean) {
+private fun DrawScope.drawClasicaCreature(level: MascotLevel, sad: Boolean, eyeOpenness: Float) {
     when (level) {
-        MascotLevel.HATCHLING -> drawCreature(level, hasWings = false, hasCrest = false, hasHorns = false, sad = sad)
-        MascotLevel.JUVENILE -> drawCreature(level, hasWings = true, hasCrest = false, hasHorns = false, sad = sad)
-        MascotLevel.ADULT -> drawCreature(level, hasWings = true, hasCrest = true, hasHorns = false, sad = sad)
-        MascotLevel.CRESTED -> drawCreature(level, hasWings = true, hasCrest = true, hasHorns = false, big = true, sad = sad)
-        MascotLevel.LEGENDARY -> drawCreature(level, hasWings = true, hasCrest = true, hasHorns = true, big = true, sad = sad)
-        MascotLevel.GOLDEN -> drawCreature(level, hasWings = true, hasCrest = true, hasHorns = true, big = true, golden = true, sad = sad)
+        MascotLevel.HATCHLING -> drawCreature(level, hasWings = false, hasCrest = false, hasHorns = false, sad = sad, eyeOpenness = eyeOpenness)
+        MascotLevel.JUVENILE -> drawCreature(level, hasWings = true, hasCrest = false, hasHorns = false, sad = sad, eyeOpenness = eyeOpenness)
+        MascotLevel.ADULT -> drawCreature(level, hasWings = true, hasCrest = true, hasHorns = false, sad = sad, eyeOpenness = eyeOpenness)
+        MascotLevel.CRESTED -> drawCreature(level, hasWings = true, hasCrest = true, hasHorns = false, big = true, sad = sad, eyeOpenness = eyeOpenness)
+        MascotLevel.LEGENDARY -> drawCreature(level, hasWings = true, hasCrest = true, hasHorns = true, big = true, sad = sad, eyeOpenness = eyeOpenness)
+        MascotLevel.GOLDEN -> drawCreature(level, hasWings = true, hasCrest = true, hasHorns = true, big = true, golden = true, sad = sad, eyeOpenness = eyeOpenness)
         else -> { /* EGG/CRACKING ya manejados arriba */ }
     }
+}
+
+/**
+ * Dibuja un ojo respetando [openness] (1 = totalmente abierto, 0 = cerrado).
+ * Por debajo de un umbral pequeño dibuja una curva "‿" en vez del ojo, para
+ * el parpadeo natural.
+ *
+ * Visible para los drawers de especies en MascotSpecies.kt (mismo paquete).
+ */
+internal fun DrawScope.drawEye(
+    center: Offset,
+    eyeR: Float,
+    pupilColor: Color,
+    pupilOffsetY: Float,
+    openness: Float
+) {
+    val o = openness.coerceIn(0f, 1f)
+    if (o < 0.18f) {
+        val path = Path().apply {
+            moveTo(center.x - eyeR * 0.95f, center.y)
+            quadraticBezierTo(
+                center.x, center.y + eyeR * 0.45f,
+                center.x + eyeR * 0.95f, center.y
+            )
+        }
+        drawPath(
+            path = path,
+            color = pupilColor,
+            style = Stroke(width = eyeR * 0.30f, cap = StrokeCap.Round)
+        )
+        return
+    }
+    // Ojo abierto/semi-abierto: escala vertical por openness.
+    drawOval(
+        color = Color.White,
+        topLeft = Offset(center.x - eyeR, center.y - eyeR * o),
+        size = Size(eyeR * 2f, eyeR * 2f * o)
+    )
+    drawCircle(
+        color = pupilColor,
+        radius = eyeR * 0.55f * o,
+        center = Offset(center.x, center.y + pupilOffsetY * o)
+    )
+    drawCircle(
+        color = Color.White,
+        radius = eyeR * 0.22f * o,
+        center = Offset(
+            center.x + eyeR * 0.2f,
+            center.y + pupilOffsetY * o - eyeR * 0.2f * o
+        )
+    )
 }
 
 private fun DrawScope.drawEgg(species: MascotSpecies, cracked: Boolean) {
@@ -280,7 +357,8 @@ private fun DrawScope.drawCreature(
     hasHorns: Boolean,
     big: Boolean = false,
     golden: Boolean = false,
-    sad: Boolean = false
+    sad: Boolean = false,
+    eyeOpenness: Float = 1f
 ) {
     val w = size.width
     val h = size.height
@@ -383,24 +461,21 @@ private fun DrawScope.drawCreature(
     val eyeY = cy - bodySize * 0.08f
     val eyeOffset = bodySize * 0.15f
     val eyeR = bodySize * 0.07f
-    // Blanco del ojo.
-    drawCircle(color = Color.White, radius = eyeR, center = Offset(cx - eyeOffset, eyeY))
-    drawCircle(color = Color.White, radius = eyeR, center = Offset(cx + eyeOffset, eyeY))
-    // Pupila.
     val pupilColor = Color(0xFF1F2937)
     val pupilOffsetY = if (sad) eyeR * 0.3f else -eyeR * 0.1f
-    drawCircle(color = pupilColor, radius = eyeR * 0.55f, center = Offset(cx - eyeOffset, eyeY + pupilOffsetY))
-    drawCircle(color = pupilColor, radius = eyeR * 0.55f, center = Offset(cx + eyeOffset, eyeY + pupilOffsetY))
-    // Brillo (highlight).
-    drawCircle(
-        color = Color.White,
-        radius = eyeR * 0.22f,
-        center = Offset(cx - eyeOffset + eyeR * 0.2f, eyeY + pupilOffsetY - eyeR * 0.2f)
+    drawEye(
+        center = Offset(cx - eyeOffset, eyeY),
+        eyeR = eyeR,
+        pupilColor = pupilColor,
+        pupilOffsetY = pupilOffsetY,
+        openness = eyeOpenness
     )
-    drawCircle(
-        color = Color.White,
-        radius = eyeR * 0.22f,
-        center = Offset(cx + eyeOffset + eyeR * 0.2f, eyeY + pupilOffsetY - eyeR * 0.2f)
+    drawEye(
+        center = Offset(cx + eyeOffset, eyeY),
+        eyeR = eyeR,
+        pupilColor = pupilColor,
+        pupilOffsetY = pupilOffsetY,
+        openness = eyeOpenness
     )
 
     // Boca / pico.

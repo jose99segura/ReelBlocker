@@ -1,47 +1,59 @@
 package app.reelblocker
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import kotlin.random.Random
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun InventoryScreen() {
+fun InventoryScreen(
+    onOpenPaywall: () -> Unit = {}
+) {
     val ctx = LocalContext.current
     val entries = remember { Collection.read(ctx) }
     val firstByMember: Map<MascotSpecies, Collection.CollectedMascot> = remember {
@@ -51,13 +63,15 @@ fun InventoryScreen() {
     val totalSpecies = MascotSpecies.entries.size
     val currentSpecies = remember { Collection.currentSpecies(ctx) }
     val streakState = remember { Streak.current(ctx) }
+    val isPro = Premium.isProLive
+    val haptic = LocalHapticFeedback.current
 
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        text = "Inventario",
+                        text = stringResource(R.string.nav_inventory),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Black
                     )
@@ -71,25 +85,24 @@ fun InventoryScreen() {
                 .padding(padding)
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(28.dp)
+            verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            Spacer(Modifier.height(4.dp))
-
             HeroCount(unique = uniqueCount, total = totalSpecies)
 
-            ActiveSpeciesRow(
-                species = currentSpecies,
-                level = streakState.level,
-                count = streakState.count
+            Constellation(
+                activeSpecies = currentSpecies,
+                activeLevel = streakState.level,
+                activeDays = streakState.count,
+                firstByMember = firstByMember,
+                isPro = isPro,
+                onProTap = {
+                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    onOpenPaywall()
+                }
             )
 
-            if (uniqueCount == 0) {
-                EmptyState()
-            } else {
-                SpeciesGrid(firstByMember = firstByMember)
-                if (entries.size > uniqueCount) {
-                    RepeatsHint(repeats = entries.size - uniqueCount)
-                }
+            if (entries.size > uniqueCount) {
+                RepeatsHint(repeats = entries.size - uniqueCount)
             }
 
             Spacer(Modifier.height(24.dp))
@@ -130,179 +143,240 @@ private fun HeroCount(unique: Int, total: Int) {
     }
 }
 
+/**
+ * Constelación orgánica: el huevo activo en el centro, las otras 4 especies
+ * orbitando en posiciones ligeramente aleatorias con un punto de rotación.
+ * El seed se calcula una vez por (especie activa + colección) para que los
+ * tiles no salten en cada recomposición, pero se reordenen al cambiar de
+ * mascota o al desbloquear una nueva.
+ */
 @Composable
-private fun ActiveSpeciesRow(species: MascotSpecies, level: MascotLevel, count: Int) {
-    Row(
+private fun Constellation(
+    activeSpecies: MascotSpecies,
+    activeLevel: MascotLevel,
+    activeDays: Int,
+    firstByMember: Map<MascotSpecies, Collection.CollectedMascot>,
+    isPro: Boolean,
+    onProTap: () -> Unit
+) {
+    val others = MascotSpecies.entries.filter { it != activeSpecies }
+
+    // Anclas base de los 4 satélites — quincuncio asimétrico alrededor del centro.
+    val anchors = listOf(
+        DpPoint(x = (-100).dp, y = (-115).dp),
+        DpPoint(x = 100.dp, y = (-105).dp),
+        DpPoint(x = (-110).dp, y = 95.dp),
+        DpPoint(x = 105.dp, y = 110.dp)
+    )
+
+    val placements = remember(activeSpecies, firstByMember.size) {
+        val r = Random(System.nanoTime())
+        others.shuffled(r).mapIndexed { i, sp ->
+            val base = anchors[i]
+            TilePlacement(
+                species = sp,
+                x = base.x + (r.nextFloat() * 24f - 12f).dp,
+                y = base.y + (r.nextFloat() * 24f - 12f).dp,
+                rotation = r.nextFloat() * 10f - 5f
+            )
+        }
+    }
+
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 24.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(14.dp)
+            .height(420.dp)
+            .padding(horizontal = 16.dp),
+        contentAlignment = Alignment.Center
     ) {
+        // Active tile en el centro — el huevo en curso, con su nivel actual.
+        ActiveFeaturedTile(
+            species = activeSpecies,
+            level = activeLevel,
+            days = activeDays
+        )
+
+        // Tiles satélite — colocados con offset + rotación aleatoria.
+        placements.forEach { p ->
+            val collected = firstByMember[p.species]
+            SatelliteTile(
+                species = p.species,
+                collected = collected,
+                isPro = isPro,
+                onProTap = onProTap,
+                modifier = Modifier
+                    .offset(x = p.x, y = p.y)
+                    .graphicsLayer { rotationZ = p.rotation }
+            )
+        }
+    }
+}
+
+private data class DpPoint(val x: Dp, val y: Dp)
+
+private data class TilePlacement(
+    val species: MascotSpecies,
+    val x: Dp,
+    val y: Dp,
+    val rotation: Float
+)
+
+@Composable
+private fun ActiveFeaturedTile(
+    species: MascotSpecies,
+    level: MascotLevel,
+    days: Int
+) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Box(
             modifier = Modifier
-                .size(56.dp)
-                .clip(RoundedCornerShape(14.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+                .size(150.dp)
+                .clip(RoundedCornerShape(28.dp))
+                .background(
+                    Brush.radialGradient(
+                        colors = listOf(
+                            species.accentTint.copy(alpha = 0.32f),
+                            species.accentTint.copy(alpha = 0.08f)
+                        )
+                    )
+                )
+                .border(
+                    width = 2.dp,
+                    color = species.accentTint,
+                    shape = RoundedCornerShape(28.dp)
+                ),
             contentAlignment = Alignment.Center
         ) {
             MascotCanvas(
                 level = level,
                 species = species,
-                animate = false,
-                modifier = Modifier.size(52.dp)
+                animate = true,
+                modifier = Modifier.size(126.dp)
             )
         }
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = stringResource(R.string.inventory_active_now),
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Text(
-                text = stringResource(
-                    R.string.inventory_active_species_level,
-                    stringResource(species.displayNameRes),
-                    stringResource(level.displayNameRes).lowercase()
-                ),
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Text(
-                text = if (count == 0)
-                    stringResource(R.string.inventory_active_waiting)
-                else
-                    stringResource(R.string.inventory_active_day_progress, count, MascotLevel.ADULT.minDays),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-    }
-}
-
-@Composable
-private fun EmptyState() {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 24.dp, vertical = 8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Box(
-            modifier = Modifier
-                .size(140.dp)
-                .clip(RoundedCornerShape(20.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)),
-            contentAlignment = Alignment.Center
-        ) {
-            MascotCanvas(
-                level = MascotLevel.EGG,
-                species = MascotSpecies.CLASICA,
-                animate = false,
-                modifier = Modifier.size(120.dp)
-            )
-        }
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(10.dp))
         Text(
-            text = stringResource(R.string.inventory_empty_title),
+            text = stringResource(species.displayNameRes),
             style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center
+            fontWeight = FontWeight.Black,
+            color = MaterialTheme.colorScheme.onSurface
         )
-        Spacer(Modifier.height(4.dp))
         Text(
-            text = stringResource(R.string.inventory_empty_body),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center
+            text = "$days / ${MascotLevel.ADULT.minDays}",
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.Bold,
+            color = species.accentTint
         )
     }
 }
 
 @Composable
-private fun SpeciesGrid(firstByMember: Map<MascotSpecies, Collection.CollectedMascot>) {
-    // Grid 2-cols hecho a mano (sin LazyVerticalGrid para no añadir scrolls anidados).
-    val species = MascotSpecies.entries
-    val rows = species.chunked(2)
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 24.dp),
-        verticalArrangement = Arrangement.spacedBy(20.dp)
-    ) {
-        rows.forEach { row ->
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                row.forEach { sp ->
-                    val collected = firstByMember[sp]
-                    SpeciesSlot(
-                        species = sp,
-                        collected = collected,
-                        modifier = Modifier
-                            .weight(1f)
-                    )
-                }
-                if (row.size == 1) {
-                    // Hueco para mantener la cuadrícula alineada.
-                    Spacer(modifier = Modifier.weight(1f))
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun SpeciesSlot(
+private fun SatelliteTile(
     species: MascotSpecies,
     collected: Collection.CollectedMascot?,
+    isPro: Boolean,
+    onProTap: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val unlocked = collected != null
+    // Pro-locked: especie Pro y el usuario es free. El usuario VE la especie
+    // (silueta tinted + nombre) pero con candado — comunica "esto existe,
+    // está disponible, paga para coleccionarla".
+    val proLocked = !isPro && species.isPro && !unlocked
+    val lockedCd = stringResource(R.string.cd_inventory_slot_locked_pro, stringResource(species.displayNameRes))
+
+    val tileModifier = if (proLocked) {
+        modifier
+            .clickable(onClick = onProTap)
+            .semantics { contentDescription = lockedCd }
+    } else modifier
+
     Column(
-        modifier = modifier,
+        modifier = tileModifier,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(
             modifier = Modifier
-                .size(120.dp)
+                .size(96.dp)
                 .clip(RoundedCornerShape(20.dp))
                 .background(
-                    if (unlocked)
-                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-                    else
-                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.25f)
+                    when {
+                        unlocked -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f)
+                        proLocked -> species.accentTint.copy(alpha = 0.10f)
+                        else -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.22f)
+                    }
+                )
+                .then(
+                    if (proLocked) Modifier.border(
+                        width = 1.dp,
+                        color = species.accentTint.copy(alpha = 0.45f),
+                        shape = RoundedCornerShape(20.dp)
+                    ) else Modifier
                 ),
             contentAlignment = Alignment.Center
         ) {
-            if (unlocked) {
-                MascotCanvas(
+            when {
+                unlocked -> MascotCanvas(
                     level = MascotLevel.ADULT,
                     species = species,
                     animate = false,
-                    modifier = Modifier.size(110.dp)
+                    modifier = Modifier.size(82.dp)
                 )
-            } else {
-                Text(
+                proLocked -> {
+                    // Silueta tinted al 35% para que se vea la especie sin
+                    // entregarla. Lock badge superpuesto arriba-derecha.
+                    MascotCanvas(
+                        level = MascotLevel.ADULT,
+                        species = species,
+                        animate = false,
+                        modifier = Modifier
+                            .size(82.dp)
+                            .alpha(0.35f)
+                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(8.dp),
+                        contentAlignment = Alignment.TopEnd
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(22.dp)
+                                .clip(CircleShape)
+                                .background(species.accentTint),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.Lock,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.surface,
+                                modifier = Modifier.size(13.dp)
+                            )
+                        }
+                    }
+                }
+                else -> Text(
                     text = "?",
-                    style = MaterialTheme.typography.displaySmall,
+                    style = MaterialTheme.typography.headlineLarge,
                     fontWeight = FontWeight.Black,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
                 )
             }
         }
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(6.dp))
         Text(
-            text = if (unlocked) stringResource(species.displayNameRes)
-                   else stringResource(R.string.inventory_slot_locked_name),
-            style = MaterialTheme.typography.titleSmall,
+            text = when {
+                unlocked -> stringResource(species.displayNameRes)
+                proLocked -> stringResource(species.displayNameRes)
+                else -> stringResource(R.string.inventory_slot_locked_name)
+            },
+            style = MaterialTheme.typography.labelMedium,
             fontWeight = FontWeight.Bold,
-            color = if (unlocked)
-                MaterialTheme.colorScheme.onSurface
-            else
-                MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+            color = when {
+                unlocked -> MaterialTheme.colorScheme.onSurface
+                proLocked -> species.accentTint
+                else -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.55f)
+            },
             textAlign = TextAlign.Center
         )
         if (collected != null) {
@@ -312,11 +386,11 @@ private fun SpeciesSlot(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
             )
-        } else {
+        } else if (proLocked) {
             Text(
-                text = stringResource(R.string.inventory_slot_locked_caption),
+                text = stringResource(R.string.inventory_slot_pro_caption),
                 style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
             )
         }
@@ -342,7 +416,6 @@ private fun RepeatsHint(repeats: Int) {
 private fun formatAcquired(isoDate: String): String {
     return try {
         val date = LocalDate.parse(isoDate)
-        // Locale.getDefault() respeta el idioma del sistema (ES o EN).
         val fmt = DateTimeFormatter.ofPattern("d MMM yyyy", Locale.getDefault())
         date.format(fmt)
     } catch (_: Exception) {

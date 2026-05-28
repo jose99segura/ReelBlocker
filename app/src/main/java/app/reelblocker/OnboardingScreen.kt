@@ -1,5 +1,8 @@
 package app.reelblocker
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.EaseOutCubic
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -31,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -163,14 +167,49 @@ fun OnboardingScreen(
             val page = pages[pageIndex]
             val granted = page.isGranted?.invoke(actions) == true
 
+            // Animaciones de entrada — solo wordmark (página 1). Cada elemento
+            // sube de 0.88 a 1.0 en escala + fade-in, en cascada: icono → título
+            // → tagline. En las demás páginas todos los Animatable se quedan
+            // en 1f y no afectan al render.
+            val iconScale = remember { Animatable(if (page.isWordmark) 0.88f else 1f) }
+            val iconAlpha = remember { Animatable(if (page.isWordmark) 0f else 1f) }
+            val titleScale = remember { Animatable(if (page.isWordmark) 0.92f else 1f) }
+            val titleAlpha = remember { Animatable(if (page.isWordmark) 0f else 1f) }
+            val taglineAlpha = remember { Animatable(if (page.isWordmark) 0f else 1f) }
+            LaunchedEffect(pageIndex) {
+                if (page.isWordmark) {
+                    iconScale.snapTo(0.88f); iconAlpha.snapTo(0f)
+                    titleScale.snapTo(0.92f); titleAlpha.snapTo(0f)
+                    taglineAlpha.snapTo(0f)
+                    scope.launch {
+                        iconAlpha.animateTo(1f, tween(500))
+                    }
+                    scope.launch {
+                        iconScale.animateTo(1f, tween(600, easing = EaseOutCubic))
+                    }
+                    kotlinx.coroutines.delay(180)
+                    scope.launch { titleAlpha.animateTo(1f, tween(500)) }
+                    scope.launch { titleScale.animateTo(1f, tween(550, easing = EaseOutCubic)) }
+                    kotlinx.coroutines.delay(260)
+                    taglineAlpha.animateTo(1f, tween(500))
+                }
+            }
+
             Column(
                 modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
                 if (page.isWordmark) {
-                    // Icono de la marca, grande y centrado.
-                    BastaIconBadge(size = 96.dp)
+                    Box(
+                        modifier = Modifier.graphicsLayer {
+                            alpha = iconAlpha.value
+                            scaleX = iconScale.value
+                            scaleY = iconScale.value
+                        }
+                    ) {
+                        BastaIconBadge(size = 96.dp)
+                    }
                     Spacer(Modifier.height(24.dp))
                 }
 
@@ -181,17 +220,23 @@ fun OnboardingScreen(
                     textAlign = TextAlign.Center,
                     color = if (page.isWordmark) MaterialTheme.colorScheme.primary
                             else MaterialTheme.colorScheme.onSurface,
-                    lineHeight = if (page.isWordmark) 80.sp else androidx.compose.ui.unit.TextUnit.Unspecified
+                    lineHeight = if (page.isWordmark) 80.sp else androidx.compose.ui.unit.TextUnit.Unspecified,
+                    modifier = if (page.isWordmark) Modifier.graphicsLayer {
+                        alpha = titleAlpha.value
+                        scaleX = titleScale.value
+                        scaleY = titleScale.value
+                    } else Modifier
                 )
 
                 if (page.isWordmark) {
-                    Spacer(Modifier.height(4.dp))
+                    Spacer(Modifier.height(8.dp))
                     Text(
-                        text = stringResource(R.string.app_tagline).uppercase(),
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Medium,
-                        letterSpacing = 0.3.em,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        text = stringResource(R.string.app_tagline),
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Light,
+                        textAlign = TextAlign.Center,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.72f),
+                        modifier = Modifier.graphicsLayer { alpha = taglineAlpha.value }
                     )
                     Spacer(Modifier.height(28.dp))
                 } else {

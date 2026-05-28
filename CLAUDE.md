@@ -34,9 +34,12 @@ Code lives under `app/src/main/java/app/reelblocker/`:
 All persistent state lives in one `SharedPreferences` file (`reelblocker_prefs`):
 
 - **`Stats.kt`** — per-day block counts (Instagram + YouTube split), 30-day rolling history, per-app enable toggles, Pro feature flags, onboarding-done flag.
-- **`Streak.kt`** — daily streak engine. `tick()` increments by 1 if called the day after the last valid date, resets to 1 if a day was skipped, no-ops if same-day. `breakStreak()` zeros the count but preserves the record. On the transition into `MascotLevel.ADULT` (day 30), `tick()` writes a `pending_graduation_from` flag.
+- **`Streak.kt`** — daily streak engine. `tick()` increments by 1 if called the day after the last valid date, resets to 1 if a day was skipped, no-ops if same-day. `breakStreak()` zeros the count but preserves the record. On the transition into `MascotLevel.ADULT` (day 30), `tick()` writes a `pending_graduation_from` flag. `shouldBeProtecting(ctx)` enforces the **strict per-app model**: returns true only if accessibility is on AND *all* installed `BLOCKABLE_APPS` are enabled — toggling any app off counts as "stopped protecting" and breaks the streak.
 - **`MascotCollection.kt`** (`object Collection`) — collected-mascot inventory. Reads the pending-graduation flag, archives the mascot, breaks the streak with reason `"graduation"`, picks a next species (random from uncollected; falls back to random-of-all when complete). Exposes `currentSpecies(ctx)`, `read(ctx)`, `pendingGraduation(ctx)`, `consumePendingGraduation(ctx, daysReached)`, `uniqueCount(ctx)`.
-- **`Premium.kt`** — Play Billing wrapper for the Pro one-time purchase (not shown here).
+- **`Premium.kt`** — Play Billing wrapper for the Pro one-time purchase. Caches `is_pro_purchased` in the same prefs so `BlockerService` (separate process) can read it without re-querying Billing.
+- **`Breaks.kt`** — Pro feature. Time-boxed pause of the blocker (`break_end_ms`) with one-per-day quota (`break_consumed_date`). The home subtext switches to a countdown while `millisRemaining(ctx)` is non-null.
+
+**Backup**: `AndroidManifest.xml` declares `allowBackup="true"` plus explicit rules at `res/xml/backup_rules.xml` (Android ≤ 11) and `res/xml/data_extraction_rules.xml` (Android 12+). Both include only `sharedpref/reelblocker_prefs.xml`. Auto Backup ships the user's progress to Google Drive and restores it on reinstall / device migration. No other stores to back up.
 
 ### Mascot rendering (Canvas)
 
@@ -60,7 +63,7 @@ All persistent state lives in one `SharedPreferences` file (`reelblocker_prefs`)
 
 ### Internationalization
 
-The app supports **Spanish (default) and English** via `res/values/strings.xml` and `res/values-en/strings.xml`. Every user-facing string in code uses `stringResource(R.string.xxx)` or `ctx.getString(...)`. Mascot level names and species names are `@StringRes` references on the enum. Rotating tips are a `string-array`. Date formatting respects `Locale.getDefault()` (system locale).
+The app supports **English (default fallback) and Spanish** via `res/values/strings.xml` (English) and `res/values-es/strings.xml` (Spanish). English lives in the unqualified `values/` so any locale Android can't match (French, German, Portuguese…) falls back to English instead of Spanish. Every user-facing string in code uses `stringResource(R.string.xxx)` / `pluralStringResource(R.plurals.xxx)` / `ctx.getString(...)`. Mascot level names and species names are `@StringRes` references on the enum. Rotating tips are a `string-array`. Date formatting respects `Locale.getDefault()` (system locale).
 
 ## Common tasks
 

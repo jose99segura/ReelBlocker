@@ -122,7 +122,11 @@ fun PaywallSheet(
                 )
             }
 
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(20.dp))
+
+            PrivacyPromiseBlock()
+
+            Spacer(Modifier.height(16.dp))
 
             Text(
                 text = stringResource(R.string.paywall_disclaimer),
@@ -134,6 +138,51 @@ fun PaywallSheet(
 
             Spacer(Modifier.height(16.dp))
         }
+    }
+}
+
+@Composable
+internal fun PrivacyPromiseBlock() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 4.dp)
+    ) {
+        Text(
+            text = stringResource(R.string.privacy_promise_heading),
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center
+        )
+        Spacer(Modifier.height(8.dp))
+        PrivacyBullet(stringResource(R.string.privacy_promise_bullet_local))
+        PrivacyBullet(stringResource(R.string.privacy_promise_bullet_no_tracking))
+        PrivacyBullet(stringResource(R.string.privacy_promise_bullet_drive))
+    }
+}
+
+@Composable
+private fun PrivacyBullet(text: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 2.dp),
+        verticalAlignment = Alignment.Top
+    ) {
+        Text(
+            text = "·",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.width(12.dp),
+            textAlign = TextAlign.Center
+        )
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 

@@ -22,6 +22,7 @@ object Collection {
     private const val KEY_COLLECTION_JSON = "collection_json"
     private const val KEY_CURRENT_SPECIES = "current_species"
     private const val KEY_PENDING_GRADUATION = "pending_graduation_from"
+    private const val KEY_PENDING_PRO_UNLOCK = "pending_pro_unlock"
 
     data class CollectedMascot(
         val species: MascotSpecies,
@@ -118,25 +119,57 @@ object Collection {
     }
 
     /**
-     * Devuelve la siguiente especie:
-     *  - Aleatoria entre las que aún NO están coleccionadas (excluyendo
-     *    [justArchived] aunque acabe de archivarse esta vez).
-     *  - Si todas están coleccionadas, aleatoria del pool completo
-     *    excluyendo [justArchived] para que al menos cambie la apariencia.
-     *  - Si solo hay una especie en el pool (caso degenerado), repite.
+     * Devuelve la siguiente especie respetando el tier del usuario:
+     *  - Free user: solo entre [MascotSpecies.freeSpecies]. Si agota todas
+     *    las free uncollected → marca [KEY_PENDING_PRO_UNLOCK] para que la
+     *    UI dispare el paywall, y devuelve una repetida free.
+     *  - Pro user: pool completo. Si todo coleccionado, aleatoria del total
+     *    excluyendo [justArchived].
+     *  - Excluye siempre [justArchived] de la elección directa para que al
+     *    menos cambie la apariencia.
      */
     private fun pickNext(ctx: Context, justArchived: MascotSpecies): MascotSpecies {
         val collected = read(ctx).map { it.species }.toSet()
-        val all = MascotSpecies.entries
-        val uncollected = all.filter { it !in collected && it != justArchived }
+        val isPro = Premium.isPro(ctx)
+        val pool = if (isPro) MascotSpecies.entries else MascotSpecies.freeSpecies()
+        val uncollected = pool.filter { it !in collected && it != justArchived }
         if (uncollected.isNotEmpty()) {
             return uncollected.random()
         }
-        val pool = all.filter { it != justArchived }
-        return if (pool.isEmpty()) justArchived else pool.random()
+        // Free user que ya completó su tier → disparar paywall en la UI.
+        if (!isPro) {
+            prefs(ctx).edit().putBoolean(KEY_PENDING_PRO_UNLOCK, true).apply()
+            Log.d(TAG, "pickNext: free tier agotado → pending_pro_unlock=true")
+        }
+        val fallback = pool.filter { it != justArchived }
+        return when {
+            fallback.isNotEmpty() -> fallback.random()
+            pool.isNotEmpty() -> pool.random()
+            else -> justArchived
+        }
+    }
+
+    /** ¿Hay un paywall pendiente por agotar las especies free? */
+    fun pendingProUnlock(ctx: Context): Boolean =
+        prefs(ctx).getBoolean(KEY_PENDING_PRO_UNLOCK, false)
+
+    /** Marca el paywall pendiente como mostrado. Llamar tras abrir la paywall. */
+    fun consumeProUnlock(ctx: Context) {
+        prefs(ctx).edit().remove(KEY_PENDING_PRO_UNLOCK).apply()
     }
 
     /** Cuenta de especies únicas coleccionadas. */
     fun uniqueCount(ctx: Context): Int =
         read(ctx).map { it.species }.toSet().size
+
+    /** Dev-only: vacia el Pokedex y reinicia la especie activa a DEFAULT. */
+    fun devClear(ctx: Context) {
+        prefs(ctx).edit()
+            .remove(KEY_COLLECTION_JSON)
+            .remove(KEY_CURRENT_SPECIES)
+            .remove(KEY_PENDING_GRADUATION)
+            .remove(KEY_PENDING_PRO_UNLOCK)
+            .apply()
+        Log.d(TAG, "devClear: inventario vaciado")
+    }
 }

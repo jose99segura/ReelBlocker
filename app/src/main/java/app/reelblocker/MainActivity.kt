@@ -432,14 +432,6 @@ private fun HomeScreen(
                     .padding(horizontal = 24.dp, vertical = 4.dp)
             )
 
-            // ===== FOOTER fino — único indicador del estado sano =====
-            if (fullyProtected) {
-                StatusFooter(
-                    serviceEnabled = serviceEnabled,
-                    refreshKey = refreshKey
-                )
-            }
-
             Spacer(Modifier.height(24.dp))
         }
     }
@@ -655,6 +647,7 @@ private fun ExternalDisableDialog(info: ExternalDisableInfo, onDismiss: () -> Un
     }
 }
 
+@Suppress("unused")
 @Composable
 private fun StatusFooter(
     serviceEnabled: Boolean,

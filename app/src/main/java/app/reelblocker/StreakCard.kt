@@ -322,7 +322,7 @@ private fun MascotWithRing(
 
     val mascotTapDescription = stringResource(R.string.cd_mascot_tap)
     Box(
-        modifier = Modifier.size(width = 280.dp, height = 280.dp),
+        modifier = Modifier.size(width = 308.dp, height = 308.dp),
         contentAlignment = Alignment.TopCenter
     ) {
         // 1) Anillo segmentado — un puntito por día (30 hacia la graduación).
@@ -338,11 +338,11 @@ private fun MascotWithRing(
         // parte superior del Canvas; sin esto el ring queda visualmente alto.
         Canvas(
             modifier = Modifier
-                .size(280.dp)
+                .size(308.dp)
                 .align(Alignment.Center)
                 .graphicsLayer { translationY = 18.dp.toPx() }
         ) {
-            val strokeWidth = 6.dp.toPx()
+            val strokeWidth = 7.dp.toPx()
             val inset = strokeWidth / 2f + 4.dp.toPx()
             val arcSize = Size(size.width - 2 * inset, size.height - 2 * inset)
             val topLeft = Offset(inset, inset)
@@ -373,8 +373,11 @@ private fun MascotWithRing(
         )
 
         // 3) Halo + mascota delante de la isla (el huevo se posa sobre el nido).
+        //    Padding superior para bajar la mascota dentro del anillo.
         Box(
-            modifier = Modifier.size(220.dp),
+            modifier = Modifier
+                .padding(top = 28.dp)
+                .size(220.dp),
             contentAlignment = Alignment.Center
         ) {
             // Halo místico detrás de la mascota — palpita y flota con ella.

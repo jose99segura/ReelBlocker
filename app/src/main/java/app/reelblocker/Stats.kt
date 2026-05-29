@@ -64,14 +64,21 @@ object Stats {
         prefs(ctx).edit().putBoolean(KEY_ALLOW_IG_DM, allowed).apply()
     }
 
-    // Dev-only: usar el PNG del huevo lila como preview en vez del Canvas.
-    private const val KEY_DEV_USE_LILA_EGG = "dev_use_lila_egg"
+    // Dev-only: previsualizar un PNG de huevo (en vez del Canvas) cuando el nivel es EGG.
+    // Valores: EGG_PREVIEW_NONE (Canvas) / "normal" / "verde" / "lila".
+    private const val KEY_DEV_EGG_PREVIEW = "dev_egg_preview"
+    const val EGG_PREVIEW_NONE = "none"
+    const val EGG_PREVIEW_NORMAL = "normal"
+    const val EGG_PREVIEW_VERDE = "verde"
+    const val EGG_PREVIEW_LILA = "lila"
+    const val EGG_PREVIEW_BRASA = "brasa"
+    const val EGG_PREVIEW_CHISPA = "chispa"
 
-    fun isDevLilaEggEnabled(ctx: Context): Boolean =
-        prefs(ctx).getBoolean(KEY_DEV_USE_LILA_EGG, false)
+    fun devEggPreview(ctx: Context): String =
+        prefs(ctx).getString(KEY_DEV_EGG_PREVIEW, EGG_PREVIEW_NONE) ?: EGG_PREVIEW_NONE
 
-    fun setDevLilaEggEnabled(ctx: Context, enabled: Boolean) {
-        prefs(ctx).edit().putBoolean(KEY_DEV_USE_LILA_EGG, enabled).apply()
+    fun setDevEggPreview(ctx: Context, value: String) {
+        prefs(ctx).edit().putString(KEY_DEV_EGG_PREVIEW, value).apply()
     }
 
     private const val KEY_BLOCK_IG_STORIES = "block_ig_stories"

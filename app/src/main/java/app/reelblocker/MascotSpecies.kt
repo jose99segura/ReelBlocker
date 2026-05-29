@@ -57,6 +57,23 @@ enum class MascotSpecies(
 
     val isPro: Boolean get() = tier == Tier.PRO
 
+    /**
+     * Huevo (PNG, render 3D) propio de la especie, mostrado en nivel EGG.
+     * Cada especie tiene su huevo, así que al ciclar [Collection.pickNext]
+     * por especies no coleccionadas, cada graduación entrega un huevo
+     * visualmente distinto hasta completar la colección. (`null` se caería
+     * al huevo dibujado por Canvas; ya no hay ninguna especie sin huevo.)
+     */
+    @get:androidx.annotation.DrawableRes
+    val eggRes: Int?
+        get() = when (this) {
+            CLASICA -> R.drawable.egg_normal_preview
+            TORTUGA -> R.drawable.egg_verde_preview
+            DRAGON -> R.drawable.egg_lila_preview
+            LOBO -> R.drawable.egg_brasa_preview   // huevo de fuego (Brasa)
+            BUHO -> R.drawable.egg_chispa_preview  // huevo eléctrico (Chispa)
+        }
+
     companion object {
         fun fromIdOrNull(id: String?): MascotSpecies? =
             entries.firstOrNull { it.id == id }

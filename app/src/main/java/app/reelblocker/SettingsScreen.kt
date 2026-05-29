@@ -373,7 +373,7 @@ fun SettingsScreen(
                         Streak.devSetDays(ctx, streakState.count + 7)
                         refreshKey++
                     }
-                    DevButton("Forzar día 30 (graduación)") {
+                    DevButton("Forzar día 21 (graduación)") {
                         Streak.devSetDays(ctx, MascotLevel.ADULT.minDays)
                         refreshKey++
                     }

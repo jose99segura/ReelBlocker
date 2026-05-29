@@ -42,7 +42,7 @@ import nl.dionsegijn.konfetti.core.emitter.Emitter
 import java.util.concurrent.TimeUnit
 
 /**
- * Pantalla ceremonial del día 30. Sustituye al [GraduationDialog] modal
+ * Pantalla ceremonial del día 21 (graduación). Sustituye al [GraduationDialog] modal
  * por una experiencia full-screen con konfetti procedural, mascota grande,
  * y botón compartir-texto (marketing viral gratis).
  *
@@ -87,11 +87,15 @@ fun GraduationCelebrationScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
+            // Base opaca: cubre el Home y el bottom nav por completo (pantalla
+            // ceremonial, no un modal semitransparente).
+            .background(MaterialTheme.colorScheme.surface)
+            // Tinte de acento sutil arriba que se desvanece hacia surface.
             .background(
                 Brush.verticalGradient(
                     colors = listOf(
-                        accent.copy(alpha = 0.10f),
-                        MaterialTheme.colorScheme.surface
+                        accent.copy(alpha = 0.12f),
+                        Color.Transparent
                     )
                 )
             )

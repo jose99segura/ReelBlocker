@@ -5,6 +5,7 @@ import androidx.compose.animation.core.EaseOutCubic
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -324,8 +325,8 @@ private fun MascotIntroVisual() {
         )
         Spacer(Modifier.height(16.dp))
 
-        // Previsualización de evolución: huevo → se agrieta → cría → juvenil → adulto.
-        // Termina en ADULT que es el punto de graduación (día 30).
+        // Previsualización de evolución: huevo → se agrieta → cría → adulto.
+        // Termina en ADULT que es el punto de graduación (día 21, donde se crea el hábito).
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly,
@@ -353,10 +354,10 @@ private fun EvolutionPreview(level: MascotLevel) {
         Spacer(Modifier.height(2.dp))
         Text(
             text = when (level) {
-                MascotLevel.EGG -> stringResource(R.string.onboarding_day_label, 0)
-                MascotLevel.CRACKING -> stringResource(R.string.onboarding_day_label, 3)
-                MascotLevel.HATCHLING -> stringResource(R.string.onboarding_day_label, 8)
-                MascotLevel.ADULT -> stringResource(R.string.onboarding_day_label, 21)
+                MascotLevel.EGG -> stringResource(R.string.onboarding_day_label, MascotLevel.EGG.minDays)
+                MascotLevel.CRACKING -> stringResource(R.string.onboarding_day_label, MascotLevel.CRACKING.minDays)
+                MascotLevel.HATCHLING -> stringResource(R.string.onboarding_day_label, MascotLevel.HATCHLING.minDays)
+                MascotLevel.ADULT -> stringResource(R.string.onboarding_day_label, MascotLevel.ADULT.minDays)
             },
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -428,18 +429,21 @@ private fun highlightStats(text: String): AnnotatedString {
 
 @Composable
 private fun GrantedBadge(text: String) {
+    // Verde "concedido": Material 3 no define un color de éxito, así que es un
+    // verde propio, aclarado en dark para que el texto mantenga contraste.
+    val green = if (isSystemInDarkTheme()) Color(0xFF66BB6A) else Color(0xFF2E7D32)
     Row(verticalAlignment = Alignment.CenterVertically) {
         Box(
             modifier = Modifier
                 .size(12.dp)
                 .clip(CircleShape)
-                .background(Color(0xFF2E7D32))
+                .background(green)
         )
         Spacer(Modifier.size(8.dp))
         Text(
             text = text,
             style = MaterialTheme.typography.titleMedium,
-            color = Color(0xFF2E7D32)
+            color = green
         )
     }
 }

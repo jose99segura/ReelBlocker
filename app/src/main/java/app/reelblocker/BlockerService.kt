@@ -26,9 +26,16 @@ class BlockerService : AccessibilityService() {
     companion object {
         private const val TAG = "ReelBlocker"
 
-        private const val PKG_INSTAGRAM = "com.instagram.android"
-        private const val PKG_YOUTUBE = "com.google.android.youtube"
-        private const val PKG_FACEBOOK = "com.facebook.katana"
+        // Fuente única de verdad para IG/YT en [Stats]; aquí solo se referencian.
+        private const val PKG_INSTAGRAM = Stats.PKG_INSTAGRAM
+        private const val PKG_YOUTUBE = Stats.PKG_YOUTUBE
+        private const val PKG_FACEBOOK = Stats.PKG_FACEBOOK
+        private const val PKG_TIKTOK = "com.zhiliaoapp.musically"
+
+        // Etiquetas (content-description) del item "Perfil" de la barra inferior
+        // de TikTok, para redirigir alli en vez de hacer BACK (que no saca del
+        // feed). Cubre es/en/pt; si no hay match se cae a GLOBAL_ACTION_HOME.
+        private val TIKTOK_PROFILE_LABELS = listOf("Perfil", "Profile")
 
         // Los hints de Reels/Stories/Shorts viven ahora en [HintConfig]
         // (defaults baked-in + override remoto por JSON). El servicio solo lee
@@ -106,6 +113,14 @@ class BlockerService : AccessibilityService() {
     // Rate-limit del chequeo de salud (deteccion rota) ante actividad IG/YT.
     private var lastHealthCheck = 0L
 
+    /**
+     * Log verbose solo en builds debug. El lambda evita construir el string
+     * en release; [onAccessibilityEvent] se dispara en cada evento del sistema.
+     */
+    private inline fun logv(msg: () -> String) {
+        if (BuildConfig.DEBUG) Log.v(TAG, msg())
+    }
+
     override fun onServiceConnected() {
         super.onServiceConnected()
         val dm = resources.displayMetrics
@@ -118,9 +133,9 @@ class BlockerService : AccessibilityService() {
         if (event == null) return
         val pkg = event.packageName?.toString() ?: return
 
-        Log.v(TAG, "Evento pkg=$pkg tipo=${event.eventType}")
+        logv { "Evento pkg=$pkg tipo=${event.eventType}" }
 
-        if (pkg != PKG_INSTAGRAM && pkg != PKG_YOUTUBE && pkg != PKG_FACEBOOK) return
+        if (pkg != PKG_INSTAGRAM && pkg != PKG_YOUTUBE && pkg != PKG_FACEBOOK && pkg != PKG_TIKTOK) return
 
         // Descanso Pro activo: el servicio sigue conectado (la racha cuenta el
         // día) pero no disparamos back durante la pausa.
@@ -128,7 +143,7 @@ class BlockerService : AccessibilityService() {
 
         // Gate por preferencias del usuario.
         if (!Stats.isAppEnabled(this, pkg)) {
-            Log.v(TAG, "Bloqueo desactivado por el usuario en $pkg")
+            logv { "Bloqueo desactivado por el usuario en $pkg" }
             return
         }
 
@@ -150,10 +165,28 @@ class BlockerService : AccessibilityService() {
             return
         }
 
-        // FASE DESCUBRIMIENTO Facebook: por ahora solo volcamos el arbol
-        // para ver que resource-ids / className expone. Aun no bloqueamos.
+        // Facebook EN PAUSA: no hay señal de deteccion fiable (resource-ids
+        // ofuscados como "(name removed)", una sola Activity FbMainTabActivity
+        // para todo, y el arbol del visor inmersivo viene contaminado con el
+        // chrome del feed de inicio). En debug seguimos volcando para investigar;
+        // mientras facebookReels este vacia NO recorremos el arbol (ahorro en
+        // release). Si algun dia se publica una señal, FB se reactiva solo.
         if (pkg == PKG_FACEBOOK) {
-            dumpFacebookTree(event, root)
+            dumpFacebookTree(event, root)  // no-op en release (guard interno)
+            if (HintConfig.facebookReels(this).isEmpty()) return
+        }
+
+        // TikTok: la app entera es feed, pero el reproductor inmersivo vertical
+        // (Para ti/Siguiendo/visor) se delata por ids semanticos como
+        // "video_player_progress" — ausentes en perfil/DMs/busqueda/rejilla.
+        // No exigimos fullscreen (la barra de progreso es fina): basta con que
+        // un nodo VISIBLE tenga la firma. Asi se bloquea el doomscroll y se
+        // dejan usables las demas pestañas.
+        if (pkg == PKG_TIKTOK) {
+            dumpDiscoveryTree(event, root, "TT")  // no-op en release
+            val ttHints = HintConfig.tiktokFeed(this)
+            val ttMatch = if (ttHints.isEmpty()) null else findHintId(root, ttHints)
+            if (ttMatch != null) handleReelsDetected(pkg, ttMatch) else handleReelsAbsent(pkg)
             return
         }
 
@@ -181,6 +214,7 @@ class BlockerService : AccessibilityService() {
                 list
             }
             PKG_YOUTUBE -> HintConfig.youtubeShorts(this)
+            PKG_FACEBOOK -> HintConfig.facebookReels(this)
             else -> return
         }
 
@@ -200,7 +234,7 @@ class BlockerService : AccessibilityService() {
         // watchdog, ignoramos. Si pasa el watchdog, dejamos caer al fire BACK.
         if (dmAllowed && watchingDmReel) {
             if (now - watchingDmReelStart < DM_VIEW_BUDGET_MS) {
-                Log.v(TAG, "Continuando reel DM autorizado, ignorado")
+                logv { "Continuando reel DM autorizado, ignorado" }
                 lastReelsPackage = pkg
                 return
             } else {
@@ -228,12 +262,12 @@ class BlockerService : AccessibilityService() {
         }
 
         if (now - lastReelsExitTime < POST_EXIT_GRACE_MS) {
-            Log.v(TAG, "Ventana de gracia post-salida, ignoro match en $pkg ($matchedId)")
+            logv { "Ventana de gracia post-salida, ignoro match en $pkg ($matchedId)" }
             return
         }
 
         if (lastReelsPackage == pkg) {
-            Log.v(TAG, "Ya marcado dentro de Reels en $pkg, no repito back")
+            logv { "Ya marcado dentro de Reels en $pkg, no repito back" }
             return
         }
 
@@ -244,7 +278,7 @@ class BlockerService : AccessibilityService() {
 
     private fun handleReelsAbsent(pkg: String) {
         if (lastReelsPackage == pkg) {
-            Log.v(TAG, "Salimos de Reels en $pkg, abro ventana de gracia")
+            logv { "Salimos de Reels en $pkg, abro ventana de gracia" }
             lastReelsPackage = null
             lastReelsExitTime = SystemClock.elapsedRealtime()
             watchingDmReel = false
@@ -257,33 +291,89 @@ class BlockerService : AccessibilityService() {
      * tamano — basta con que el fragmento exista en el arbol.
      */
     /**
-     * Diagnostico Facebook: cada ~1.5 s, volcar el className del evento y
-     * todos los resource-id no nulos del arbol. Sirve para descubrir por
-     * que se reconoce el visor de Reels de Facebook.
+     * Diagnostico Facebook. Los resource-id de FB vienen ofuscados como
+     * "(name removed)", asi que la deteccion por id NO sirve. Este volcado
+     * captura las señales alternativas viables:
+     *   - la Activity host (event.className en TYPE_WINDOW_STATE_CHANGED),
+     *   - content-description y text del overlay (rail de like/comentar/etc.),
+     * para decidir por que firma reconocer el visor de Reels de Facebook.
      */
     private fun dumpFacebookTree(event: AccessibilityEvent, root: AccessibilityNodeInfo) {
+        // Diagnóstico solo en debug: Facebook está en modo discovery (no bloquea),
+        // así que en release no recorremos el árbol ni logueamos nada.
+        if (!BuildConfig.DEBUG) return
+
+        // Siempre (sin throttle): en cambios de ventana, la Activity host.
+        if (event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
+            Log.d(TAG, "FB STATE className=${event.className}")
+        }
+
         val now = SystemClock.elapsedRealtime()
         if (now - lastFbDumpTime < 1500L) return
         lastFbDumpTime = now
 
         Log.d(TAG, "FB === evento tipo=${event.eventType} className=${event.className}")
-        val ids = mutableSetOf<String>()
+        val labels = LinkedHashSet<String>()
         val queue = ArrayDeque<AccessibilityNodeInfo>()
         queue.add(root)
         var visited = 0
-        while (queue.isNotEmpty() && visited < 1500 && ids.size < 60) {
+        while (queue.isNotEmpty() && visited < 1500 && labels.size < 80) {
             val node = queue.removeFirst()
             visited++
-            node.viewIdResourceName?.let { if (it.isNotBlank()) ids.add(it) }
+            node.contentDescription?.toString()?.let { if (it.isNotBlank()) labels.add("cd: " + it.take(48)) }
+            node.text?.toString()?.let { if (it.isNotBlank()) labels.add("tx: " + it.take(48)) }
             for (i in 0 until node.childCount) {
                 node.getChild(i)?.let { queue.add(it) }
             }
         }
-        if (ids.isEmpty()) {
-            Log.d(TAG, "FB   (sin resource-ids en el arbol — $visited nodos)")
+        if (labels.isEmpty()) {
+            Log.d(TAG, "FB   (sin labels — $visited nodos)")
         } else {
-            ids.forEach { Log.d(TAG, "FB   id: $it") }
+            labels.forEach { Log.d(TAG, "FB   $it") }
         }
+    }
+
+    /**
+     * Diagnostico generico de discovery para una app nueva (p.ej. TikTok).
+     * Captura TODO lo potencialmente direccionable: resource-ids reales (los
+     * obfuscados "(name removed)" o "0_resource_name_obfuscated" se descartan),
+     * content-description, text, y la Activity host en cambios de ventana.
+     * Solo en debug y rate-limited. [prefix] etiqueta las lineas en logcat.
+     */
+    private fun dumpDiscoveryTree(event: AccessibilityEvent, root: AccessibilityNodeInfo, prefix: String) {
+        if (!BuildConfig.DEBUG) return
+
+        if (event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
+            Log.d(TAG, "$prefix STATE className=${event.className}")
+        }
+
+        val now = SystemClock.elapsedRealtime()
+        if (now - lastFbDumpTime < 1500L) return
+        lastFbDumpTime = now
+
+        Log.d(TAG, "$prefix === evento tipo=${event.eventType} className=${event.className}")
+        val ids = LinkedHashSet<String>()
+        val labels = LinkedHashSet<String>()
+        val queue = ArrayDeque<AccessibilityNodeInfo>()
+        queue.add(root)
+        var visited = 0
+        while (queue.isNotEmpty() && visited < 1500 && ids.size + labels.size < 120) {
+            val node = queue.removeFirst()
+            visited++
+            node.viewIdResourceName?.let {
+                if (it.isNotBlank() && !it.contains("(name removed)") && !it.contains("obfuscated")) {
+                    ids.add(it.substringAfter("id/", it))
+                }
+            }
+            node.contentDescription?.toString()?.let { if (it.isNotBlank()) labels.add("cd: " + it.take(48)) }
+            node.text?.toString()?.let { if (it.isNotBlank()) labels.add("tx: " + it.take(48)) }
+            for (i in 0 until node.childCount) {
+                node.getChild(i)?.let { queue.add(it) }
+            }
+        }
+        if (ids.isEmpty()) Log.d(TAG, "$prefix   (sin resource-ids usables — $visited nodos)")
+        else ids.forEach { Log.d(TAG, "$prefix   id: $it") }
+        labels.forEach { Log.d(TAG, "$prefix   $it") }
     }
 
     private fun containsAnyHint(
@@ -332,10 +422,10 @@ class BlockerService : AccessibilityService() {
                     if (bounds.width() >= minWidth && bounds.height() >= minHeight) {
                         return id
                     } else {
-                        Log.v(TAG, "Match $id descartado por tamano ${bounds.width()}x${bounds.height()}")
+                        logv { "Match $id descartado por tamano ${bounds.width()}x${bounds.height()}" }
                     }
                 } else {
-                    Log.v(TAG, "Match $id descartado por no visible")
+                    logv { "Match $id descartado por no visible" }
                 }
             }
 
@@ -346,20 +436,103 @@ class BlockerService : AccessibilityService() {
         return null
     }
 
+    /**
+     * Variante para TikTok: devuelve el id del primer nodo cuyo
+     * viewIdResourceName contiene una pista. NO exige fullscreen (la barra
+     * "video_player_progress" es pequeña) ni visibilidad — la firma solo existe
+     * en el arbol mientras el reproductor inmersivo esta montado; al cambiar a
+     * Perfil/DMs TikTok lo destruye y desaparece, asi que la presencia es una
+     * señal limpia de on/off. El arbol del feed es grande (videos precargados),
+     * por eso el tope de nodos es mas alto que en IG/YT.
+     */
+    private fun findHintId(
+        root: AccessibilityNodeInfo,
+        hints: List<String>
+    ): String? {
+        val queue = ArrayDeque<AccessibilityNodeInfo>()
+        queue.add(root)
+        var visited = 0
+        val maxNodes = 2500
+        while (queue.isNotEmpty() && visited < maxNodes) {
+            val node = queue.removeFirst()
+            visited++
+            val id = node.viewIdResourceName
+            if (id != null && hints.any { id.contains(it, ignoreCase = true) }) {
+                return id
+            }
+            for (i in 0 until node.childCount) {
+                node.getChild(i)?.let { queue.add(it) }
+            }
+        }
+        return null
+    }
+
     private fun triggerBack(pkg: String) {
         val now = SystemClock.elapsedRealtime()
         if (now - lastActionTime < MIN_INTERVAL_MS) {
-            Log.v(TAG, "Anti-rebote: ignorando")
+            logv { "Anti-rebote: ignorando" }
             return
         }
         lastActionTime = now
-        val ok = performGlobalAction(GLOBAL_ACTION_BACK)
-        Log.d(TAG, "performGlobalAction(BACK) = $ok")
+        // En TikTok el BACK no saca del feed (lo interpreta como "video
+        // anterior"), asi que redirigimos a una pestaña segura (Perfil) y, si
+        // no la encontramos, salimos al launcher. En IG/YT el BACK si funciona.
+        val ok = if (pkg == PKG_TIKTOK) escapeTikTokFeed() else performGlobalAction(GLOBAL_ACTION_BACK)
+        Log.d(TAG, "accion salida pkg=$pkg ok=$ok")
         if (ok) {
             Stats.increment(this, pkg)
             HealthCheck.recordBlock(this)
             Toast.makeText(this, R.string.toast_blocked, Toast.LENGTH_SHORT).show()
         }
+    }
+
+    /**
+     * Saca al usuario del feed de TikTok sin cerrar la app: busca el item
+     * "Perfil" de la barra inferior y lo pulsa (deja DMs/perfil/busqueda
+     * usables). Si no se encuentra (otro idioma, cambio de UI), cae a
+     * GLOBAL_ACTION_HOME para sacarlo de la app igualmente.
+     */
+    private fun escapeTikTokFeed(): Boolean {
+        val root = rootInActiveWindow ?: return performGlobalAction(GLOBAL_ACTION_HOME)
+        val profile = findClickableByContentDesc(root, TIKTOK_PROFILE_LABELS)
+        return if (profile != null) {
+            val clicked = profile.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+            Log.d(TAG, "TikTok: pulsado Perfil = $clicked")
+            if (clicked) true else performGlobalAction(GLOBAL_ACTION_HOME)
+        } else {
+            Log.d(TAG, "TikTok: no se encontro Perfil, salgo al launcher")
+            performGlobalAction(GLOBAL_ACTION_HOME)
+        }
+    }
+
+    /**
+     * BFS: primer nodo cuyo content-description coincide exactamente (ignorando
+     * mayusculas) con alguna etiqueta; sube hasta el primer ancestro clickable
+     * y lo devuelve (el item de nav suele tener el texto en un hijo no
+     * clickable). Null si no hay match.
+     */
+    private fun findClickableByContentDesc(
+        root: AccessibilityNodeInfo,
+        labels: List<String>
+    ): AccessibilityNodeInfo? {
+        val queue = ArrayDeque<AccessibilityNodeInfo>()
+        queue.add(root)
+        var visited = 0
+        val maxNodes = 800
+        while (queue.isNotEmpty() && visited < maxNodes) {
+            val node = queue.removeFirst()
+            visited++
+            val cd = node.contentDescription?.toString()
+            if (cd != null && labels.any { it.equals(cd, ignoreCase = true) }) {
+                var target: AccessibilityNodeInfo? = node
+                while (target != null && !target.isClickable) target = target.parent
+                if (target != null) return target
+            }
+            for (i in 0 until node.childCount) {
+                node.getChild(i)?.let { queue.add(it) }
+            }
+        }
+        return null
     }
 
     override fun onUnbind(intent: android.content.Intent?): Boolean {

@@ -27,6 +27,13 @@
     <string name="badge_pro">Pro</string>
     <string name="chip_upgrade">Upgrade</string>
 
+    <!-- Nivel de perfil (XP de por vida) -->
+    <string name="profile_level_chip">Nv. %1$d</string>
+    <string name="profile_level_dialog_title">Nivel %1$d</string>
+    <string name="profile_xp_progress">%1$d / %2$d XP</string>
+    <string name="profile_xp_to_next">%1$d XP para el Nivel %2$d</string>
+    <string name="profile_level_dialog_body">Ganas XP cada día que sigues protegido, cada Reel o Short bloqueado y cada vez que una mascota se gradúa. Tu nivel nunca baja, ni aunque rompas la racha.</string>
+
     <!-- Action-required cards in home -->
     <string name="home_action_accessibility_title">Activa el servicio de accesibilidad</string>
     <string name="home_action_accessibility_body">Sin esto, Basta! no puede detectar los Reels. Toca y activa Basta! en la lista.</string>
@@ -122,6 +129,7 @@
     <string name="stats_hero_subtitle">caídas evitadas en Reels y Shorts</string>
     <string name="stats_distribution_instagram">Instagram</string>
     <string name="stats_distribution_youtube">YouTube</string>
+    <string name="stats_distribution_tiktok">TikTok</string>
     <string name="stats_section_weekly">Últimos 7 días</string>
     <string name="stats_no_history">Aún no hay historial. Vuelve mañana — los datos se acumulan.</string>
     <string name="stats_chart_today">Hoy</string>

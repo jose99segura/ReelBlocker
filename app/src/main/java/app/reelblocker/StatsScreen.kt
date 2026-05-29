@@ -2,6 +2,7 @@ package app.reelblocker
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,19 +29,24 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
@@ -50,8 +56,20 @@ fun StatsScreen(
     onOpenPaywall: () -> Unit
 ) {
     val ctx = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
     val isPro = Premium.isProLive
-    val refreshKey by remember { mutableIntStateOf(0) }
+    var refreshKey by remember { mutableIntStateOf(0) }
+
+    // Refrescar las métricas en cada ON_RESUME: al volver a esta pestaña tras
+    // bloquear reels los contadores deben reflejar los nuevos datos.
+    DisposableEffect(lifecycleOwner) {
+        val obs = LifecycleEventObserver { _, e ->
+            if (e == Lifecycle.Event.ON_RESUME) refreshKey++
+        }
+        lifecycleOwner.lifecycle.addObserver(obs)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(obs) }
+    }
+
     val today = remember(refreshKey) { Stats.read(ctx) }
     val history = remember(refreshKey) { Stats.readLastDays(ctx, 7) }
     val totalBlocks = remember(refreshKey) { Stats.totalBlocks(ctx) }
@@ -81,11 +99,12 @@ fun StatsScreen(
             // ===== HERO — Hoy =====
             HeroToday(today = today.total)
 
-            // ===== Distribución IG / YT (solo si hay datos) =====
+            // ===== Distribución IG / YT / TikTok (solo si hay datos) =====
             if (today.total > 0) {
                 DistributionStrip(
                     instagram = today.instagram,
-                    youtube = today.youtube
+                    youtube = today.youtube,
+                    tiktok = today.tiktok
                 )
             }
 
@@ -130,7 +149,7 @@ private fun HeroToday(today: Int) {
             fontSize = 72.sp,
             fontWeight = FontWeight.Black,
             color = if (today == 0)
-                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f)
+                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
             else MaterialTheme.colorScheme.onSurface
         )
         Text(
@@ -146,7 +165,13 @@ private fun HeroToday(today: Int) {
 // ===== Distribución =====
 
 @Composable
-private fun DistributionStrip(instagram: Int, youtube: Int) {
+private fun DistributionStrip(instagram: Int, youtube: Int, tiktok: Int) {
+    // Colores de marca; se ajustan al tema para mantener contraste legible.
+    val dark = isSystemInDarkTheme()
+    val instagramAccent = Color(0xFFE1306C).let { if (dark) it.lighten(0.30f) else it }
+    val youtubeAccent = Color(0xFFFF0000).let { if (dark) it.lighten(0.30f) else it }
+    // Cian de TikTok: muy claro de base, se oscurece en light para contraste.
+    val tiktokAccent = Color(0xFF25F4EE).let { if (dark) it else it.darken(0.35f) }
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -157,14 +182,21 @@ private fun DistributionStrip(instagram: Int, youtube: Int) {
         DistributionItem(
             label = stringResource(R.string.stats_distribution_instagram),
             value = instagram,
-            accent = Color(0xFFE1306C),
+            accent = instagramAccent,
             modifier = Modifier.weight(1f)
         )
         VerticalDivider()
         DistributionItem(
             label = stringResource(R.string.stats_distribution_youtube),
             value = youtube,
-            accent = Color(0xFFFF0000),
+            accent = youtubeAccent,
+            modifier = Modifier.weight(1f)
+        )
+        VerticalDivider()
+        DistributionItem(
+            label = stringResource(R.string.stats_distribution_tiktok),
+            value = tiktok,
+            accent = tiktokAccent,
             modifier = Modifier.weight(1f)
         )
     }
@@ -429,7 +461,7 @@ private fun VerticalDivider() {
 }
 
 private fun formatRecoveredFull(blocks: Int): String {
-    val totalSeconds = blocks * 30L
+    val totalSeconds = blocks * Stats.SECONDS_PER_BLOCK
     val hours = totalSeconds / 3600
     val minutes = (totalSeconds % 3600) / 60
     return when {

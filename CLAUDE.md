@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ReelBlocker (in-app brand: **Basta!**) is a single-module Android app that detects when the user is inside Instagram Reels or YouTube Shorts and immediately fires the system Back action to leave that surface. It does not block the host apps themselves — only the short-video surface inside them.
 
-On top of the core detection, the app has a gamification layer: a daily streak with an evolving mascot, a 5-species **Pokédex-style collection** unlocked by reaching day 30 of an active streak (mascot graduates → archived in inventory → new egg of a different species emerges), and full stats.
+On top of the core detection, the app has a gamification layer: a daily streak with an evolving mascot, a 5-species **Pokédex-style collection** unlocked by reaching day 21 of an active streak (where the habit consolidates) (mascot graduates → archived in inventory → new egg of a different species emerges), and full stats.
 
 ## Build / run
 
@@ -27,14 +27,14 @@ Code lives under `app/src/main/java/app/reelblocker/`:
 
 ### Detection layer (always-on)
 
-- **`BlockerService.kt`** — the `AccessibilityService` registered in `AndroidManifest.xml` with config `res/xml/accessibility_config.xml`. Receives events for Instagram, YouTube and (recently) Facebook. BFS-walks `rootInActiveWindow` (capped at 800 nodes) looking for any `viewIdResourceName` that contains a substring from `INSTAGRAM_REEL_HINTS` / `YOUTUBE_SHORTS_HINTS`. A match triggers `performGlobalAction(GLOBAL_ACTION_BACK)`, gated by `MIN_INTERVAL_MS` (600 ms) anti-bounce. Facebook is in *discovery-only* mode for now (dumps tree, does not block).
+- **`BlockerService.kt`** — the `AccessibilityService` registered in `AndroidManifest.xml` with config `res/xml/accessibility_config.xml`. Receives events for Instagram, YouTube and (recently) Facebook. BFS-walks `rootInActiveWindow` (capped at 800 nodes) looking for any `viewIdResourceName` that contains a substring from `INSTAGRAM_REEL_HINTS` / `YOUTUBE_SHORTS_HINTS`. A match triggers `performGlobalAction(GLOBAL_ACTION_BACK)`, gated by `MIN_INTERVAL_MS` (600 ms) anti-bounce. Facebook is wired as a first-class blockable app (toggle, stats, strict-streak) but **paused**: `HintConfig.DEFAULT_FACEBOOK_REELS` ships empty and the FB branch returns early while it stays empty (so the tree is never walked). Pausing was a deliberate decision after an on-device investigation (May 2026) found FB hostile to the resource-id strategy — see [[reference-facebook-internals]]: (1) resource-ids are obfuscated to `(name removed)`; (2) everything is hosted in a single `FbMainTabActivity`; (3) the immersive Reels viewer's accessibility tree stays contaminated with the home-feed chrome, so home vs. Reels can't be told apart by node presence without risking closing the whole app. The debug-only `dumpFacebookTree` (now logs content-descriptions + `FB STATE` Activity className, since ids are useless) stays for future discovery. To revisit: build a multi-signal heuristic gated on `isVisibleToUser` + fullscreen bounds.
 
 ### State / persistence
 
 All persistent state lives in one `SharedPreferences` file (`reelblocker_prefs`):
 
 - **`Stats.kt`** — per-day block counts (Instagram + YouTube split), 30-day rolling history, per-app enable toggles, Pro feature flags, onboarding-done flag.
-- **`Streak.kt`** — daily streak engine. `tick()` increments by 1 if called the day after the last valid date, resets to 1 if a day was skipped, no-ops if same-day. `breakStreak()` zeros the count but preserves the record. On the transition into `MascotLevel.ADULT` (day 30), `tick()` writes a `pending_graduation_from` flag. `shouldBeProtecting(ctx)` enforces the **strict per-app model**: returns true only if accessibility is on AND *all* installed `BLOCKABLE_APPS` are enabled — toggling any app off counts as "stopped protecting" and breaks the streak.
+- **`Streak.kt`** — daily streak engine. `tick()` increments by 1 if called the day after the last valid date, resets to 1 if a day was skipped, no-ops if same-day. `breakStreak()` zeros the count but preserves the record. On the transition into `MascotLevel.ADULT` (day 21), `tick()` writes a `pending_graduation_from` flag. `shouldBeProtecting(ctx)` enforces the **strict per-app model**: returns true only if accessibility is on AND *all* installed `BLOCKABLE_APPS` are enabled — toggling any app off counts as "stopped protecting" and breaks the streak.
 - **`MascotCollection.kt`** (`object Collection`) — collected-mascot inventory. Reads the pending-graduation flag, archives the mascot, breaks the streak with reason `"graduation"`, picks a next species (random from uncollected; falls back to random-of-all when complete). Exposes `currentSpecies(ctx)`, `read(ctx)`, `pendingGraduation(ctx)`, `consumePendingGraduation(ctx, daysReached)`, `uniqueCount(ctx)`.
 - **`Premium.kt`** — Play Billing wrapper for the Pro one-time purchase. Caches `is_pro_purchased` in the same prefs so `BlockerService` (separate process) can read it without re-querying Billing.
 - **`Breaks.kt`** — Pro feature. Time-boxed pause of the blocker (`break_end_ms`) with one-per-day quota (`break_consumed_date`). The home subtext switches to a countdown while `millisRemaining(ctx)` is non-null.
@@ -43,7 +43,7 @@ All persistent state lives in one `SharedPreferences` file (`reelblocker_prefs`)
 
 ### Mascot rendering (Canvas)
 
-- **`MascotEvolution.kt`** — the `MascotLevel` enum (Egg, Cracking, Hatchling, Juvenile, Adult, Crested, Legendary, Golden) with palette + `@StringRes displayNameRes`, plus the `MascotCanvas` Composable that draws the mascot on a `Canvas` using primitive shapes (ovals, paths, gradients). Drawing dispatches by species via the species-specific functions in MascotSpecies.kt.
+- **`MascotEvolution.kt`** — the `MascotLevel` enum (Egg=day 0, Cracking=3, Hatchling=8, Adult=21 — graduation point) with palette + `@StringRes displayNameRes`, plus the `MascotCanvas` Composable that draws the mascot on a `Canvas` using primitive shapes (ovals, paths, gradients). Drawing dispatches by species via the species-specific functions in MascotSpecies.kt.
 - **`MascotSpecies.kt`** — the `MascotSpecies` enum (5 entries: CLASICA, DRAGON, TORTUGA, LOBO, BUHO) with `accentTint` + `@StringRes displayNameRes` + per-species drawing functions (`drawDragonBody`, `drawTortugaBody`, `drawLoboBody`, `drawBuhoBody`). The CLASICA species uses the original `drawCreature` flags from MascotEvolution.kt. Egg / Cracking phases share the same primitive across species, tinted by `species.accentTint`.
 
 ### UI (Compose)
@@ -53,7 +53,7 @@ All persistent state lives in one `SharedPreferences` file (`reelblocker_prefs`)
 - **`StatsScreen.kt`** — Hoy hero + IG/YT distribution strip + 7-day chart + time recovered + record + Pro upsell.
 - **`InventoryScreen.kt`** — "Species X / 5" hero, "Active now" row (current species + level + days), 2×3 grid of slots (filled mascot + name + date, or locked `?`), repeat-hint when applicable.
 - **`SettingsScreen.kt`** — Apps to block, Protection (accessibility, battery, disable), Pro, About. The "Disable protection" row triggers `ConfirmDisableDialog`.
-- **`OnboardingScreen.kt`** — 4-page pager: wordmark, mascot intro (with corrected timeline 0/3/7/14/30), enable service, exclude from battery.
+- **`OnboardingScreen.kt`** — 4-page pager: wordmark, mascot intro (with timeline 0/3/8/21), enable service, exclude from battery.
 - **`ConfirmDisableDialog.kt`** — sad mascot + warning before breaking the streak.
 - **`TipQuote.kt`** + **`Tips.kt`** — rotating motivational quote read from `string-array tips_quotes` in resources (so it localizes automatically).
 

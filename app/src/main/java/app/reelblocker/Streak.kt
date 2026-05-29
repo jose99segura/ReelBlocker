@@ -98,6 +98,11 @@ object Streak {
 
         editor.apply()
 
+        // XP de perfil: hemos pasado el guard de no-op, así que se registra un
+        // día protegido nuevo (como mucho una vez por día natural). Suma aunque
+        // la racha se haya reiniciado a 1 — cada día activo cuenta de por vida.
+        Profile.addDayXp(ctx)
+
         // Graduación: si acaba de alcanzar ADULT, archivar la mascota.
         // El editor anterior ya está apply'd; markPendingGraduation usa otro write.
         if (newLevel == MascotLevel.ADULT && oldLevel != MascotLevel.ADULT) {

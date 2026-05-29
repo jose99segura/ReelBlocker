@@ -198,6 +198,9 @@ private fun AppRoot(onResetOnboarding: () -> Unit) {
     var showPaywall by remember { mutableStateOf(false) }
     var pendingGraduation by remember { mutableStateOf<MascotSpecies?>(Collection.pendingGraduation(ctx)) }
     val pendingGraduationVisible = pendingGraduation != null
+    // Señal de refresco AppRoot → HomeScreen para forzar relectura en sitio
+    // (sin esperar a ON_RESUME) tras consumir una graduación.
+    var homeRefresh by remember { mutableIntStateOf(0) }
 
     BackHandler(enabled = currentScreen != Screen.Home && !showPaywall) {
         currentScreen = Screen.Home
@@ -222,7 +225,8 @@ private fun AppRoot(onResetOnboarding: () -> Unit) {
                 when (screen) {
                     is Screen.Home -> HomeScreen(
                         onOpenPaywall = { showPaywall = true },
-                        onPendingGraduationChanged = { pendingGraduation = it }
+                        onPendingGraduationChanged = { pendingGraduation = it },
+                        externalRefresh = homeRefresh
                     )
                     is Screen.Stats -> StatsScreen(
                         onOpenPaywall = { showPaywall = true }
@@ -257,7 +261,7 @@ private fun AppRoot(onResetOnboarding: () -> Unit) {
             )
         }
 
-        // Celebración día 30 — sustituye al GraduationDialog modal. Se renderiza
+        // Celebración día 21 — sustituye al GraduationDialog modal. Se renderiza
         // al nivel del AppRoot Box para cubrir el bottom nav y dar sensación
         // ceremonial. El consume del flag + posible trigger del paywall sucede
         // dentro del onContinue, no en HomeScreen.
@@ -268,6 +272,9 @@ private fun AppRoot(onResetOnboarding: () -> Unit) {
                 onContinue = {
                     Collection.consumePendingGraduation(ctx, daysReached = MascotLevel.ADULT.minDays)
                     pendingGraduation = null
+                    // Forzar relectura del Home en sitio: el huevo nuevo entra
+                    // animado y la racha baja a 0 sin esperar a un ON_RESUME.
+                    homeRefresh++
                     if (Collection.pendingProUnlock(ctx)) {
                         // Consume el flag siempre para que no quede pendiente,
                         // pero el paywall solo se auto-dispara si el throttle
@@ -290,12 +297,16 @@ private fun AppRoot(onResetOnboarding: () -> Unit) {
 @Composable
 private fun HomeScreen(
     onOpenPaywall: () -> Unit,
-    onPendingGraduationChanged: (MascotSpecies?) -> Unit
+    onPendingGraduationChanged: (MascotSpecies?) -> Unit,
+    externalRefresh: Int = 0
 ) {
     val ctx = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
 
-    var refreshKey by remember { mutableIntStateOf(0) }
+    // Contador interno (ON_RESUME, countdown) combinado con la señal externa
+    // de AppRoot (graduación consumida). Cualquiera de los dos fuerza relectura.
+    var localRefresh by remember { mutableIntStateOf(0) }
+    val refreshKey = localRefresh + externalRefresh
     var externalDisableInfo by remember { mutableStateOf<ExternalDisableInfo?>(null) }
     var breakRemainingMs by remember { mutableStateOf(Breaks.millisRemaining(ctx)) }
     DisposableEffect(lifecycleOwner) {
@@ -320,7 +331,7 @@ private fun HomeScreen(
                 Streak.setProtectingSeen(ctx, nowProtecting)
                 onPendingGraduationChanged(Collection.pendingGraduation(ctx))
                 breakRemainingMs = Breaks.millisRemaining(ctx)
-                refreshKey++
+                localRefresh++
             }
         }
         lifecycleOwner.lifecycle.addObserver(obs)
@@ -334,7 +345,7 @@ private fun HomeScreen(
             val remaining = Breaks.millisRemaining(ctx)
             if (remaining == null) {
                 breakRemainingMs = null
-                refreshKey++  // re-leer Streak.current y forzar repaint
+                localRefresh++  // re-leer Streak.current y forzar repaint
                 break
             }
             breakRemainingMs = remaining
@@ -362,6 +373,14 @@ private fun HomeScreen(
                         fontSize = 26.sp,
                         fontWeight = FontWeight.Black,
                         letterSpacing = (-0.5).sp
+                    )
+                },
+                navigationIcon = {
+                    // Nivel de perfil arriba a la izquierda, junto al wordmark
+                    // — libera la fila que antes ocupaba sobre el hero.
+                    ProfileLevelChip(
+                        refreshKey = refreshKey,
+                        modifier = Modifier.padding(start = 12.dp)
                     )
                 },
                 actions = {
@@ -577,7 +596,7 @@ private fun MetricVerticalDivider() {
 }
 
 private fun formatRecoveredShort(blocks: Int): String {
-    val totalSeconds = blocks * 30L
+    val totalSeconds = blocks * Stats.SECONDS_PER_BLOCK
     val hours = totalSeconds / 3600
     val minutes = (totalSeconds % 3600) / 60
     return when {

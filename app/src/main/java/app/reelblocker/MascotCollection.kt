@@ -88,34 +88,53 @@ object Collection {
      */
     fun consumePendingGraduation(ctx: Context, daysReached: Int): MascotSpecies? {
         val species = pendingGraduation(ctx) ?: return null
-        archive(ctx, species, daysReached)
-        Streak.breakStreak(ctx, reason = "graduation")
-        val next = pickNext(ctx, justArchived = species)
-        prefs(ctx).edit()
-            .putString(KEY_CURRENT_SPECIES, next.id)
-            .remove(KEY_PENDING_GRADUATION)
-            .apply()
-        Log.d(TAG, "consumePendingGraduation: archivada=${species.id} próxima=${next.id}")
-        return species
-    }
 
-    /**
-     * Inserta una entrada en la colección. Permite duplicados (orden de adquisición).
-     */
-    private fun archive(ctx: Context, species: MascotSpecies, daysReached: Int) {
+        // 1) Releer la colección y añadir la mascota graduada EN MEMORIA (permite
+        //    duplicados; orden de adquisición).
         val arr = try {
             val raw = prefs(ctx).getString(KEY_COLLECTION_JSON, null)
             if (raw == null) JSONArray() else JSONArray(raw)
         } catch (_: Exception) {
             JSONArray()
         }
-        val entry = JSONObject().apply {
+        arr.put(JSONObject().apply {
             put("species", species.id)
             put("date", today())
             put("days", daysReached)
+        })
+
+        // 2) Elegir la siguiente especie con la colección YA actualizada (incluye
+        //    la recién archivada). Selección por tier: free solo entre freeSpecies;
+        //    al agotar las free uncollected se marca el pro-unlock para el paywall.
+        val collected = buildSet {
+            for (i in 0 until arr.length()) {
+                MascotSpecies.fromIdOrNull(arr.getJSONObject(i).optString("species"))?.let { add(it) }
+            }
         }
-        arr.put(entry)
-        prefs(ctx).edit().putString(KEY_COLLECTION_JSON, arr.toString()).apply()
+        val selection = selectNextSpecies(collected, justArchived = species, isPro = Premium.isPro(ctx))
+
+        // Romper la racha antes de la escritura final. Es idempotente (no-op si ya
+        // está a 0), así que reintentarlo tras un crash es seguro.
+        Streak.breakStreak(ctx, reason = "graduation")
+
+        // 3) Escritura ÚNICA y atómica: colección + especie siguiente + limpiar el
+        //    flag pendiente (+ pro-unlock). Si el proceso muere ANTES, el flag sigue
+        //    puesto y se reintenta limpio; si muere DESPUÉS, ya está todo hecho. La
+        //    mascota nunca se archiva dos veces.
+        val editor = prefs(ctx).edit()
+            .putString(KEY_COLLECTION_JSON, arr.toString())
+            .putString(KEY_CURRENT_SPECIES, selection.next.id)
+            .remove(KEY_PENDING_GRADUATION)
+        if (selection.markPendingProUnlock) {
+            editor.putBoolean(KEY_PENDING_PRO_UNLOCK, true)
+            Log.d(TAG, "consumePendingGraduation: free tier agotado → pending_pro_unlock=true")
+        }
+        editor.apply()
+
+        // XP de perfil: la graduación es el hito gordo de progresión permanente.
+        Profile.addGraduationXp(ctx)
+        Log.d(TAG, "consumePendingGraduation: archivada=${species.id} próxima=${selection.next.id}")
+        return species
     }
 
     /**

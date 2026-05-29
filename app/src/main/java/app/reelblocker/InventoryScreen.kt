@@ -148,7 +148,7 @@ private fun HeroCount(unique: Int, total: Int) {
             style = MaterialTheme.typography.displaySmall,
             fontWeight = FontWeight.Black,
             color = if (unique == 0)
-                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f)
+                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
             else
                 MaterialTheme.colorScheme.onSurface
         )

@@ -39,8 +39,8 @@ Shorts y ejecuta el botón "atrás" para devolverte al feed normal. No
 bloquea Instagram ni YouTube enteros — solo la sección de vídeos cortos.
 
 UNA MASCOTA QUE CRECE CONTIGO
-Cada día con el servicio activo, tu mascota evoluciona: huevo → cría →
-juvenil → adulta. A los 30 días se gradúa y se guarda en tu inventario,
+Cada día con el servicio activo, tu mascota evoluciona: huevo → se agrieta →
+cría → adulta. A los 21 días se gradúa y se guarda en tu inventario,
 y aparece un huevo nuevo de otra especie. Hay 5 especies para coleccionar
 (Clásica, Dragón, Tortuga, Lobo y Búho). Si rompes la racha antes de
 graduar, mantienes la misma especie — solo la graduación cambia de
@@ -147,7 +147,7 @@ network requests. Source code is publicly available for audit.
 2. Inventario (Pokédex) con 2-3 mascotas graduadas y el resto bloqueados
    con "?" — comunica de un vistazo el sistema de colección.
 3. Estadísticas con el hero "Hoy" enorme + distribución IG/YT + gráfico 7 días.
-4. Diálogo "Cómo funciona" mostrando la timeline 0/3/7/14/30 días.
+4. Diálogo "Cómo funciona" mostrando la timeline 0/3/8/21 días.
 5. Ajustes → sección "Apps a bloquear" con los iconos reales de
    Instagram/YouTube y las sub-opciones de IG expandidas.
 6. Onboarding paso 2 ("Conoce a tu mascota") con la fila de evoluciones.
@@ -226,12 +226,12 @@ opens and presses Back to return you to the normal feed. It doesn't
 block Instagram or YouTube as a whole — only the short-video section.
 
 A MASCOT THAT GROWS WITH YOU
-Every day with the service active, your mascot evolves: egg → hatchling
-→ juvenile → adult. At day 30 it graduates and gets saved in your
+Every day with the service active, your mascot evolves: egg → cracking
+→ hatchling → adult. At day 21 it graduates and gets saved in your
 inventory, and a new egg of a different species appears. There are 5
 species to collect (Classic, Dragon, Turtle, Wolf and Owl). If you
 break the streak before graduating, you keep the same species — only
-graduation changes the mascot. An achievable reward loop every ~30 days,
+graduation changes the mascot. An achievable reward loop every ~21 days,
 no lectures.
 
 WHAT'S INCLUDED

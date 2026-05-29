@@ -30,7 +30,9 @@ import java.net.URL
  *   "v": 1,
  *   "instagram_reels":   ["clips_viewer", "clips_swipe_refresh"],
  *   "instagram_stories": ["reel_viewer", "story_viewer"],
- *   "youtube_shorts":    ["reel_watch_player", ...]
+ *   "youtube_shorts":    ["reel_watch_player", ...],
+ *   "facebook_reels":    ["reels_viewer", ...],
+ *   "tiktok_feed":       ["video_player_progress", ...]
  * }
  */
 object HintConfig {
@@ -68,18 +70,36 @@ object HintConfig {
         "reel_player_page_container",
         "reel_recycler"
     )
+    // Suelo vacío a propósito: Facebook usa Litho y aún no hay resource-ids
+    // confirmados del visor de Reels. Sin hints, FB no bloquea (cero falsos
+    // positivos). Bakear aquí los ids capturados en dispositivo, o empujarlos
+    // por el JSON remoto bajo la clave "facebook_reels".
+    val DEFAULT_FACEBOOK_REELS = emptyList<String>()
+    // Firma del reproductor inmersivo vertical de TikTok (feed "Para ti" /
+    // "Siguiendo" y el visor de vídeo). Estos ids semánticos aparecen SOLO con
+    // un vídeo reproduciéndose a pantalla completa; NO en perfil, DMs, búsqueda
+    // ni la rejilla de vídeos (esas usan listas/grids sin barra de progreso).
+    // Capturado en dispositivo (com.zhiliaoapp.musically, 2026-05-29).
+    val DEFAULT_TIKTOK_FEED = listOf(
+        "video_player_progress",
+        "feed_multi_tag_layout"
+    )
 
-    /** Resultado del parseo: las tres listas ya fundidas con sus defaults. */
+    /** Resultado del parseo: las listas ya fundidas con sus defaults. */
     data class Parsed(
         val instagramReels: List<String>,
         val instagramStories: List<String>,
-        val youtubeShorts: List<String>
+        val youtubeShorts: List<String>,
+        val facebookReels: List<String>,
+        val tiktokFeed: List<String>
     )
 
     private val DEFAULTS = Parsed(
         DEFAULT_INSTAGRAM_REELS,
         DEFAULT_INSTAGRAM_STORIES,
-        DEFAULT_YOUTUBE_SHORTS
+        DEFAULT_YOUTUBE_SHORTS,
+        DEFAULT_FACEBOOK_REELS,
+        DEFAULT_TIKTOK_FEED
     )
 
     // ---- Cache en memoria (servicio): se re-parsea solo si cambia el ts ----
@@ -103,6 +123,8 @@ object HintConfig {
     fun instagramReels(ctx: Context): List<String> = current(ctx).instagramReels
     fun instagramStories(ctx: Context): List<String> = current(ctx).instagramStories
     fun youtubeShorts(ctx: Context): List<String> = current(ctx).youtubeShorts
+    fun facebookReels(ctx: Context): List<String> = current(ctx).facebookReels
+    fun tiktokFeed(ctx: Context): List<String> = current(ctx).tiktokFeed
 
     /**
      * Parseo puro y a prueba de fallos. JSON nulo/vacío/corrupto → defaults.
@@ -116,7 +138,9 @@ object HintConfig {
             Parsed(
                 merge(DEFAULT_INSTAGRAM_REELS, o.optJSONArray("instagram_reels")),
                 merge(DEFAULT_INSTAGRAM_STORIES, o.optJSONArray("instagram_stories")),
-                merge(DEFAULT_YOUTUBE_SHORTS, o.optJSONArray("youtube_shorts"))
+                merge(DEFAULT_YOUTUBE_SHORTS, o.optJSONArray("youtube_shorts")),
+                merge(DEFAULT_FACEBOOK_REELS, o.optJSONArray("facebook_reels")),
+                merge(DEFAULT_TIKTOK_FEED, o.optJSONArray("tiktok_feed"))
             )
         } catch (_: Exception) {
             DEFAULTS

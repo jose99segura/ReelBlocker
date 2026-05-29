@@ -26,6 +26,13 @@
     <string name="badge_pro">Pro</string>
     <string name="chip_upgrade">Upgrade</string>
 
+    <!-- Profile level (lifetime XP) -->
+    <string name="profile_level_chip">Lv. %1$d</string>
+    <string name="profile_level_dialog_title">Level %1$d</string>
+    <string name="profile_xp_progress">%1$d / %2$d XP</string>
+    <string name="profile_xp_to_next">%1$d XP to Level %2$d</string>
+    <string name="profile_level_dialog_body">Earn XP every day you stay protected, every Reel or Short blocked, and each time a mascot graduates. Your level never goes down — not even if your streak breaks.</string>
+
     <string name="home_action_accessibility_title">Turn on the accessibility service</string>
     <string name="home_action_accessibility_body">Without this, Basta! can\'t detect Reels. Tap and enable Basta! in the list.</string>
     <string name="home_action_accessibility_cta">Open settings</string>
@@ -115,6 +122,7 @@
     <string name="stats_hero_subtitle">Reels and Shorts dodged</string>
     <string name="stats_distribution_instagram">Instagram</string>
     <string name="stats_distribution_youtube">YouTube</string>
+    <string name="stats_distribution_tiktok">TikTok</string>
     <string name="stats_section_weekly">Last 7 days</string>
     <string name="stats_no_history">No history yet. Come back tomorrow — data builds up.</string>
     <string name="stats_chart_today">Today</string>

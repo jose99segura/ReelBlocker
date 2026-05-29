@@ -325,7 +325,7 @@ private fun MascotWithRing(
         modifier = Modifier.size(width = 308.dp, height = 308.dp),
         contentAlignment = Alignment.TopCenter
     ) {
-        // 1) Anillo segmentado — un puntito por día (30 hacia la graduación).
+        // 1) Anillo segmentado — un puntito por día hasta la graduación (goal = MascotLevel.ADULT.minDays).
         //    Los días completados se encienden con el accent color de la especie;
         //    los pendientes quedan como track tenue. Feedback claro desde día 1.
         val trackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.14f)

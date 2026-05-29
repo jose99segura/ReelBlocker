@@ -33,10 +33,9 @@ Además del bloqueo, Basta! tiene una capa de gamificación:
 - **Tu mascota evoluciona**:
   - Día 0 → Huevo
   - Día 3 → Se agrieta
-  - Día 7 → Cría
-  - Día 14 → Juvenil
-  - Día 30 → Adulto
-- **Graduación a los 30 días**: tu mascota se va a tu inventario y emerge un
+  - Día 8 → Cría
+  - Día 21 → Adulta
+- **Graduación a los 21 días** (donde se consolida el hábito): tu mascota se va a tu inventario y emerge un
   huevo nuevo de otra especie. Hay **5 especies** que coleccionar (Clásica,
   Dragón, Tortuga, Lobo, Búho). La siguiente sale aleatoria entre las que aún
   no tengas; cuando están las 5, se permite repetir.
@@ -108,7 +107,7 @@ fires the system Back action when its accessibility service detects you're on
 the short-video screen. Everything else in those apps works normally.
 
 The app also has a gamification layer: a daily streak with an evolving mascot
-that **graduates at day 30** and is archived in your Pokédex-style inventory,
+that **graduates at day 21** and is archived in your Pokédex-style inventory,
 making room for a new egg of a different species. There are 5 species to
 collect. The UI is available in **Spanish and English**, following the
 system locale.

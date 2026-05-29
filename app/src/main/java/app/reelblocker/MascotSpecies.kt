@@ -70,7 +70,7 @@ enum class MascotSpecies(
 
 // ============================================================
 //   Dragon — cuerpo redondo con cuernos siempre, alas
-//   membranosas desde JUVENILE, cola corta.
+//   membranosas desde ADULT, cola corta.
 // ============================================================
 
 internal fun DrawScope.drawDragonBody(level: MascotLevel, sad: Boolean, eyeOpenness: Float = 1f) {
@@ -134,7 +134,7 @@ internal fun DrawScope.drawDragonBody(level: MascotLevel, sad: Boolean, eyeOpenn
         drawPath(tri, color = spikeColor)
     }
 
-    drawFace(cx, cy, bodySize, level = level, sad = sad, eyeOpenness = eyeOpenness)
+    drawFace(cx, cy, bodySize, sad = sad, eyeOpenness = eyeOpenness)
 }
 
 // ============================================================
@@ -216,7 +216,6 @@ internal fun DrawScope.drawTortugaBody(level: MascotLevel, sad: Boolean, eyeOpen
         cx = cx - bodyW * 0.45f,
         cy = cy + bodyH * 0.05f,
         bodySize = bodyW * 0.30f,
-        level = level,
         sad = sad,
         eyeOpenness = eyeOpenness
     )
@@ -281,7 +280,7 @@ internal fun DrawScope.drawLoboBody(level: MascotLevel, sad: Boolean, eyeOpennes
         size = Size(bodySize * 0.36f, bodySize * 0.26f)
     )
 
-    drawFace(cx, cy, bodySize, level = level, sad = sad, customNose = true, eyeOpenness = eyeOpenness)
+    drawFace(cx, cy, bodySize, sad = sad, customNose = true, eyeOpenness = eyeOpenness)
 }
 
 // ============================================================
@@ -471,7 +470,6 @@ internal fun DrawScope.drawFace(
     cx: Float,
     cy: Float,
     bodySize: Float,
-    level: MascotLevel,
     sad: Boolean,
     customNose: Boolean = false,
     eyeOpenness: Float = 1f

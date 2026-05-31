@@ -1,9 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  isAccessibilityTool="true" declares Basta! as a genuine assistive technology
+  (target user: ADHD, anxiety, self-control difficulties with short-form video).
+  Required to survive Android 17 Advanced Protection Mode (revokes accessibility
+  from non-tool apps) and Google Play's 2025+ enforcement against autonomous-action
+  uses of AccessibilityService. Must be defended in Play Console review with
+  matching copy in the listing.
+-->
 <accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
     android:accessibilityEventTypes="typeWindowStateChanged|typeWindowContentChanged|typeViewScrolled"
     android:accessibilityFeedbackType="feedbackGeneric"
     android:accessibilityFlags="flagDefault|flagRetrieveInteractiveWindows|flagReportViewIds"
     android:canRetrieveWindowContent="true"
     android:canPerformGestures="true"
+    android:isAccessibilityTool="true"
     android:notificationTimeout="100"
     android:description="@string/service_description" />

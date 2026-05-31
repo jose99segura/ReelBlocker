@@ -243,13 +243,10 @@ private fun AppRoot(onResetOnboarding: () -> Unit) {
         }
 
         if (showPaywall) {
-            // Hasta que Fase 1 entregue ProTier multi-SKU, todos los tiers
-            // disparan el flujo existente single-SKU. La selección visual del
-            // tier solo sirve para que el usuario *vea* el modelo de pricing.
             PremiumPaywallScreen(
                 onClose = { showPaywall = false },
                 onContinueFree = { showPaywall = false },
-                onPurchase = { _ ->
+                onPurchase = {
                     (ctx as? Activity)?.let { Premium.launchPurchase(it) }
                     showPaywall = false
                 },

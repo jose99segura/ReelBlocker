@@ -41,6 +41,7 @@ import androidx.compose.material.icons.outlined.PrivacyTip
 import androidx.compose.material.icons.outlined.Restore
 import androidx.compose.material.icons.outlined.School
 import androidx.compose.material.icons.outlined.Shield
+import androidx.compose.material.icons.outlined.Stars
 import androidx.compose.material.icons.outlined.WorkspacePremium
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -274,11 +275,31 @@ fun SettingsScreen(
                     )
                 }
             } else {
+                val purchaseMs = Premium.purchaseDateMs(ctx)
+                val founder = Premium.isFounder(ctx)
+                val dateStr = remember(purchaseMs) {
+                    purchaseMs?.let {
+                        java.time.Instant.ofEpochMilli(it)
+                            .atZone(java.time.ZoneId.systemDefault())
+                            .toLocalDate()
+                            .format(
+                                java.time.format.DateTimeFormatter
+                                    .ofLocalizedDate(java.time.format.FormatStyle.MEDIUM)
+                                    .withLocale(java.util.Locale.getDefault())
+                            )
+                    }
+                }
+                val proSubtitle = when {
+                    dateStr == null -> stringResource(R.string.settings_row_pro_on_subtitle_generic)
+                    founder -> stringResource(R.string.settings_row_pro_on_subtitle_founder, dateStr)
+                    else -> stringResource(R.string.settings_row_pro_on_subtitle, dateStr)
+                }
                 SettingsCard {
                     SettingsRow(
-                        icon = Icons.Outlined.WorkspacePremium,
-                        title = stringResource(R.string.settings_row_pro_on_title),
-                        subtitle = stringResource(R.string.settings_row_pro_on_subtitle),
+                        icon = if (founder) Icons.Outlined.Stars else Icons.Outlined.WorkspacePremium,
+                        title = if (founder) stringResource(R.string.settings_row_pro_on_title_founder)
+                                else stringResource(R.string.settings_row_pro_on_title),
+                        subtitle = proSubtitle,
                         accent = true
                     )
                 }

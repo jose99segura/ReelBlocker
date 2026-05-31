@@ -34,12 +34,28 @@ object Premium {
     private const val TAG = "BastaBilling"
     private const val PREFS = "reelblocker_prefs"
     private const val KEY_IS_PRO = "is_pro_purchased"
+    private const val KEY_PURCHASE_DATE_MS = "pro_purchase_date_ms"
+    private const val KEY_IS_FOUNDER = "pro_is_founder"
 
     /** Precio de respaldo si Google aun no ha devuelto el ProductDetails. */
     const val PRO_PRICE = "4,99 €"
 
     /** Product ID configurado en Play Console. */
     const val PRO_PRODUCT_ID = "basta_pro"
+
+    /**
+     * Founder Edition cutoff. Cualquier compra de Pro antes de este instante
+     * marca al usuario como Founder permanente (badge en Ajustes, copy
+     * "Founder · Pro since X" en lugar de "Pro since X"). Crea urgencia
+     * legítima al lanzamiento sin truco — la fecha es pública y fija.
+     *
+     * 1_772_496_000_000L = 2027-03-01 00:00 UTC (~6 meses tras el lanzamiento
+     * previsto Q3-Q4 2026). Ajustar este valor antes de release si el
+     * lanzamiento se mueve. Sin servidor, esto es lo más honesto que se
+     * puede hacer: rank global numerado requiere backend (ver memoria
+     * project_launch_marketing).
+     */
+    const val FOUNDER_CUTOFF_MS = 1_772_496_000_000L
 
     /** Estado vivo para Compose. */
     var isProLive by mutableStateOf(false)
@@ -55,6 +71,18 @@ object Premium {
     fun isPro(ctx: Context): Boolean =
         ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
             .getBoolean(KEY_IS_PRO, false)
+
+    /** Millis epoch de cuando el usuario activó Pro. Null si nunca compró. */
+    fun purchaseDateMs(ctx: Context): Long? {
+        val ms = ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .getLong(KEY_PURCHASE_DATE_MS, 0L)
+        return if (ms == 0L) null else ms
+    }
+
+    /** True si la compra cayó dentro de la ventana Founder. Permanente. */
+    fun isFounder(ctx: Context): Boolean =
+        ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .getBoolean(KEY_IS_FOUNDER, false)
 
     private fun setProPersisted(ctx: Context, value: Boolean) {
         ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
@@ -216,6 +244,16 @@ object Premium {
 
     private fun grantPro(ctx: Context) {
         setProPersisted(ctx, true)
+        // Stamp purchase date + founder flag una sola vez, en la primera
+        // concesión. Restores y re-queries no deben pisarlo.
+        val prefs = ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        if (prefs.getLong(KEY_PURCHASE_DATE_MS, 0L) == 0L) {
+            val now = System.currentTimeMillis()
+            prefs.edit()
+                .putLong(KEY_PURCHASE_DATE_MS, now)
+                .putBoolean(KEY_IS_FOUNDER, now < FOUNDER_CUTOFF_MS)
+                .apply()
+        }
         isProLive = true
     }
 

@@ -6,7 +6,37 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ReelBlocker (in-app brand: **Basta!**) is a single-module Android app that detects when the user is inside Instagram Reels or YouTube Shorts and immediately fires the system Back action to leave that surface. It does not block the host apps themselves — only the short-video surface inside them.
 
-On top of the core detection, the app has a gamification layer: a daily streak with an evolving mascot, a 5-species **Pokédex-style collection** unlocked by reaching day 21 of an active streak (where the habit consolidates) (mascot graduates → archived in inventory → new egg of a different species emerges), and full stats.
+On top of the core detection, the app has a gamification layer: a daily streak with an evolving mascot, a **Pokédex-style collection** of mascot species unlocked by reaching day 21 of an active streak (where the habit consolidates) (mascot graduates → archived in inventory → new egg of a different species emerges), and full stats. The collection ships with 5 species (Classic, Dragon, Turtle, Wolf, Owl) and is designed to grow over time — new species will be added in future releases as the main "what's new" hook for retention and Pro value.
+
+## Play Store positioning (load-bearing — do not soften)
+
+Basta! is declared as a real assistive technology — `android:isAccessibilityTool="true"` in `res/xml/accessibility_config.xml`. This is the only thing standing between the app and (a) Google Play's 2025+ enforcement against "autonomous-action" uses of AccessibilityService and (b) Android 17's Advanced Protection Mode, which automatically revokes accessibility permission from apps not declared as tools.
+
+The flag must be defended in Play Console review with matching listing copy. The framing is **"assistive tool for people with ADHD, anxiety, or self-control difficulties around addictive short-form video"** — this language is already in `service_description` (EN + ES) and must propagate to the Play Store description, screenshots and category. Do not revert to generic "anti-distraction app" / "block Reels" copy in user-visible system surfaces (service description, Play listing) — the in-app emotional copy ("Scrolling steals your life", manifesto) is fine and stays.
+
+## Monetization model (decided)
+
+- **One-time IAP only**, no subscription. `Premium.PRO_PRICE = 4,99 €`. The `PremiumPaywallScreen` is single-SKU — it renders headline, comparison table, privacy promise, and a sticky CTA showing the dynamic Play Billing price (`Premium.priceLabel` with `PRO_PRICE` fallback). No tier selection, no trial.
+- **No ads, ever.** eCPM in ES/LATAM doesn't justify the brand cost; contradicts the manifesto.
+- **Cosmetic IAPs are the planned second monetization layer** (extra mascot species packs at ~2,99€ each, themed: mythological, space, etc.). Not yet built.
+- **Regional pricing** via Play Console is on the roadmap (LATAM lower, Nordics/UK higher) — Play handles auto-conversion but per-country overrides extract more EU value without hurting LATAM conversion.
+
+### Free / Pro split rule (stable across future species additions)
+
+- **Free tier (frozen at 2 base species forever):** core block (Reels + Shorts + TikTok), streak + mascot evolution, **Classic + Turtle** as the only free-collectible species, basic stats (today + 7-day chart + record), tip quotes, Auto Backup.
+- **Pro tier (grows over time):** the remaining 3 v1 species (**Dragon, Wolf, Owl**) plus **every future species added in updates**. Also: 10-min daily break without streak loss, allow Reels from DMs, block Stories, advanced stats, widget. The species list growing over time is the main retention/Pro-value loop — existing Pro buyers get new species free as part of their one-time purchase, which compounds the perceived value of upgrading.
+- Core block is **never** behind the paywall. Pro is expansion, not extortion. Reviews are downstream of this discipline.
+
+### Founder Edition (launch lever)
+
+Any Pro purchase made before `Premium.FOUNDER_CUTOFF_MS` (currently 2027-03-01 00:00 UTC — bump if launch slips) flags the user as a Founder permanently. Settings shows "Miembro Founder" / "Founder member" with a stars icon and "Edición Founder · Pro desde [date]" subtitle instead of the standard "Pro desde [date]". `Premium.purchaseDateMs(ctx)` and `Premium.isFounder(ctx)` are the canonical getters; both backed by `reelblocker_prefs` and stamped exactly once inside `grantPro` on the first successful purchase grant (restores and re-queries don't overwrite).
+
+The Founder mechanic is the headline call-to-action for the launch marketing push: scarcity is honest (a public, fixed date — not a fake countdown), it rewards early supporters without locking them into anything renewable, and it gives the first social-media wave of users an artifact ("Founder member" badge) to screenshot and share. See memory `project_launch_marketing` for the full launch playbook.
+
+**Future expansions of the Founder identity (deferred, document only):**
+- Exclusive shiny Clásica variant for Founders (requires Canvas drawing work in `MascotSpecies.kt`).
+- Global "Pro #N" rank requires a backend (architecture says no server today); revisit only if there is a clear product reason.
+- Founders-only annual themed packs as a recurring perk.
 
 ## Build / run
 

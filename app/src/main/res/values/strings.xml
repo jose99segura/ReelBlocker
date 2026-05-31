@@ -4,7 +4,7 @@
     <string name="app_name">Basta!</string>
     <string name="app_tagline">Scrolling steals your life.</string>
     <string name="service_label">Basta! — Reel Blocker</string>
-    <string name="service_description">Helps you avoid falling into Instagram Reels and YouTube Shorts. When it detects you opened them, it closes that section so you can keep doing what you were doing. Nothing is sent off the device.</string>
+    <string name="service_description">Assistive tool for people with ADHD, anxiety, or self-control difficulties around addictive short-form video. Detects when you enter Instagram Reels or YouTube Shorts and assists you out of that section. Reads only screen identifiers, never message content. Everything stays on your device.</string>
     <string name="toast_blocked">Enough!</string>
 
     <!-- ==================== Bottom navigation ==================== -->
@@ -202,7 +202,10 @@
     <string name="settings_row_disable_subtitle">Opens accessibility settings to turn off the service. You\'ll break your streak and your mascot will go back to an egg.</string>
 
     <string name="settings_row_pro_on_title">Pro active</string>
-    <string name="settings_row_pro_on_subtitle">You have access to all advanced options</string>
+    <string name="settings_row_pro_on_title_founder">Founder member</string>
+    <string name="settings_row_pro_on_subtitle">Pro since %1$s</string>
+    <string name="settings_row_pro_on_subtitle_founder">Founder edition · Pro since %1$s</string>
+    <string name="settings_row_pro_on_subtitle_generic">You have access to all advanced options</string>
     <string name="settings_row_pro_off_title">See Pro benefits</string>
     <string name="settings_row_pro_off_subtitle">One-time payment — no subscription</string>
     <string name="settings_row_restore_title">Restore purchase</string>
@@ -256,42 +259,23 @@
 
     <!-- ==================== Premium paywall (full-screen) ==================== -->
     <string name="ppw_headline">Reclaim what scrolling stole from you.</string>
-    <string name="ppw_sub">Three more species. Real breaks. The whole bestiary.</string>
+    <string name="ppw_sub">All current and future species. Real breaks. The whole bestiary.</string>
     <string name="ppw_compare_title">What changes with Pro</string>
     <string name="ppw_compare_free">Free</string>
     <string name="ppw_compare_pro">Pro</string>
     <string name="ppw_compare_block">Reels &amp; Shorts blocking</string>
     <string name="ppw_compare_species">Collectible species</string>
-    <string name="ppw_compare_species_free">2 of 5</string>
-    <string name="ppw_compare_species_pro">5 of 5 + shiny</string>
+    <string name="ppw_compare_species_free">2 species</string>
+    <string name="ppw_compare_species_pro">All + future drops</string>
     <string name="ppw_compare_breaks">Scheduled breaks</string>
     <string name="ppw_compare_stats">Advanced stats &amp; export</string>
     <string name="ppw_compare_widget">Home-screen widget</string>
     <string name="ppw_compare_no">—</string>
     <string name="ppw_compare_yes">✓</string>
 
-    <string name="ppw_tier_weekly_label">Weekly</string>
-    <string name="ppw_tier_monthly_label">Monthly</string>
-    <string name="ppw_tier_yearly_label">Yearly</string>
-    <string name="ppw_tier_lifetime_label">Lifetime</string>
-
-    <string name="ppw_tier_weekly_price">€2.49 / wk</string>
-    <string name="ppw_tier_monthly_price">€3.99 / mo</string>
-    <string name="ppw_tier_yearly_price">€19.99 / yr</string>
-    <string name="ppw_tier_lifetime_price">€39.99</string>
-
-    <string name="ppw_tier_yearly_badge">BEST VALUE</string>
-    <string name="ppw_tier_yearly_save">Save 58% vs monthly</string>
-    <string name="ppw_tier_yearly_trial">7 days free, then €19.99/yr</string>
-    <string name="ppw_tier_lifetime_sub">One-time payment</string>
-    <string name="ppw_tier_weekly_sub">Just to see</string>
-
-    <string name="ppw_cta_trial">Start 7-day free trial</string>
     <string name="ppw_cta_buy">Unlock Pro</string>
     <string name="ppw_secondary_continue_free">Continue free with another %1$s</string>
-    <string name="ppw_secondary_close">Maybe later</string>
     <string name="ppw_restore">Restore purchase</string>
-    <string name="ppw_play_disclaimer">Managed by Google Play. Cancel anytime in the Play Store.</string>
     <string name="cd_paywall_close">Close</string>
     <string name="settings_app_status_blocking">Blocking Reels</string>
     <string name="settings_app_status_disabled">Disabled</string>

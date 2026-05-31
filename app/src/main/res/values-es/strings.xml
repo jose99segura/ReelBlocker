@@ -4,7 +4,7 @@
     <string name="app_name">Basta!</string>
     <string name="app_tagline">El scroll te roba la vida.</string>
     <string name="service_label">Basta! — Reel Blocker</string>
-    <string name="service_description">Te ayuda a no caer en Reels de Instagram y Shorts de YouTube. Cuando detecta que entras, cierra esa sección para que sigas con lo que estabas haciendo. No envía nada fuera del dispositivo.</string>
+    <string name="service_description">Herramienta de asistencia para personas con TDAH, ansiedad o dificultades de autocontrol ante el vídeo corto adictivo. Detecta cuando entras en Reels de Instagram o Shorts de YouTube y te asiste para salir de esa sección. Solo lee identificadores de pantalla, nunca el contenido de mensajes. Todo se queda en tu dispositivo.</string>
     <string name="toast_blocked">¡Basta!</string>
 
     <!-- ==================== Bottom navigation ==================== -->
@@ -210,7 +210,10 @@
     <string name="settings_row_disable_subtitle">Abre los ajustes de accesibilidad para apagar el servicio. Romperás tu racha y tu mascota volverá a huevo.</string>
 
     <string name="settings_row_pro_on_title">Pro activo</string>
-    <string name="settings_row_pro_on_subtitle">Tienes acceso a todas las opciones avanzadas</string>
+    <string name="settings_row_pro_on_title_founder">Miembro Founder</string>
+    <string name="settings_row_pro_on_subtitle">Pro desde %1$s</string>
+    <string name="settings_row_pro_on_subtitle_founder">Edición Founder · Pro desde %1$s</string>
+    <string name="settings_row_pro_on_subtitle_generic">Tienes acceso a todas las opciones avanzadas</string>
     <string name="settings_row_pro_off_title">Ver beneficios Pro</string>
     <string name="settings_row_pro_off_subtitle">Pago único — sin suscripción</string>
     <string name="settings_row_restore_title">Restaurar compra</string>
@@ -264,42 +267,23 @@
 
     <!-- ==================== Paywall premium (full-screen) ==================== -->
     <string name="ppw_headline">Recupera lo que el scroll te ha robado.</string>
-    <string name="ppw_sub">Tres especies más. Descansos de verdad. El Bestiario completo.</string>
+    <string name="ppw_sub">Todas las especies actuales y futuras. Descansos de verdad. El Bestiario completo.</string>
     <string name="ppw_compare_title">Qué cambia con Pro</string>
     <string name="ppw_compare_free">Free</string>
     <string name="ppw_compare_pro">Pro</string>
     <string name="ppw_compare_block">Bloqueo de Reels y Shorts</string>
     <string name="ppw_compare_species">Especies coleccionables</string>
-    <string name="ppw_compare_species_free">2 de 5</string>
-    <string name="ppw_compare_species_pro">5 de 5 + shiny</string>
+    <string name="ppw_compare_species_free">2 especies</string>
+    <string name="ppw_compare_species_pro">Todas + nuevas</string>
     <string name="ppw_compare_breaks">Descansos programables</string>
     <string name="ppw_compare_stats">Estadísticas avanzadas y export</string>
     <string name="ppw_compare_widget">Widget en pantalla de inicio</string>
     <string name="ppw_compare_no">—</string>
     <string name="ppw_compare_yes">✓</string>
 
-    <string name="ppw_tier_weekly_label">Semanal</string>
-    <string name="ppw_tier_monthly_label">Mensual</string>
-    <string name="ppw_tier_yearly_label">Anual</string>
-    <string name="ppw_tier_lifetime_label">Lifetime</string>
-
-    <string name="ppw_tier_weekly_price">2,49 € / sem</string>
-    <string name="ppw_tier_monthly_price">3,99 € / mes</string>
-    <string name="ppw_tier_yearly_price">19,99 € / año</string>
-    <string name="ppw_tier_lifetime_price">39,99 €</string>
-
-    <string name="ppw_tier_yearly_badge">MEJOR VALOR</string>
-    <string name="ppw_tier_yearly_save">Ahorra 58% vs mensual</string>
-    <string name="ppw_tier_yearly_trial">7 días gratis, luego 19,99 €/año</string>
-    <string name="ppw_tier_lifetime_sub">Pago único</string>
-    <string name="ppw_tier_weekly_sub">Solo para probar</string>
-
-    <string name="ppw_cta_trial">Empezar 7 días gratis</string>
     <string name="ppw_cta_buy">Desbloquear Pro</string>
     <string name="ppw_secondary_continue_free">Seguir gratis con otra %1$s</string>
-    <string name="ppw_secondary_close">Quizás más tarde</string>
     <string name="ppw_restore">Restaurar compra</string>
-    <string name="ppw_play_disclaimer">Gestionado por Google Play. Cancela cuando quieras en la Play Store.</string>
     <string name="cd_paywall_close">Cerrar</string>
     <string name="settings_app_status_blocking">Bloqueando Reels</string>
     <string name="settings_app_status_disabled">Desactivado</string>

@@ -29,7 +29,16 @@ object Streak {
     private const val KEY_RECORD_DATE = "streak_record_date"
     private const val KEY_LAST_SEEN_PROTECTING = "streak_last_seen_protecting"
     private const val KEY_PENDING_EVOLUTION_FROM = "streak_pending_evolution_from"
+    private const val KEY_PENDING_MILESTONE_DAY = "streak_pending_milestone_day"
     private const val KEY_MIGRATION_V21_DONE = "migration_v21_done"
+
+    /**
+     * Días intermedios de la racha que disparan una celebración compartible
+     * (no la graduación del día 21 — esa es ceremonial y vive aparte).
+     * Pensadas como hooks de virality orgánica: el usuario al día 7 / 14 ve
+     * un share-prompt mientras la motivación sigue alta.
+     */
+    private val MILESTONE_DAYS = setOf(7, 14)
 
     data class State(
         val count: Int,
@@ -96,6 +105,13 @@ object Streak {
             Log.d(TAG, "tick: evolucion ${oldLevel.name} -> ${newLevel.name} (dia $newCount)")
         }
 
+        // Marcar milestone pendiente solo al cruzar el día por primera vez en
+        // esta racha (newCount > currentCount evita re-disparar en mismo día).
+        if (newCount > currentCount && newCount in MILESTONE_DAYS) {
+            editor.putInt(KEY_PENDING_MILESTONE_DAY, newCount)
+            Log.d(TAG, "tick: milestone pendiente día $newCount")
+        }
+
         editor.apply()
 
         // XP de perfil: hemos pasado el guard de no-op, así que se registra un
@@ -134,6 +150,9 @@ object Streak {
         if (newLevel.ordinal > oldLevel.ordinal) {
             editor.putString(KEY_PENDING_EVOLUTION_FROM, oldLevel.name)
         }
+        if (days > currentCount && days in MILESTONE_DAYS) {
+            editor.putInt(KEY_PENDING_MILESTONE_DAY, days)
+        }
         editor.apply()
         if (newLevel == MascotLevel.ADULT && oldLevel != MascotLevel.ADULT) {
             Collection.markPendingGraduation(ctx, Collection.currentSpecies(ctx))
@@ -150,8 +169,22 @@ object Streak {
             .putInt(KEY_COUNT, 0)
             .remove(KEY_LAST_DATE)
             .remove(KEY_PENDING_EVOLUTION_FROM)
+            .remove(KEY_PENDING_MILESTONE_DAY)
             .apply()
         Log.d(TAG, "breakStreak: $previous -> 0 (motivo: $reason)")
+    }
+
+    /** Día del milestone pendiente (7 o 14), o null si no hay. */
+    fun pendingMilestone(ctx: Context): Int? {
+        val v = prefs(ctx).getInt(KEY_PENDING_MILESTONE_DAY, 0)
+        return if (v == 0) null else v
+    }
+
+    /** Lee y limpia el milestone pendiente. */
+    fun consumePendingMilestone(ctx: Context): Int? {
+        val v = pendingMilestone(ctx) ?: return null
+        prefs(ctx).edit().remove(KEY_PENDING_MILESTONE_DAY).apply()
+        return v
     }
 
     fun current(ctx: Context): State {

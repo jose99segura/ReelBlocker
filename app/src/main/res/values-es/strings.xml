@@ -285,6 +285,9 @@
     <string name="ppw_secondary_continue_free">Seguir gratis con otra %1$s</string>
     <string name="ppw_restore">Restaurar compra</string>
     <string name="cd_paywall_close">Cerrar</string>
+
+    <string name="paywall_founder_banner_title">Edición Founder</string>
+    <string name="paywall_founder_banner_body">El precio sube a %1$s tras el %2$s</string>
     <string name="settings_app_status_blocking">Bloqueando Reels</string>
     <string name="settings_app_status_disabled">Desactivado</string>
     <string name="settings_app_status_show_advanced">Opciones avanzadas</string>

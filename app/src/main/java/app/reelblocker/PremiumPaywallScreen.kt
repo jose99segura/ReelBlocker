@@ -3,7 +3,6 @@ package app.reelblocker
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,12 +17,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.Stars
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -35,13 +34,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -49,15 +44,18 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 /**
  * Paywall full-screen del único SKU one-time (Basta! Pro). El precio se
  * lee de [Premium.priceLabel] (set por Play Billing tras queryProductDetails)
- * con fallback a [Premium.PRO_PRICE]. No hay tiers, ni trial, ni selección:
+ * con fallback a [Premium.fallbackPrice]. No hay tiers, ni trial, ni selección:
  * la decisión es comprar o no.
+ *
+ * Durante la ventana Founder (hasta [Premium.FOUNDER_CUTOFF_MS]) se renderiza
+ * un banner de ancla mostrando que el precio sube tras esa fecha, para que
+ * la oferta actual se perciba como ventajosa sin trucos.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -73,7 +71,8 @@ internal fun PremiumPaywallScreen(
     val ctx = androidx.compose.ui.platform.LocalContext.current
     // Fallback: si no se pasó la especie, leer la actual desde Collection.
     val freeSpecies = nextFreeSpecies ?: Collection.currentSpecies(ctx)
-    val price = Premium.priceLabel ?: Premium.PRO_PRICE
+    val price = Premium.priceLabel ?: Premium.fallbackPrice()
+    val inFounderWindow = System.currentTimeMillis() < Premium.FOUNDER_CUTOFF_MS
 
     Scaffold(
         topBar = {
@@ -127,6 +126,11 @@ internal fun PremiumPaywallScreen(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
             )
+
+            if (inFounderWindow) {
+                Spacer(Modifier.height(20.dp))
+                FounderAnchorBanner()
+            }
 
             Spacer(Modifier.height(28.dp))
             ComparisonCard()
@@ -364,6 +368,67 @@ private fun StickyCta(
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+        }
+    }
+}
+
+/**
+ * Banner de ancla mostrado en el paywall solo durante la ventana Founder.
+ * Comunica que el precio actual es promocional ("sube a 6,99€ tras 1 mar 2027")
+ * sin trucos: la fecha de cutoff es pública y fija en [Premium.FOUNDER_CUTOFF_MS].
+ */
+@Composable
+private fun FounderAnchorBanner() {
+    val cutoffDate = remember {
+        java.time.Instant.ofEpochMilli(Premium.FOUNDER_CUTOFF_MS)
+            .atZone(java.time.ZoneId.systemDefault())
+            .toLocalDate()
+            .format(
+                java.time.format.DateTimeFormatter
+                    .ofLocalizedDate(java.time.format.FormatStyle.MEDIUM)
+                    .withLocale(java.util.Locale.getDefault())
+            )
+    }
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(14.dp),
+        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .border(
+                    1.dp,
+                    MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                    RoundedCornerShape(14.dp)
+                )
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Stars,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(20.dp)
+            )
+            Spacer(Modifier.width(12.dp))
+            Column(modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    text = stringResource(R.string.paywall_founder_banner_title),
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Text(
+                    text = stringResource(
+                        R.string.paywall_founder_banner_body,
+                        Premium.POST_FOUNDER_PRICE,
+                        cutoffDate
+                    ),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
     }
 }

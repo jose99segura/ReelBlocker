@@ -16,7 +16,7 @@ The flag must be defended in Play Console review with matching listing copy. The
 
 ## Monetization model (decided)
 
-- **One-time IAP only**, no subscription. `Premium.PRO_PRICE = 4,99 €`. The `PremiumPaywallScreen` is single-SKU — it renders headline, comparison table, privacy promise, and a sticky CTA showing the dynamic Play Billing price (`Premium.priceLabel` with `PRO_PRICE` fallback). No tier selection, no trial.
+- **One-time IAP only**, no subscription. `Premium.FOUNDER_PRICE = "4,99 €"` during the Founder window, `Premium.POST_FOUNDER_PRICE = "6,99 €"` after — `Premium.fallbackPrice()` returns the right one based on `FOUNDER_CUTOFF_MS`. The paywall renders headline, a Founder anchor banner (only during the window — "Price rises to 6,99 € after [date]"), comparison table, privacy promise, and a sticky CTA showing the dynamic Play Billing price (`Premium.priceLabel` with `fallbackPrice()` fallback). No tier selection, no trial.
 - **No ads, ever.** eCPM in ES/LATAM doesn't justify the brand cost; contradicts the manifesto.
 - **Cosmetic IAPs are the planned second monetization layer** (extra mascot species packs at ~2,99€ each, themed: mythological, space, etc.). Not yet built.
 - **Regional pricing** via Play Console is on the roadmap (LATAM lower, Nordics/UK higher) — Play handles auto-conversion but per-country overrides extract more EU value without hurting LATAM conversion.

@@ -37,8 +37,22 @@ object Premium {
     private const val KEY_PURCHASE_DATE_MS = "pro_purchase_date_ms"
     private const val KEY_IS_FOUNDER = "pro_is_founder"
 
-    /** Precio de respaldo si Google aun no ha devuelto el ProductDetails. */
-    const val PRO_PRICE = "4,99 €"
+    /** Precio durante la ventana Founder (display fallback). */
+    const val FOUNDER_PRICE = "4,99 €"
+
+    /** Precio post-cutoff. Anchor mostrado en el banner Founder y fallback
+     *  cuando la ventana ha pasado. */
+    const val POST_FOUNDER_PRICE = "6,99 €"
+
+    /**
+     * Fallback display si Play Billing aún no ha devuelto ProductDetails.
+     * Se ajusta automáticamente cuando la ventana Founder pasa, para que el
+     * fallback siempre coincida con lo que Play Console debería estar
+     * cobrando (el dev tiene que subir Play Console al pasar la ventana).
+     */
+    fun fallbackPrice(): String =
+        if (System.currentTimeMillis() < FOUNDER_CUTOFF_MS) FOUNDER_PRICE
+        else POST_FOUNDER_PRICE
 
     /** Product ID configurado en Play Console. */
     const val PRO_PRODUCT_ID = "basta_pro"

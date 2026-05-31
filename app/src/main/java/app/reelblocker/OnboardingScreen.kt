@@ -1,7 +1,11 @@
 package app.reelblocker
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.EaseOutCubic
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,7 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -50,6 +54,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import kotlinx.coroutines.launch
@@ -76,7 +81,9 @@ private data class OnboardingPage(
     val source: String? = null,
     val isWordmark: Boolean = false,
     val statusContent: (@Composable (OnboardingActions, Boolean) -> Unit)? = null,
-    val isGranted: ((OnboardingActions) -> Boolean)? = null
+    val isGranted: ((OnboardingActions) -> Boolean)? = null,
+    /** Contenido visual custom que se renderiza ENTRE el título y el body. */
+    val customContent: (@Composable () -> Unit)? = null
 )
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -98,31 +105,39 @@ fun OnboardingScreen(
     val accessibilityOn = remember(refreshKey) { actions.isAccessibilityEnabled() }
     val batteryOk = remember(refreshKey) { actions.isBatteryExempt() }
 
+    val p3Granted = stringResource(R.string.onboarding_p3_granted)
+    val p3Cta = stringResource(R.string.onboarding_p3_cta)
+    val p4Granted = stringResource(R.string.onboarding_p4_granted)
+    val p4Cta = stringResource(R.string.onboarding_p4_cta)
     val pages = listOf(
         OnboardingPage(
-            // Wordmark de la marca, no traducible.
-            title = "Basta!",
+            title = stringResource(R.string.onboarding_p1_title),
             body = stringResource(R.string.onboarding_p1_body),
             isWordmark = true
         ),
         OnboardingPage(
             title = stringResource(R.string.onboarding_p2_title),
             body = stringResource(R.string.onboarding_p2_body),
-            statusContent = { acts, granted ->
-                if (granted) GrantedBadge(stringResource(R.string.granted_service_enabled))
-                else Button(onClick = { acts.openAccessibility() }) {
-                    Text(stringResource(R.string.button_open_accessibility))
-                }
-            },
-            isGranted = { it.isAccessibilityEnabled() }
+            customContent = { MascotIntroVisual() }
         ),
         OnboardingPage(
             title = stringResource(R.string.onboarding_p3_title),
             body = stringResource(R.string.onboarding_p3_body),
             statusContent = { acts, granted ->
-                if (granted) GrantedBadge(stringResource(R.string.granted_battery_exempt))
+                if (granted) GrantedBadge(p3Granted)
+                else Button(onClick = { acts.openAccessibility() }) {
+                    Text(p3Cta)
+                }
+            },
+            isGranted = { it.isAccessibilityEnabled() }
+        ),
+        OnboardingPage(
+            title = stringResource(R.string.onboarding_p4_title),
+            body = stringResource(R.string.onboarding_p4_body),
+            statusContent = { acts, granted ->
+                if (granted) GrantedBadge(p4Granted)
                 else Button(onClick = { acts.requestBatteryExemption() }) {
-                    Text(stringResource(R.string.button_exclude_from_battery))
+                    Text(p4Cta)
                 }
             },
             isGranted = { it.isBatteryExempt() }
@@ -153,14 +168,49 @@ fun OnboardingScreen(
             val page = pages[pageIndex]
             val granted = page.isGranted?.invoke(actions) == true
 
+            // Animaciones de entrada — solo wordmark (página 1). Cada elemento
+            // sube de 0.88 a 1.0 en escala + fade-in, en cascada: icono → título
+            // → tagline. En las demás páginas todos los Animatable se quedan
+            // en 1f y no afectan al render.
+            val iconScale = remember { Animatable(if (page.isWordmark) 0.88f else 1f) }
+            val iconAlpha = remember { Animatable(if (page.isWordmark) 0f else 1f) }
+            val titleScale = remember { Animatable(if (page.isWordmark) 0.92f else 1f) }
+            val titleAlpha = remember { Animatable(if (page.isWordmark) 0f else 1f) }
+            val taglineAlpha = remember { Animatable(if (page.isWordmark) 0f else 1f) }
+            LaunchedEffect(pageIndex) {
+                if (page.isWordmark) {
+                    iconScale.snapTo(0.88f); iconAlpha.snapTo(0f)
+                    titleScale.snapTo(0.92f); titleAlpha.snapTo(0f)
+                    taglineAlpha.snapTo(0f)
+                    scope.launch {
+                        iconAlpha.animateTo(1f, tween(500))
+                    }
+                    scope.launch {
+                        iconScale.animateTo(1f, tween(600, easing = EaseOutCubic))
+                    }
+                    kotlinx.coroutines.delay(180)
+                    scope.launch { titleAlpha.animateTo(1f, tween(500)) }
+                    scope.launch { titleScale.animateTo(1f, tween(550, easing = EaseOutCubic)) }
+                    kotlinx.coroutines.delay(260)
+                    taglineAlpha.animateTo(1f, tween(500))
+                }
+            }
+
             Column(
                 modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
                 if (page.isWordmark) {
-                    // Icono de la marca, grande y centrado.
-                    BastaIconBadge(size = 96.dp)
+                    Box(
+                        modifier = Modifier.graphicsLayer {
+                            alpha = iconAlpha.value
+                            scaleX = iconScale.value
+                            scaleY = iconScale.value
+                        }
+                    ) {
+                        BastaIconBadge(size = 96.dp)
+                    }
                     Spacer(Modifier.height(24.dp))
                 }
 
@@ -171,21 +221,32 @@ fun OnboardingScreen(
                     textAlign = TextAlign.Center,
                     color = if (page.isWordmark) MaterialTheme.colorScheme.primary
                             else MaterialTheme.colorScheme.onSurface,
-                    lineHeight = if (page.isWordmark) 80.sp else androidx.compose.ui.unit.TextUnit.Unspecified
+                    lineHeight = if (page.isWordmark) 80.sp else androidx.compose.ui.unit.TextUnit.Unspecified,
+                    modifier = if (page.isWordmark) Modifier.graphicsLayer {
+                        alpha = titleAlpha.value
+                        scaleX = titleScale.value
+                        scaleY = titleScale.value
+                    } else Modifier
                 )
 
                 if (page.isWordmark) {
-                    Spacer(Modifier.height(4.dp))
+                    Spacer(Modifier.height(8.dp))
                     Text(
-                        text = "REEL BLOCKER",
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Medium,
-                        letterSpacing = 0.3.em,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        text = stringResource(R.string.app_tagline),
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Light,
+                        textAlign = TextAlign.Center,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.72f),
+                        modifier = Modifier.graphicsLayer { alpha = taglineAlpha.value }
                     )
                     Spacer(Modifier.height(28.dp))
                 } else {
                     Spacer(Modifier.height(16.dp))
+                }
+
+                if (page.customContent != null) {
+                    page.customContent.invoke()
+                    Spacer(Modifier.height(20.dp))
                 }
 
                 Text(
@@ -198,7 +259,7 @@ fun OnboardingScreen(
                 if (page.source != null) {
                     Spacer(Modifier.height(8.dp))
                     Text(
-                        text = stringResource(R.string.onboarding_source_format, page.source),
+                        text = stringResource(R.string.onboarding_source_prefix, page.source),
                         style = MaterialTheme.typography.labelSmall,
                         textAlign = TextAlign.Center,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
@@ -240,9 +301,77 @@ fun OnboardingScreen(
                 else scope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) }
             }
         ) {
-            Text(stringResource(if (isLast) R.string.onboarding_start else R.string.onboarding_next))
+            Text(if (isLast) stringResource(R.string.onboarding_start) else stringResource(R.string.onboarding_next))
         }
     }
+}
+
+/**
+ * Visual de presentación de la mascota: huevo grande arriba + fila pequeña
+ * de evoluciones con flechas, para que el usuario vea de un vistazo que
+ * hay progresión.
+ */
+@Composable
+private fun MascotIntroVisual() {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        // Huevo principal — animado (respiración).
+        MascotCanvas(
+            level = MascotLevel.EGG,
+            animate = true,
+            modifier = Modifier.size(140.dp)
+        )
+        Spacer(Modifier.height(16.dp))
+
+        // Previsualización de evolución: huevo → se agrieta → cría → adulto.
+        // Termina en ADULT que es el punto de graduación (día 21, donde se crea el hábito).
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            EvolutionPreview(level = MascotLevel.EGG)
+            EvolutionArrow()
+            EvolutionPreview(level = MascotLevel.CRACKING)
+            EvolutionArrow()
+            EvolutionPreview(level = MascotLevel.HATCHLING)
+            EvolutionArrow()
+            EvolutionPreview(level = MascotLevel.ADULT)
+        }
+    }
+}
+
+@Composable
+private fun EvolutionPreview(level: MascotLevel) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        MascotCanvas(
+            level = level,
+            animate = false,
+            modifier = Modifier.size(40.dp)
+        )
+        Spacer(Modifier.height(2.dp))
+        Text(
+            text = when (level) {
+                MascotLevel.EGG -> stringResource(R.string.onboarding_day_label, MascotLevel.EGG.minDays)
+                MascotLevel.CRACKING -> stringResource(R.string.onboarding_day_label, MascotLevel.CRACKING.minDays)
+                MascotLevel.HATCHLING -> stringResource(R.string.onboarding_day_label, MascotLevel.HATCHLING.minDays)
+                MascotLevel.ADULT -> stringResource(R.string.onboarding_day_label, MascotLevel.ADULT.minDays)
+            },
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+@Composable
+private fun EvolutionArrow() {
+    Text(
+        text = "→",
+        style = MaterialTheme.typography.titleSmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+    )
 }
 
 @Composable
@@ -277,10 +406,9 @@ private fun BastaIconBadge(size: Dp) {
     }
 }
 
-/** Resalta digitos + "min" en rojo para impacto visual. Tolerante a sufijos
- *  por locale: "95 min", "95 min/dia", "95 min/day", etc. */
+/** Resalta digitos + "min" en rojo para impacto visual. */
 private fun highlightStats(text: String): AnnotatedString {
-    val regex = Regex("""\d+\s*min(?:/\w+)?""")
+    val regex = Regex("""\d+\s*min(?:/dia)?""")
     return androidx.compose.ui.text.buildAnnotatedString {
         var lastEnd = 0
         regex.findAll(text).forEach { match ->
@@ -301,18 +429,21 @@ private fun highlightStats(text: String): AnnotatedString {
 
 @Composable
 private fun GrantedBadge(text: String) {
+    // Verde "concedido": Material 3 no define un color de éxito, así que es un
+    // verde propio, aclarado en dark para que el texto mantenga contraste.
+    val green = if (isSystemInDarkTheme()) Color(0xFF66BB6A) else Color(0xFF2E7D32)
     Row(verticalAlignment = Alignment.CenterVertically) {
         Box(
             modifier = Modifier
                 .size(12.dp)
                 .clip(CircleShape)
-                .background(Color(0xFF2E7D32))
+                .background(green)
         )
         Spacer(Modifier.size(8.dp))
         Text(
             text = text,
             style = MaterialTheme.typography.titleMedium,
-            color = Color(0xFF2E7D32)
+            color = green
         )
     }
 }

@@ -4,16 +4,26 @@
     <!-- Para que el accesibilidad no muera tras horas: pedir exencion. -->
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
 
+    <!-- Descargar el JSON remoto de hints de deteccion (HintConfig). -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- Avisar cuando la proteccion deja de funcionar (HealthCheck). -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
     <!-- Android 11+ exige declarar explicitamente que paquetes podemos
          consultar via PackageManager. Sin esto, getPackageInfo() devuelve
          "no instalada" aunque la app este instalada. -->
     <queries>
         <package android:name="com.instagram.android" />
         <package android:name="com.google.android.youtube" />
+        <package android:name="com.facebook.katana" />
+        <package android:name="com.zhiliaoapp.musically" />
     </queries>
 
     <application
         android:allowBackup="true"
+        android:fullBackupContent="@xml/backup_rules"
+        android:dataExtractionRules="@xml/data_extraction_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:localeConfig="@xml/locales_config"

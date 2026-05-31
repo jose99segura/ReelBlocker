@@ -7,7 +7,7 @@ import java.time.LocalDate
 
 /**
  * Contador persistente con historial diario. Se guarda como JSON en
- * SharedPreferences: { "yyyy-MM-dd": { "t": total, "ig": instagram, "yt": youtube }, ... }
+ * SharedPreferences: { "yyyy-MM-dd": { "t": total, "ig": instagram, "yt": youtube, "tt": tiktok }, ... }
  *
  * Los dias mas antiguos que MAX_HISTORY_DAYS se purgan al escribir.
  */
@@ -26,11 +26,24 @@ object Stats {
 
     const val PKG_INSTAGRAM = "com.instagram.android"
     const val PKG_YOUTUBE = "com.google.android.youtube"
+    const val PKG_FACEBOOK = "com.facebook.katana"
+    const val PKG_TIKTOK = "com.zhiliaoapp.musically"
+
+    /**
+     * Segundos estimados recuperados por cada bloqueo, usado para la métrica
+     * "tiempo recuperado". Si cambias este valor, actualiza también la caption
+     * `stats_metric_time_recovered_caption` en strings.xml (EN + ES).
+     */
+    const val SECONDS_PER_BLOCK = 30L
 
     /** Apps que el usuario puede activar o desactivar desde la UI. */
+    // Facebook NO se lista: está pausado (sin señal de detección fiable, ver
+    // BlockerService) y un toggle que no hace nada confunde. La infraestructura
+    // de FB (discovery, split de stats) se conserva por si se retoma.
     val BLOCKABLE_APPS = listOf(
         PKG_INSTAGRAM to "Instagram",
-        PKG_YOUTUBE to "YouTube"
+        PKG_YOUTUBE to "YouTube",
+        PKG_TIKTOK to "TikTok"
     )
 
     private fun appEnabledKey(pkg: String) = "app_enabled_$pkg"
@@ -49,6 +62,23 @@ object Stats {
 
     fun setDmReelsAllowed(ctx: Context, allowed: Boolean) {
         prefs(ctx).edit().putBoolean(KEY_ALLOW_IG_DM, allowed).apply()
+    }
+
+    // Dev-only: previsualizar un PNG de huevo (en vez del Canvas) cuando el nivel es EGG.
+    // Valores: EGG_PREVIEW_NONE (Canvas) / "normal" / "verde" / "lila".
+    private const val KEY_DEV_EGG_PREVIEW = "dev_egg_preview"
+    const val EGG_PREVIEW_NONE = "none"
+    const val EGG_PREVIEW_NORMAL = "normal"
+    const val EGG_PREVIEW_VERDE = "verde"
+    const val EGG_PREVIEW_LILA = "lila"
+    const val EGG_PREVIEW_BRASA = "brasa"
+    const val EGG_PREVIEW_CHISPA = "chispa"
+
+    fun devEggPreview(ctx: Context): String =
+        prefs(ctx).getString(KEY_DEV_EGG_PREVIEW, EGG_PREVIEW_NONE) ?: EGG_PREVIEW_NONE
+
+    fun setDevEggPreview(ctx: Context, value: String) {
+        prefs(ctx).edit().putString(KEY_DEV_EGG_PREVIEW, value).apply()
     }
 
     private const val KEY_BLOCK_IG_STORIES = "block_ig_stories"
@@ -73,8 +103,8 @@ object Stats {
     fun effectiveStoriesBlocked(ctx: Context): Boolean =
         Premium.isPro(ctx) && isStoriesBlocked(ctx)
 
-    data class Counts(val total: Int, val instagram: Int, val youtube: Int) {
-        companion object { val ZERO = Counts(0, 0, 0) }
+    data class Counts(val total: Int, val instagram: Int, val youtube: Int, val tiktok: Int = 0) {
+        companion object { val ZERO = Counts(0, 0, 0, 0) }
     }
 
     data class DayCounts(val date: LocalDate, val counts: Counts)
@@ -106,7 +136,8 @@ object Stats {
     private fun JSONObject.toCounts(): Counts = Counts(
         total = optInt("t"),
         instagram = optInt("ig"),
-        youtube = optInt("yt")
+        youtube = optInt("yt"),
+        tiktok = optInt("tt")
     )
 
     fun increment(ctx: Context, pkg: String) {
@@ -119,10 +150,15 @@ object Stats {
         when (pkg) {
             PKG_INSTAGRAM -> entry.put("ig", entry.optInt("ig") + 1)
             PKG_YOUTUBE -> entry.put("yt", entry.optInt("yt") + 1)
+            PKG_FACEBOOK -> entry.put("fb", entry.optInt("fb") + 1)
+            PKG_TIKTOK -> entry.put("tt", entry.optInt("tt") + 1)
         }
         history.put(today, entry)
 
         p.edit().putString(KEY_HISTORY, history.toString()).apply()
+
+        // XP de perfil: cada bloqueo suma (capa de progresión permanente).
+        Profile.addBlockXp(ctx)
     }
 
     /** Contadores del dia de hoy. */
@@ -131,6 +167,17 @@ object Stats {
         val today = LocalDate.now().toString()
         val entry = history.optJSONObject(today) ?: return Counts.ZERO
         return entry.toCounts()
+    }
+
+    /** Suma todos los bloqueos en la historia (ultimos MAX_HISTORY_DAYS). */
+    fun totalBlocks(ctx: Context): Int {
+        val history = loadHistory(prefs(ctx))
+        var sum = 0
+        val iter = history.keys()
+        while (iter.hasNext()) {
+            sum += history.optJSONObject(iter.next())?.optInt("t") ?: 0
+        }
+        return sum
     }
 
     /**

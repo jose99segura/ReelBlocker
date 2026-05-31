@@ -1,5 +1,6 @@
 package app.reelblocker
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -33,9 +34,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
@@ -366,15 +370,9 @@ private fun SatelliteTile(
                     modifier = Modifier.size(82.dp)
                 )
                 proLocked -> {
-                    // Silueta tinted al 35% para que se vea la especie sin
-                    // entregarla. Lock badge superpuesto arriba-derecha.
-                    MascotCanvas(
-                        level = MascotLevel.ADULT,
-                        species = species,
-                        animate = false,
-                        modifier = Modifier
-                            .size(82.dp)
-                            .alpha(0.35f)
+                    MysteryCreatureSilhouette(
+                        color = species.accentTint.copy(alpha = 0.55f),
+                        modifier = Modifier.size(82.dp)
                     )
                     Box(
                         modifier = Modifier
@@ -398,11 +396,9 @@ private fun SatelliteTile(
                         }
                     }
                 }
-                else -> Text(
-                    text = "?",
-                    style = MaterialTheme.typography.headlineLarge,
-                    fontWeight = FontWeight.Black,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
+                else -> MysteryCreatureSilhouette(
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.30f),
+                    modifier = Modifier.size(82.dp)
                 )
             }
         }
@@ -463,5 +459,56 @@ private fun formatAcquired(isoDate: String): String {
         date.format(fmt)
     } catch (_: Exception) {
         isoDate
+    }
+}
+
+// Silueta genérica de criatura — placeholder para slots bloqueados del
+// bestiario. NO debe revelar nada de la especie concreta: cuerpo + dos
+// orejas + dos patas, en color plano. Si en el futuro se cambian los
+// diseños de las mascotas, esta silueta sigue siendo válida.
+@Composable
+private fun MysteryCreatureSilhouette(
+    color: Color,
+    modifier: Modifier = Modifier
+) {
+    Canvas(modifier = modifier) {
+        val w = size.width
+        val h = size.height
+        val cx = w / 2f
+        val cy = h * 0.56f
+
+        val bodyW = w * 0.62f
+        val bodyH = h * 0.66f
+
+        // Cuerpo principal en forma de gota redondeada (más ancho abajo).
+        val body = Path().apply {
+            moveTo(cx, cy - bodyH * 0.50f)
+            cubicTo(
+                cx + bodyW * 0.55f, cy - bodyH * 0.50f,
+                cx + bodyW * 0.55f, cy + bodyH * 0.50f,
+                cx, cy + bodyH * 0.50f
+            )
+            cubicTo(
+                cx - bodyW * 0.55f, cy + bodyH * 0.50f,
+                cx - bodyW * 0.55f, cy - bodyH * 0.50f,
+                cx, cy - bodyH * 0.50f
+            )
+            close()
+        }
+        drawPath(body, color = color)
+
+        // Dos "orejas" redondeadas sobre el cuerpo — comunican "criatura"
+        // sin definir especie (no son triangulares, no son largas, no son
+        // específicas de ningún animal).
+        val earR = w * 0.085f
+        val earY = cy - bodyH * 0.45f
+        drawCircle(color = color, radius = earR, center = Offset(cx - bodyW * 0.26f, earY))
+        drawCircle(color = color, radius = earR, center = Offset(cx + bodyW * 0.26f, earY))
+
+        // Dos patitas en la base, ligeramente saliendo del cuerpo.
+        val footR = w * 0.07f
+        val footY = cy + bodyH * 0.46f
+        drawCircle(color = color, radius = footR, center = Offset(cx - bodyW * 0.20f, footY))
+        drawCircle(color = color, radius = footR, center = Offset(cx + bodyW * 0.20f, footY))
     }
 }

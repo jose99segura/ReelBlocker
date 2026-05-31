@@ -163,6 +163,7 @@
     <string name="inventory_slot_locked_caption">Por descubrir</string>
     <string name="inventory_slot_pro_caption">Desbloquear con Pro</string>
     <string name="cd_inventory_slot_locked_pro">%1$s bloqueada. Toca para desbloquear con Pro.</string>
+    <string name="cd_inventory_slot_locked_pro_generic">Mascota bloqueada. Toca para desbloquear con Pro.</string>
     <string name="inventory_repeats_singular">También has graduado 1 mascota repetida.</string>
     <string name="inventory_repeats_plural">También has graduado %1$d mascotas repetidas.</string>
 
@@ -276,6 +277,8 @@
     <string name="ppw_compare_species_free">2 especies</string>
     <string name="ppw_compare_species_pro">Todas + nuevas</string>
     <string name="ppw_compare_breaks">Descansos programables</string>
+    <string name="ppw_compare_dm">Permitir Reels desde DMs de amigos</string>
+    <string name="ppw_compare_stories">Bloquear Stories de Instagram</string>
     <string name="ppw_compare_stats">Estadísticas avanzadas y export</string>
     <string name="ppw_compare_widget">Widget en pantalla de inicio</string>
     <string name="ppw_compare_no">—</string>

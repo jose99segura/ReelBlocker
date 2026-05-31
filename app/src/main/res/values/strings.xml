@@ -155,6 +155,7 @@
     <string name="inventory_slot_locked_caption">To discover</string>
     <string name="inventory_slot_pro_caption">Unlock with Pro</string>
     <string name="cd_inventory_slot_locked_pro">%1$s locked. Tap to unlock with Pro.</string>
+    <string name="cd_inventory_slot_locked_pro_generic">Locked mascot. Tap to unlock with Pro.</string>
     <string name="inventory_repeats_singular">You\'ve also graduated 1 repeated mascot.</string>
     <string name="inventory_repeats_plural">You\'ve also graduated %1$d repeated mascots.</string>
 
@@ -268,6 +269,8 @@
     <string name="ppw_compare_species_free">2 species</string>
     <string name="ppw_compare_species_pro">All + future drops</string>
     <string name="ppw_compare_breaks">Scheduled breaks</string>
+    <string name="ppw_compare_dm">Allow Reels from friends\' DMs</string>
+    <string name="ppw_compare_stories">Block Instagram Stories</string>
     <string name="ppw_compare_stats">Advanced stats &amp; export</string>
     <string name="ppw_compare_widget">Home-screen widget</string>
     <string name="ppw_compare_no">—</string>

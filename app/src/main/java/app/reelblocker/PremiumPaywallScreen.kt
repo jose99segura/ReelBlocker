@@ -1,6 +1,7 @@
 package app.reelblocker
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -40,7 +41,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -109,8 +112,7 @@ internal fun PremiumPaywallScreen(
                 .padding(horizontal = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            ProMascotHero()
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(8.dp))
             Text(
                 text = stringResource(R.string.ppw_headline),
                 fontSize = 28.sp,
@@ -126,6 +128,12 @@ internal fun PremiumPaywallScreen(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
             )
+
+            // Hero de huevos como PRUEBA visual de lo que promete el sub
+            // ("Todas las especies actuales y futuras…") — no como teaser
+            // descontextualizado. Por eso va aquí, no arriba del todo.
+            Spacer(Modifier.height(20.dp))
+            ProMascotHero()
 
             if (inFounderWindow) {
                 Spacer(Modifier.height(20.dp))
@@ -178,26 +186,26 @@ private fun ProMascotHero() {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            MascotCanvas(
-                level = MascotLevel.ADULT,
-                species = MascotSpecies.TORTUGA,
-                animate = false,
-                modifier = Modifier.size(92.dp)
-            )
-            MascotCanvas(
-                level = MascotLevel.ADULT,
-                species = MascotSpecies.LOBO,
-                animate = false,
-                modifier = Modifier.size(116.dp)
-            )
-            MascotCanvas(
-                level = MascotLevel.ADULT,
-                species = MascotSpecies.BUHO,
-                animate = false,
-                modifier = Modifier.size(92.dp)
-            )
+            // Los 3 huevos PNG (assets 3D) de las especies Pro: verde Tortuga,
+            // magma Lobo en el centro (más grande), oscuro Buho. Mismos assets
+            // que la Home — usar MascotCanvas dibujaría los huevos primitivos
+            // antiguos, no los nuevos diferenciados.
+            ProEggImage(species = MascotSpecies.TORTUGA, size = 100.dp)
+            ProEggImage(species = MascotSpecies.LOBO, size = 128.dp)
+            ProEggImage(species = MascotSpecies.BUHO, size = 100.dp)
         }
     }
+}
+
+@Composable
+private fun ProEggImage(species: MascotSpecies, size: androidx.compose.ui.unit.Dp) {
+    val eggRes = species.eggRes ?: return
+    Image(
+        painter = painterResource(eggRes),
+        contentDescription = null,
+        modifier = Modifier.size(size),
+        contentScale = ContentScale.Fit
+    )
 }
 
 @Composable
@@ -225,6 +233,20 @@ private fun ComparisonCard() {
             )
             ComparisonRow(
                 feature = stringResource(R.string.ppw_compare_breaks),
+                freeText = stringResource(R.string.ppw_compare_no),
+                proText = stringResource(R.string.ppw_compare_yes),
+                freeIsCheck = false,
+                proIsCheck = true
+            )
+            ComparisonRow(
+                feature = stringResource(R.string.ppw_compare_dm),
+                freeText = stringResource(R.string.ppw_compare_no),
+                proText = stringResource(R.string.ppw_compare_yes),
+                freeIsCheck = false,
+                proIsCheck = true
+            )
+            ComparisonRow(
+                feature = stringResource(R.string.ppw_compare_stories),
                 freeText = stringResource(R.string.ppw_compare_no),
                 proText = stringResource(R.string.ppw_compare_yes),
                 freeIsCheck = false,

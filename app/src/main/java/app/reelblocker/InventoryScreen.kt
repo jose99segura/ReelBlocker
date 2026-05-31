@@ -1,6 +1,7 @@
 package app.reelblocker
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -45,6 +46,8 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -294,20 +297,27 @@ private fun ActiveFeaturedTile(
                 ),
             contentAlignment = Alignment.Center
         ) {
-            MascotCanvas(
-                level = level,
-                species = species,
-                animate = true,
-                modifier = Modifier.size(126.dp)
-            )
+            // En EGG: usar el huevo PNG propio de la especie (mismo asset
+            // que Home), no el primitivo Canvas. En el resto de niveles
+            // sigue siendo MascotCanvas.
+            val eggRes = if (level == MascotLevel.EGG) species.eggRes else null
+            if (eggRes != null) {
+                Image(
+                    painter = painterResource(eggRes),
+                    contentDescription = null,
+                    modifier = Modifier.size(126.dp),
+                    contentScale = ContentScale.Fit
+                )
+            } else {
+                MascotCanvas(
+                    level = level,
+                    species = species,
+                    animate = true,
+                    modifier = Modifier.size(126.dp)
+                )
+            }
         }
         Spacer(Modifier.height(10.dp))
-        Text(
-            text = stringResource(species.displayNameRes),
-            style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.Black,
-            color = MaterialTheme.colorScheme.onSurface
-        )
         Text(
             text = "$days / ${MascotLevel.ADULT.minDays}",
             style = MaterialTheme.typography.labelMedium,
@@ -326,11 +336,11 @@ private fun SatelliteTile(
     modifier: Modifier = Modifier
 ) {
     val unlocked = collected != null
-    // Pro-locked: especie Pro y el usuario es free. El usuario VE la especie
-    // (silueta tinted + nombre) pero con candado — comunica "esto existe,
+    // Pro-locked: especie Pro y el usuario es free. El usuario VE el slot con
+    // candado (sin revelar especie concreta) — comunica "esto existe,
     // está disponible, paga para coleccionarla".
     val proLocked = !isPro && species.isPro && !unlocked
-    val lockedCd = stringResource(R.string.cd_inventory_slot_locked_pro, stringResource(species.displayNameRes))
+    val lockedCd = stringResource(R.string.cd_inventory_slot_locked_pro_generic)
 
     val tileModifier = if (proLocked) {
         modifier
@@ -402,23 +412,8 @@ private fun SatelliteTile(
                 )
             }
         }
-        Spacer(Modifier.height(6.dp))
-        Text(
-            text = when {
-                unlocked -> stringResource(species.displayNameRes)
-                proLocked -> stringResource(species.displayNameRes)
-                else -> stringResource(R.string.inventory_slot_locked_name)
-            },
-            style = MaterialTheme.typography.labelMedium,
-            fontWeight = FontWeight.Bold,
-            color = when {
-                unlocked -> MaterialTheme.colorScheme.onSurface
-                proLocked -> species.accentTint
-                else -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.55f)
-            },
-            textAlign = TextAlign.Center
-        )
         if (collected != null) {
+            Spacer(Modifier.height(6.dp))
             Text(
                 text = formatAcquired(collected.acquiredDate),
                 style = MaterialTheme.typography.labelSmall,
@@ -426,10 +421,12 @@ private fun SatelliteTile(
                 textAlign = TextAlign.Center
             )
         } else if (proLocked) {
+            Spacer(Modifier.height(6.dp))
             Text(
                 text = stringResource(R.string.inventory_slot_pro_caption),
                 style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                color = species.accentTint.copy(alpha = 0.9f),
+                fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center
             )
         }

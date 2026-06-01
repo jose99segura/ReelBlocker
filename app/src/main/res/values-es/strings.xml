@@ -196,10 +196,10 @@
     <string name="settings_status_off_sub_service">Activa el servicio de accesibilidad para empezar</string>
     <string name="settings_status_off_sub_app">Vuelve a activar las apps bloqueadas para reanudar la protección</string>
     <string name="settings_section_apps">El Cerco</string>
-    <string name="settings_section_protection">Protección</string>
+    <string name="settings_section_protection">Sistema</string>
     <string name="settings_section_pro">Basta! Pro</string>
-    <string name="settings_section_about">Acerca de</string>
-    <string name="about_manifesto">Basta! existe porque nadie más está de tu lado cuando el algoritmo empieza a tirar. La hicimos pequeña, local y silenciosa — sin métricas sobre ti, sin upselling en cada pantalla, sin un scroll infinito propio. Hace un solo trabajo: cuando caes en Reels o Shorts, te saca antes de que notes que ha pasado una hora. El resto es tuyo.</string>
+    <string name="settings_section_about">Ajustes y ayuda</string>
+    <string name="about_manifesto">Basta! hace un solo trabajo: cuando caes en Reels o Shorts, te saca antes de que pase la hora. Pequeña, local y silenciosa — el resto es tuyo.</string>
 
     <string name="settings_row_accessibility_title">Servicio de accesibilidad</string>
     <string name="settings_row_accessibility_subtitle_on">Activo</string>
@@ -265,6 +265,7 @@
     <string name="privacy_promise_bullet_local">Todo se queda en tu dispositivo.</string>
     <string name="privacy_promise_bullet_no_tracking">No vendemos tus datos. No los recolectamos.</string>
     <string name="privacy_promise_bullet_drive">Tu progreso viaja contigo gracias a Google Drive (cifrado por Google).</string>
+    <string name="privacy_promise_compact">Todo local · Sin tracking ni venta de datos · Backup cifrado en Google Drive.</string>
 
     <!-- ==================== Paywall premium (full-screen) ==================== -->
     <string name="ppw_headline">Recupera lo que el scroll te ha robado.</string>
@@ -281,6 +282,7 @@
     <string name="ppw_compare_stories">Bloquear Stories de Instagram</string>
     <string name="ppw_compare_stats">Estadísticas avanzadas y export</string>
     <string name="ppw_compare_widget">Widget en pantalla de inicio</string>
+    <string name="ppw_compare_block_whole">Bloquear apps enteras</string>
     <string name="ppw_compare_no">—</string>
     <string name="ppw_compare_yes">✓</string>
 
@@ -300,6 +302,8 @@
     <string name="ig_suboption_dm_description">Los Reels enviados por amigos en mensajes directos no se bloquean.</string>
     <string name="ig_suboption_stories_title">Bloquear Historias</string>
     <string name="ig_suboption_stories_description">Por defecto no se bloquean. Actívalo si también las quieres fuera.</string>
+    <string name="suboption_block_whole_title">Bloquear la app completa</string>
+    <string name="suboption_block_whole_description">Cierra %1$s entera, no solo los Reels</string>
     <string name="ig_suboption_pro_cd">Pro</string>
 
     <string name="toast_checking_purchases">Comprobando compras…</string>

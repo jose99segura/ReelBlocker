@@ -188,10 +188,10 @@
     <string name="settings_status_off_sub_service">Enable the accessibility service to start</string>
     <string name="settings_status_off_sub_app">Turn your blocked apps back on to resume protection</string>
     <string name="settings_section_apps">The perimeter</string>
-    <string name="settings_section_protection">Protection</string>
+    <string name="settings_section_protection">System</string>
     <string name="settings_section_pro">Basta! Pro</string>
-    <string name="settings_section_about">About</string>
-    <string name="about_manifesto">Basta! exists because no one else is on your side when the algorithm starts pulling. We built it small, local, and silent — no metrics on you, no upselling at every screen, no infinite scroll of its own. It does one job: when you fall into Reels or Shorts, it pulls you out before you notice the hour is gone. The rest is yours.</string>
+    <string name="settings_section_about">Settings &amp; help</string>
+    <string name="about_manifesto">Basta! does one job: when you fall into Reels or Shorts, it pulls you out before the hour\'s gone. Small, local, silent — the rest is yours.</string>
 
     <string name="settings_row_accessibility_title">Accessibility service</string>
     <string name="settings_row_accessibility_subtitle_on">Active</string>
@@ -257,6 +257,7 @@
     <string name="privacy_promise_bullet_local">Everything stays on your device.</string>
     <string name="privacy_promise_bullet_no_tracking">We don\'t sell your data. We don\'t collect it.</string>
     <string name="privacy_promise_bullet_drive">Your progress travels with you via Google Drive (encrypted by Google).</string>
+    <string name="privacy_promise_compact">Local-only · No tracking, no data selling · Encrypted backup via Google Drive.</string>
 
     <!-- ==================== Premium paywall (full-screen) ==================== -->
     <string name="ppw_headline">Reclaim what scrolling stole from you.</string>
@@ -273,6 +274,7 @@
     <string name="ppw_compare_stories">Block Instagram Stories</string>
     <string name="ppw_compare_stats">Advanced stats &amp; export</string>
     <string name="ppw_compare_widget">Home-screen widget</string>
+    <string name="ppw_compare_block_whole">Block whole apps</string>
     <string name="ppw_compare_no">—</string>
     <string name="ppw_compare_yes">✓</string>
 
@@ -292,6 +294,8 @@
     <string name="ig_suboption_dm_description">Reels sent by friends in direct messages are not blocked.</string>
     <string name="ig_suboption_stories_title">Block Stories</string>
     <string name="ig_suboption_stories_description">By default they\'re not blocked. Enable it if you want them out too.</string>
+    <string name="suboption_block_whole_title">Block the whole app</string>
+    <string name="suboption_block_whole_description">Close %1$s completely, not just Reels</string>
     <string name="ig_suboption_pro_cd">Pro</string>
 
     <string name="toast_checking_purchases">Checking purchases…</string>

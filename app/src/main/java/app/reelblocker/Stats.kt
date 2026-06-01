@@ -103,6 +103,25 @@ object Stats {
     fun effectiveStoriesBlocked(ctx: Context): Boolean =
         Premium.isPro(ctx) && isStoriesBlocked(ctx)
 
+    // --- Bloqueo total por app (también Pro) ---
+    // En vez de cerrar solo la superficie de Reels/Shorts, cierra la app entera
+    // en cuanto se abre. Por app, clave "block_whole_<pkg>".
+    private fun wholeAppKey(pkg: String) = "block_whole_$pkg"
+
+    fun isWholeAppBlocked(ctx: Context, pkg: String): Boolean =
+        prefs(ctx).getBoolean(wholeAppKey(pkg), false)
+
+    fun setWholeAppBlocked(ctx: Context, pkg: String, blocked: Boolean) {
+        prefs(ctx).edit().putBoolean(wholeAppKey(pkg), blocked).apply()
+    }
+
+    /**
+     * Valor EFECTIVO del bloqueo total: requiere ser Pro Y tener el switch ON.
+     * El servicio consulta este, no la pref pelada (que es lo que muestra la UI).
+     */
+    fun effectiveWholeAppBlocked(ctx: Context, pkg: String): Boolean =
+        Premium.isPro(ctx) && isWholeAppBlocked(ctx, pkg)
+
     data class Counts(val total: Int, val instagram: Int, val youtube: Int, val tiktok: Int = 0) {
         companion object { val ZERO = Counts(0, 0, 0, 0) }
     }

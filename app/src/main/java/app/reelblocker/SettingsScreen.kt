@@ -163,7 +163,7 @@ fun SettingsScreen(
                 }
             }
 
-            // ===== Proteccion =====
+            // ===== Sistema (requisitos para que el motor funcione) =====
             SectionHeader(stringResource(R.string.settings_section_protection))
             SettingsCard {
                 SettingsRow(
@@ -185,44 +185,6 @@ fun SettingsScreen(
                     trailing = { StatusDot(ok = batteryExempt) },
                     onClick = { requestBatteryExemption(ctx) }
                 )
-                RowDivider()
-                // Descanso — feature Pro. 1 al día de 10 min sin romper la racha.
-                val breakSubtitle = when {
-                    breakRemainingMs != null -> {
-                        val totalSecs = breakRemainingMs / 1000
-                        val mmss = String.format("%d:%02d", totalSecs / 60, totalSecs % 60)
-                        stringResource(R.string.settings_row_break_subtitle_in_use, mmss)
-                    }
-                    !breakAvailable -> stringResource(R.string.settings_row_break_subtitle_consumed)
-                    else -> stringResource(R.string.settings_row_break_subtitle_available)
-                }
-                SettingsRow(
-                    icon = Icons.Outlined.Pause,
-                    title = stringResource(R.string.settings_row_break_title),
-                    subtitle = breakSubtitle,
-                    onClick = {
-                        when {
-                            !isPro -> onOpenPaywall()
-                            breakRemainingMs != null -> {
-                                // En pausa → terminar.
-                                Breaks.endEarly(ctx)
-                                refreshKey++
-                            }
-                            breakAvailable -> showBreakDialog = true
-                            else -> { /* consumido hoy, no hacer nada */ }
-                        }
-                    },
-                    trailing = {
-                        if (!isPro) {
-                            Icon(
-                                imageVector = Icons.Outlined.Lock,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(16.dp)
-                            )
-                        }
-                    }
-                )
             }
 
             val oem = Build.MANUFACTURER.lowercase()
@@ -238,32 +200,21 @@ fun SettingsScreen(
                 )
             }
 
-            // Desactivar protección — acción destructiva, de baja jerarquía
-            // para que no compita con el resto.
-            Spacer(Modifier.height(4.dp))
-            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                TextButton(onClick = { showConfirmDisable = true }) {
-                    Icon(
-                        imageVector = Icons.Outlined.Block,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Text(
-                        text = stringResource(R.string.settings_row_disable_title),
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.labelLarge
-                    )
-                }
-            }
-
-            // ===== Pro =====
+            // ===== Basta! Pro — todo lo Pro agrupado (incluido Descanso) =====
             SectionHeader(stringResource(R.string.settings_section_pro))
             if (!isPro) {
                 ProUpsellCard(onClick = onOpenPaywall)
                 Spacer(Modifier.height(8.dp))
                 SettingsCard {
+                    BreakRow(
+                        isPro = false,
+                        breakRemainingMs = breakRemainingMs,
+                        breakAvailable = breakAvailable,
+                        onOpenPaywall = onOpenPaywall,
+                        onStartBreak = { showBreakDialog = true },
+                        onRefresh = { refreshKey++ }
+                    )
+                    RowDivider()
                     SettingsRow(
                         icon = Icons.Outlined.Restore,
                         title = stringResource(R.string.settings_row_restore_title),
@@ -302,20 +253,19 @@ fun SettingsScreen(
                         subtitle = proSubtitle,
                         accent = true
                     )
+                    RowDivider()
+                    BreakRow(
+                        isPro = true,
+                        breakRemainingMs = breakRemainingMs,
+                        breakAvailable = breakAvailable,
+                        onOpenPaywall = onOpenPaywall,
+                        onStartBreak = { showBreakDialog = true },
+                        onRefresh = { refreshKey++ }
+                    )
                 }
             }
 
-            // ===== Tu privacidad — visible, no escondida =====
-            SectionHeader(stringResource(R.string.privacy_promise_heading))
-            SettingsCard {
-                Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp)) {
-                    PrivacyBullet(stringResource(R.string.privacy_promise_bullet_local))
-                    PrivacyBullet(stringResource(R.string.privacy_promise_bullet_no_tracking))
-                    PrivacyBullet(stringResource(R.string.privacy_promise_bullet_drive))
-                }
-            }
-
-            // ===== Acerca de =====
+            // ===== Ajustes y ayuda (fusiona Acerca de + privacidad) =====
             SectionHeader(stringResource(R.string.settings_section_about))
             Text(
                 text = stringResource(R.string.about_manifesto),
@@ -354,6 +304,33 @@ fun SettingsScreen(
                         )
                     }
                 )
+            }
+            // Promesa de privacidad comprimida en una sola línea.
+            Text(
+                text = stringResource(R.string.privacy_promise_compact),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
+            )
+
+            // Desactivar protección — acción destructiva, de baja jerarquía,
+            // al final de todo para que no compita con el resto.
+            Spacer(Modifier.height(8.dp))
+            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                TextButton(onClick = { showConfirmDisable = true }) {
+                    Icon(
+                        imageVector = Icons.Outlined.Block,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        text = stringResource(R.string.settings_row_disable_title),
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.labelLarge
+                    )
+                }
             }
 
             // ===== Dev tools (solo builds debug) =====
@@ -592,28 +569,57 @@ private fun DevButton(label: String, onClick: () -> Unit) {
     }
 }
 
-/** Viñeta de la promesa de privacidad (antes vivía en el borrado PaywallSheet.kt). */
+/**
+ * Fila de "Descanso" (feature Pro: 1 al día de 10 min sin romper la racha).
+ * Vive en la sección Pro y se reutiliza tanto en estado Pro como no-Pro
+ * (con candado, que abre el paywall).
+ */
 @Composable
-private fun PrivacyBullet(text: String) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 2.dp),
-        verticalAlignment = Alignment.Top
-    ) {
-        Text(
-            text = "·",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.width(12.dp),
-            textAlign = androidx.compose.ui.text.style.TextAlign.Center
-        )
-        Text(
-            text = text,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+private fun BreakRow(
+    isPro: Boolean,
+    breakRemainingMs: Long?,
+    breakAvailable: Boolean,
+    onOpenPaywall: () -> Unit,
+    onStartBreak: () -> Unit,
+    onRefresh: () -> Unit
+) {
+    val ctx = LocalContext.current
+    val breakSubtitle = when {
+        breakRemainingMs != null -> {
+            val totalSecs = breakRemainingMs / 1000
+            val mmss = String.format("%d:%02d", totalSecs / 60, totalSecs % 60)
+            stringResource(R.string.settings_row_break_subtitle_in_use, mmss)
+        }
+        !breakAvailable -> stringResource(R.string.settings_row_break_subtitle_consumed)
+        else -> stringResource(R.string.settings_row_break_subtitle_available)
     }
+    SettingsRow(
+        icon = Icons.Outlined.Pause,
+        title = stringResource(R.string.settings_row_break_title),
+        subtitle = breakSubtitle,
+        onClick = {
+            when {
+                !isPro -> onOpenPaywall()
+                breakRemainingMs != null -> {
+                    // En pausa → terminar.
+                    Breaks.endEarly(ctx)
+                    onRefresh()
+                }
+                breakAvailable -> onStartBreak()
+                else -> { /* consumido hoy, no hacer nada */ }
+            }
+        },
+        trailing = {
+            if (!isPro) {
+                Icon(
+                    imageVector = Icons.Outlined.Lock,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(16.dp)
+                )
+            }
+        }
+    )
 }
 
 @Composable
@@ -630,10 +636,12 @@ private fun AppRow(
     val icon = remember(refreshKey, pkg) { loadAppIcon(ctx, pkg) }
     val enabled = remember(refreshKey, pkg) { Stats.isAppEnabled(ctx, pkg) }
     val isInstagram = pkg == Stats.PKG_INSTAGRAM
-    val canExpand = isInstagram && installed && enabled
-    // Por defecto las sub-opciones de IG se muestran si IG está activado —
-    // así el usuario no tiene que descubrir que existen.
-    var expanded by remember(refreshKey, canExpand) { mutableStateOf(canExpand) }
+    // Toda app instalada y activada puede desplegar opciones avanzadas (al menos
+    // el bloqueo total); Instagram añade además DM/Stories.
+    val canExpand = installed && enabled
+    // Por defecto solo IG arranca expandido (tiene varias sub-opciones); las
+    // demás se despliegan a demanda para no abrir las 3 a la vez.
+    var expanded by remember(refreshKey, canExpand) { mutableStateOf(isInstagram && canExpand) }
     // Confirmación al apagar: el usuario no debería desactivar el bloqueo
     // de una red social sin querer.
     var showDisableConfirm by remember { mutableStateOf(false) }
@@ -691,28 +699,43 @@ private fun AppRow(
             Column(
                 modifier = Modifier.padding(start = 72.dp, end = 16.dp, bottom = 8.dp)
             ) {
+                // Bloqueo total: disponible para todas las apps bloqueables.
                 IgSubOption(
-                    title = stringResource(R.string.ig_suboption_dm_title),
-                    description = stringResource(R.string.ig_suboption_dm_description),
-                    checked = isPro && Stats.isDmReelsAllowed(ctx),
+                    title = stringResource(R.string.suboption_block_whole_title),
+                    description = stringResource(R.string.suboption_block_whole_description, label),
+                    checked = isPro && Stats.isWholeAppBlocked(ctx, pkg),
                     isPro = isPro,
                     onCheckedChange = {
-                        Stats.setDmReelsAllowed(ctx, it)
+                        Stats.setWholeAppBlocked(ctx, pkg, it)
                         onChanged()
                     },
                     onLockedClick = onOpenPaywall
                 )
-                IgSubOption(
-                    title = stringResource(R.string.ig_suboption_stories_title),
-                    description = stringResource(R.string.ig_suboption_stories_description),
-                    checked = isPro && Stats.isStoriesBlocked(ctx),
-                    isPro = isPro,
-                    onCheckedChange = {
-                        Stats.setStoriesBlocked(ctx, it)
-                        onChanged()
-                    },
-                    onLockedClick = onOpenPaywall
-                )
+                // DM/Stories: solo Instagram.
+                if (isInstagram) {
+                    IgSubOption(
+                        title = stringResource(R.string.ig_suboption_dm_title),
+                        description = stringResource(R.string.ig_suboption_dm_description),
+                        checked = isPro && Stats.isDmReelsAllowed(ctx),
+                        isPro = isPro,
+                        onCheckedChange = {
+                            Stats.setDmReelsAllowed(ctx, it)
+                            onChanged()
+                        },
+                        onLockedClick = onOpenPaywall
+                    )
+                    IgSubOption(
+                        title = stringResource(R.string.ig_suboption_stories_title),
+                        description = stringResource(R.string.ig_suboption_stories_description),
+                        checked = isPro && Stats.isStoriesBlocked(ctx),
+                        isPro = isPro,
+                        onCheckedChange = {
+                            Stats.setStoriesBlocked(ctx, it)
+                            onChanged()
+                        },
+                        onLockedClick = onOpenPaywall
+                    )
+                }
             }
         }
     }

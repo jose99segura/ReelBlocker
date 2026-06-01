@@ -147,6 +147,13 @@ class BlockerService : AccessibilityService() {
             return
         }
 
+        // Bloqueo total (Pro): cerrar la app entera sin importar la pantalla.
+        // Corta antes de pedir rootInActiveWindow y recorrer el arbol.
+        if (Stats.effectiveWholeAppBlocked(this, pkg)) {
+            triggerHome(pkg)
+            return
+        }
+
         // Detectar swipe dentro del visor: si estabamos viendo un reel
         // permitido por DM y el usuario hace scroll para pasar al siguiente,
         // terminamos el bypass y dejamos que el proximo match dispare BACK.
@@ -479,6 +486,27 @@ class BlockerService : AccessibilityService() {
         // no la encontramos, salimos al launcher. En IG/YT el BACK si funciona.
         val ok = if (pkg == PKG_TIKTOK) escapeTikTokFeed() else performGlobalAction(GLOBAL_ACTION_BACK)
         Log.d(TAG, "accion salida pkg=$pkg ok=$ok")
+        if (ok) {
+            Stats.increment(this, pkg)
+            HealthCheck.recordBlock(this)
+            Toast.makeText(this, R.string.toast_blocked, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    /**
+     * Bloqueo total (Pro): saca al launcher en cuanto la app esta en primer
+     * plano. No intenta BACK (en TikTok el BACK no sale del feed). Comparte el
+     * anti-rebote y la contabilidad con triggerBack.
+     */
+    private fun triggerHome(pkg: String) {
+        val now = SystemClock.elapsedRealtime()
+        if (now - lastActionTime < MIN_INTERVAL_MS) {
+            logv { "Anti-rebote: ignorando (bloqueo total)" }
+            return
+        }
+        lastActionTime = now
+        val ok = performGlobalAction(GLOBAL_ACTION_HOME)
+        Log.d(TAG, "bloqueo total pkg=$pkg ok=$ok")
         if (ok) {
             Stats.increment(this, pkg)
             HealthCheck.recordBlock(this)

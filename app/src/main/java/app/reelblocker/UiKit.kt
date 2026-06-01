@@ -2,6 +2,7 @@ package app.reelblocker
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -24,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -140,13 +142,18 @@ internal fun StatusHeroCard(
         !batteryExempt -> 1
         else -> 0
     }
+    // Protegido = verde explícito (no dependemos de tertiary, que con Material
+    // You dinámico puede salir morado/azul según el fondo de pantalla).
+    val dark = isSystemInDarkTheme()
+    val protectedBg = if (dark) Color(0xFF1E3A24) else Color(0xFFC8EFCB)
+    val protectedFg = if (dark) Color(0xFFA8E6B0) else Color(0xFF0B5D1E)
     val bg = when (state) {
-        0 -> MaterialTheme.colorScheme.tertiaryContainer
+        0 -> protectedBg
         1 -> MaterialTheme.colorScheme.secondaryContainer
         else -> MaterialTheme.colorScheme.errorContainer
     }
     val fg = when (state) {
-        0 -> MaterialTheme.colorScheme.onTertiaryContainer
+        0 -> protectedFg
         1 -> MaterialTheme.colorScheme.onSecondaryContainer
         else -> MaterialTheme.colorScheme.onErrorContainer
     }
@@ -222,7 +229,7 @@ internal fun StatusDot(ok: Boolean) {
             .size(10.dp)
             .clip(CircleShape)
             .background(
-                if (ok) MaterialTheme.colorScheme.tertiary
+                if (ok) (if (isSystemInDarkTheme()) Color(0xFF4CAF50) else Color(0xFF2E7D32))
                 else MaterialTheme.colorScheme.error
             )
     )

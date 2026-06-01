@@ -225,6 +225,13 @@ private fun ComparisonCard() {
                 proIsCheck = true
             )
             ComparisonRow(
+                feature = stringResource(R.string.ppw_compare_block_whole),
+                freeText = stringResource(R.string.ppw_compare_no),
+                proText = stringResource(R.string.ppw_compare_yes),
+                freeIsCheck = false,
+                proIsCheck = true
+            )
+            ComparisonRow(
                 feature = stringResource(R.string.ppw_compare_species),
                 freeText = stringResource(R.string.ppw_compare_species_free),
                 proText = stringResource(R.string.ppw_compare_species_pro),

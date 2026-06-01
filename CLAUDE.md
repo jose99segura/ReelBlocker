@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-ReelBlocker (in-app brand: **Basta!**) is a single-module Android app that detects when the user is inside Instagram Reels or YouTube Shorts and immediately fires the system Back action to leave that surface. It does not block the host apps themselves — only the short-video surface inside them.
+ReelBlocker (in-app brand: **Basta!**) is a single-module Android app that detects when the user is inside Instagram Reels or YouTube Shorts and immediately fires the system Back action to leave that surface. By default it does not block the host apps themselves — only the short-video surface inside them. The one exception is the **opt-in Pro "block whole app" toggle** (per app, `Stats.isWholeAppBlocked`): when a user explicitly enables it, the service fires `GLOBAL_ACTION_HOME` on any foreground event from that app, kicking them to the launcher. It is off by default and user-chosen, so the surface-only framing still holds for the default experience.
 
 On top of the core detection, the app has a gamification layer: a daily streak with an evolving mascot, a **Pokédex-style collection** of mascot species unlocked by reaching day 21 of an active streak (where the habit consolidates) (mascot graduates → archived in inventory → new egg of a different species emerges), and full stats. The collection ships with 5 species (Classic, Dragon, Turtle, Wolf, Owl) and is designed to grow over time — new species will be added in future releases as the main "what's new" hook for retention and Pro value.
 
@@ -24,7 +24,7 @@ The flag must be defended in Play Console review with matching listing copy. The
 ### Free / Pro split rule (stable across future species additions)
 
 - **Free tier (frozen at 2 base species forever):** core block (Reels + Shorts + TikTok), streak + mascot evolution, **Classic + Turtle** as the only free-collectible species, basic stats (today + 7-day chart + record), tip quotes, Auto Backup.
-- **Pro tier (grows over time):** the remaining 3 v1 species (**Dragon, Wolf, Owl**) plus **every future species added in updates**. Also: 10-min daily break without streak loss, allow Reels from DMs, block Stories, advanced stats, widget. The species list growing over time is the main retention/Pro-value loop — existing Pro buyers get new species free as part of their one-time purchase, which compounds the perceived value of upgrading.
+- **Pro tier (grows over time):** the remaining 3 v1 species (**Dragon, Wolf, Owl**) plus **every future species added in updates**. Also: 10-min daily break without streak loss, allow Reels from DMs, block Stories, **per-app "block whole app"** (opt-in, fires HOME on any visit — see Project note above), advanced stats, widget. The species list growing over time is the main retention/Pro-value loop — existing Pro buyers get new species free as part of their one-time purchase, which compounds the perceived value of upgrading.
 - Core block is **never** behind the paywall. Pro is expansion, not extortion. Reviews are downstream of this discipline.
 
 ### Founder Edition (launch lever)

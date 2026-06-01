@@ -38,7 +38,7 @@ object Premium {
     private const val KEY_IS_FOUNDER = "pro_is_founder"
 
     /** Precio durante la ventana Founder (display fallback). */
-    const val FOUNDER_PRICE = "4,99 €"
+    const val FOUNDER_PRICE = "5,99 €"
 
     /** Precio post-cutoff. Anchor mostrado en el banner Founder y fallback
      *  cuando la ventana ha pasado. */

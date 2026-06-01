@@ -110,6 +110,7 @@ object Premium {
     fun setProDebug(ctx: Context, value: Boolean) {
         setProPersisted(ctx, value)
         isProLive = value
+        StreakWidget.refresh(ctx)
     }
 
     // ---- Billing ----
@@ -272,11 +273,14 @@ object Premium {
                 .apply()
         }
         isProLive = true
+        // Desbloquea el widget Pro al instante.
+        StreakWidget.refresh(ctx)
     }
 
     private fun revokePro(ctx: Context) {
         setProPersisted(ctx, false)
         isProLive = false
+        StreakWidget.refresh(ctx)
     }
 }
 

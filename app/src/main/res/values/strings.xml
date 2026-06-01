@@ -275,6 +275,9 @@
     <string name="ppw_compare_stats">Advanced stats &amp; export</string>
     <string name="ppw_compare_widget">Home-screen widget</string>
     <string name="ppw_compare_block_whole">Block whole apps</string>
+    <string name="widget_label">Basta! — streak &amp; pet</string>
+    <string name="widget_locked_title">Pro widget</string>
+    <string name="widget_locked_cta">Tap to unlock</string>
     <string name="ppw_compare_no">—</string>
     <string name="ppw_compare_yes">✓</string>
 
@@ -296,6 +299,7 @@
     <string name="ig_suboption_stories_description">By default they\'re not blocked. Enable it if you want them out too.</string>
     <string name="suboption_block_whole_title">Block the whole app</string>
     <string name="suboption_block_whole_description">Close %1$s completely, not just Reels</string>
+    <string name="suboption_whole_active_note">The whole app closes on open, so the other Instagram options don\'t apply.</string>
     <string name="ig_suboption_pro_cd">Pro</string>
 
     <string name="toast_checking_purchases">Checking purchases…</string>

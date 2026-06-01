@@ -55,6 +55,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -98,6 +99,10 @@ fun SettingsScreen(
         lifecycleOwner.lifecycle.addObserver(obs)
         onDispose { lifecycleOwner.lifecycle.removeObserver(obs) }
     }
+
+    // Cualquier cambio en Ajustes (toggles, dev tools, preview de huevo) refresca
+    // el widget para que refleje el estado al instante.
+    LaunchedEffect(refreshKey) { StreakWidget.refresh(ctx) }
 
     val serviceEnabled = remember(refreshKey) { isAccessibilityEnabled(ctx) }
     val batteryExempt = remember(refreshKey) { isBatteryExempt(ctx) }
@@ -699,11 +704,14 @@ private fun AppRow(
             Column(
                 modifier = Modifier.padding(start = 72.dp, end = 16.dp, bottom = 8.dp)
             ) {
+                // Si el bloqueo total está activo, la app se cierra entera, así que
+                // las opciones finas (DM/Historias) no tienen sentido: se ocultan.
+                val wholeBlocked = isPro && Stats.isWholeAppBlocked(ctx, pkg)
                 // Bloqueo total: disponible para todas las apps bloqueables.
                 IgSubOption(
                     title = stringResource(R.string.suboption_block_whole_title),
                     description = stringResource(R.string.suboption_block_whole_description, label),
-                    checked = isPro && Stats.isWholeAppBlocked(ctx, pkg),
+                    checked = wholeBlocked,
                     isPro = isPro,
                     onCheckedChange = {
                         Stats.setWholeAppBlocked(ctx, pkg, it)
@@ -711,8 +719,8 @@ private fun AppRow(
                     },
                     onLockedClick = onOpenPaywall
                 )
-                // DM/Stories: solo Instagram.
-                if (isInstagram) {
+                // DM/Stories: solo Instagram y solo si NO está el bloqueo total.
+                if (isInstagram && !wholeBlocked) {
                     IgSubOption(
                         title = stringResource(R.string.ig_suboption_dm_title),
                         description = stringResource(R.string.ig_suboption_dm_description),
@@ -734,6 +742,13 @@ private fun AppRow(
                             onChanged()
                         },
                         onLockedClick = onOpenPaywall
+                    )
+                } else if (isInstagram && wholeBlocked) {
+                    Text(
+                        text = stringResource(R.string.suboption_whole_active_note),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 6.dp, bottom = 2.dp)
                     )
                 }
             }

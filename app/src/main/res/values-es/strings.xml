@@ -283,6 +283,9 @@
     <string name="ppw_compare_stats">Estadísticas avanzadas y export</string>
     <string name="ppw_compare_widget">Widget en pantalla de inicio</string>
     <string name="ppw_compare_block_whole">Bloquear apps enteras</string>
+    <string name="widget_label">Basta! — racha y mascota</string>
+    <string name="widget_locked_title">Widget Pro</string>
+    <string name="widget_locked_cta">Toca para desbloquear</string>
     <string name="ppw_compare_no">—</string>
     <string name="ppw_compare_yes">✓</string>
 
@@ -304,6 +307,7 @@
     <string name="ig_suboption_stories_description">Por defecto no se bloquean. Actívalo si también las quieres fuera.</string>
     <string name="suboption_block_whole_title">Bloquear la app completa</string>
     <string name="suboption_block_whole_description">Cierra %1$s entera, no solo los Reels</string>
+    <string name="suboption_whole_active_note">La app se cierra entera al abrirla, así que las demás opciones de Instagram no aplican.</string>
     <string name="ig_suboption_pro_cd">Pro</string>
 
     <string name="toast_checking_purchases">Comprobando compras…</string>

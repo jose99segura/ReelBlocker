@@ -202,6 +202,15 @@ private fun AppRoot(onResetOnboarding: () -> Unit) {
     // (sin esperar a ON_RESUME) tras consumir una graduación.
     var homeRefresh by remember { mutableIntStateOf(0) }
 
+    // Apertura desde el widget bloqueado (no-Pro): abrir directamente el paywall.
+    LaunchedEffect(Unit) {
+        val act = ctx as? Activity
+        if (act?.intent?.getBooleanExtra(StreakWidget.EXTRA_OPEN_PAYWALL, false) == true) {
+            act.intent.removeExtra(StreakWidget.EXTRA_OPEN_PAYWALL)
+            showPaywall = true
+        }
+    }
+
     BackHandler(enabled = currentScreen != Screen.Home && !showPaywall) {
         currentScreen = Screen.Home
     }
@@ -328,6 +337,8 @@ private fun HomeScreen(
                 Streak.setProtectingSeen(ctx, nowProtecting)
                 onPendingGraduationChanged(Collection.pendingGraduation(ctx))
                 breakRemainingMs = Breaks.millisRemaining(ctx)
+                // Refrescar el widget para reflejar racha/mascota actuales.
+                StreakWidget.refresh(ctx)
                 localRefresh++
             }
         }

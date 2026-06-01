@@ -20,10 +20,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathOperation
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.graphics.drawscope.CanvasDrawScope
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.scale
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.LayoutDirection
 import kotlinx.coroutines.delay
 import kotlin.math.PI
 import kotlin.math.sin
@@ -174,6 +179,30 @@ private fun DrawScope.drawMascot(
             MascotSpecies.BUHO -> drawBuhoBody(level, sad, eyeOpenness)
         }
     }
+}
+
+/**
+ * Renderiza la mascota a un Bitmap de Android fuera de cualquier composición.
+ * Usado por el widget de pantalla de inicio (RemoteViews no soporta Compose).
+ * Reutiliza las mismas funciones de dibujo [DrawScope] que la app.
+ */
+fun renderMascotBitmap(
+    species: MascotSpecies,
+    level: MascotLevel,
+    sizePx: Int,
+    density: Float
+): android.graphics.Bitmap {
+    val image = ImageBitmap(sizePx, sizePx)
+    val canvas = androidx.compose.ui.graphics.Canvas(image)
+    CanvasDrawScope().draw(
+        Density(density),
+        LayoutDirection.Ltr,
+        canvas,
+        Size(sizePx.toFloat(), sizePx.toFloat())
+    ) {
+        drawMascot(species, level, sad = false, eyeOpenness = 1f)
+    }
+    return image.asAndroidBitmap()
 }
 
 private fun DrawScope.drawClasicaCreature(level: MascotLevel, sad: Boolean, eyeOpenness: Float) {

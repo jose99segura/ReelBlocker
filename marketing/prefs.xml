@@ -1,0 +1,26 @@
+﻿<?xml version='1.0' encoding='utf-8' standalone='yes' ?>
+<map>
+    <boolean name="health_ever_blocked" value="true" />
+    <boolean name="migration_v21_done" value="true" />
+    <int name="profile_xp" value="2916" />
+    <boolean name="onboarding_done" value="true" />
+    <boolean name="app_enabled_com.google.android.youtube" value="true" />
+    <string name="dev_egg_preview">none</string>
+    <boolean name="streak_last_seen_protecting" value="true" />
+    <int name="streak_record" value="30" />
+    <boolean name="is_pro_purchased" value="false" />
+    <boolean name="streak_last_seen_enabled" value="true" />
+    <boolean name="profile_seeded" value="true" />
+    <boolean name="app_enabled_com.zhiliaoapp.musically" value="true" />
+    <string name="streak_record_date">2026-05-27</string>
+    <long name="health_suppress_off_until_ms" value="1780302804901" />
+    <long name="paywall_last_shown_ms" value="1780006375895" />
+    <boolean name="block_whole_com.instagram.android" value="false" />
+    <boolean name="app_enabled_com.instagram.android" value="true" />
+    <long name="health_last_block_ms" value="1780311963442" />
+    <string name="streak_last_valid_date">2026-06-01</string>
+    <boolean name="notif_perm_asked" value="true" />
+    <boolean name="dev_use_lila_egg" value="true" />
+    <string name="history_json">{&quot;2026-05-27&quot;:{&quot;t&quot;:16,&quot;ig&quot;:14,&quot;yt&quot;:2},&quot;2026-05-28&quot;:{&quot;t&quot;:7,&quot;ig&quot;:7},&quot;2026-05-29&quot;:{&quot;t&quot;:36,&quot;ig&quot;:17,&quot;yt&quot;:5,&quot;tt&quot;:14},&quot;2026-05-30&quot;:{&quot;t&quot;:10,&quot;ig&quot;:10},&quot;2026-05-31&quot;:{&quot;t&quot;:3,&quot;ig&quot;:3},&quot;2026-06-01&quot;:{&quot;t&quot;:6,&quot;ig&quot;:6}}</string>
+    <int name="streak_count" value="2" />
+</map>

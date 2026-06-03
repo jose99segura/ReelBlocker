@@ -398,8 +398,11 @@ private fun SatelliteTile(
                     modifier = Modifier.size(82.dp)
                 )
                 proLocked -> {
-                    MysteryCreatureSilhouette(
-                        color = species.accentTint.copy(alpha = 0.55f),
+                    MascotCanvas(
+                        level = MascotLevel.ADULT,
+                        species = species,
+                        animate = false,
+                        silhouetteColor = species.accentTint.copy(alpha = 0.55f),
                         modifier = Modifier.size(82.dp)
                     )
                     Box(
@@ -424,8 +427,11 @@ private fun SatelliteTile(
                         }
                     }
                 }
-                else -> MysteryCreatureSilhouette(
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.30f),
+                else -> MascotCanvas(
+                    level = MascotLevel.ADULT,
+                    species = species,
+                    animate = false,
+                    silhouetteColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f),
                     modifier = Modifier.size(82.dp)
                 )
             }
@@ -653,53 +659,3 @@ private fun DetailStat(
     }
 }
 
-// Silueta genérica de criatura — placeholder para slots bloqueados del
-// bestiario. NO debe revelar nada de la especie concreta: cuerpo + dos
-// orejas + dos patas, en color plano. Si en el futuro se cambian los
-// diseños de las mascotas, esta silueta sigue siendo válida.
-@Composable
-private fun MysteryCreatureSilhouette(
-    color: Color,
-    modifier: Modifier = Modifier
-) {
-    Canvas(modifier = modifier) {
-        val w = size.width
-        val h = size.height
-        val cx = w / 2f
-        val cy = h * 0.56f
-
-        val bodyW = w * 0.62f
-        val bodyH = h * 0.66f
-
-        // Cuerpo principal en forma de gota redondeada (más ancho abajo).
-        val body = Path().apply {
-            moveTo(cx, cy - bodyH * 0.50f)
-            cubicTo(
-                cx + bodyW * 0.55f, cy - bodyH * 0.50f,
-                cx + bodyW * 0.55f, cy + bodyH * 0.50f,
-                cx, cy + bodyH * 0.50f
-            )
-            cubicTo(
-                cx - bodyW * 0.55f, cy + bodyH * 0.50f,
-                cx - bodyW * 0.55f, cy - bodyH * 0.50f,
-                cx, cy - bodyH * 0.50f
-            )
-            close()
-        }
-        drawPath(body, color = color)
-
-        // Dos "orejas" redondeadas sobre el cuerpo — comunican "criatura"
-        // sin definir especie (no son triangulares, no son largas, no son
-        // específicas de ningún animal).
-        val earR = w * 0.085f
-        val earY = cy - bodyH * 0.45f
-        drawCircle(color = color, radius = earR, center = Offset(cx - bodyW * 0.26f, earY))
-        drawCircle(color = color, radius = earR, center = Offset(cx + bodyW * 0.26f, earY))
-
-        // Dos patitas en la base, ligeramente saliendo del cuerpo.
-        val footR = w * 0.07f
-        val footY = cy + bodyH * 0.46f
-        drawCircle(color = color, radius = footR, center = Offset(cx - bodyW * 0.20f, footY))
-        drawCircle(color = color, radius = footR, center = Offset(cx + bodyW * 0.20f, footY))
-    }
-}

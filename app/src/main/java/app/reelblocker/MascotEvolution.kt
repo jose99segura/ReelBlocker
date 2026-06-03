@@ -14,12 +14,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import kotlin.math.PI
 import kotlin.math.sin
 
@@ -97,7 +100,9 @@ enum class MascotLevel(
  * Mascota mostrada como sprite webp (render 3D). Respira sutilmente si
  * [animate] = true. Si [sad] = true, se dessatura y se inclina ligeramente
  * para transmitir tristeza (modal de confirmación de desactivación), sin
- * necesitar arte aparte.
+ * necesitar arte aparte. Si [silhouetteColor] != null, se pinta como silueta
+ * de ese color y se difumina (placeholder estilo Pokédex en el Bestiario:
+ * deja intuir la forma de la criatura sin revelar sus detalles).
  */
 @Composable
 fun MascotCanvas(
@@ -105,7 +110,8 @@ fun MascotCanvas(
     modifier: Modifier = Modifier,
     animate: Boolean = true,
     sad: Boolean = false,
-    species: MascotSpecies = MascotSpecies.CLASICA
+    species: MascotSpecies = MascotSpecies.CLASICA,
+    silhouetteColor: Color? = null
 ) {
     val transition = rememberInfiniteTransition(label = "mascot")
     val breath by transition.animateFloat(
@@ -117,21 +123,27 @@ fun MascotCanvas(
         ),
         label = "breath"
     )
-    val sadFilter = remember(sad) {
-        if (sad) ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(0.45f) }) else null
+    val filter = remember(sad, silhouetteColor) {
+        when {
+            silhouetteColor != null -> ColorFilter.tint(silhouetteColor, BlendMode.SrcIn)
+            sad -> ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(0.45f) })
+            else -> null
+        }
     }
 
     Image(
         painter = painterResource(species.spriteRes(level)),
         contentDescription = null,
         contentScale = ContentScale.Fit,
-        colorFilter = sadFilter,
-        modifier = modifier.graphicsLayer {
-            val s = 1f + 0.028f * sin(breath * PI).toFloat()
-            scaleX = s
-            scaleY = s
-            rotationZ = if (sad) 4f else 0f
-        }
+        colorFilter = filter,
+        modifier = modifier
+            .then(if (silhouetteColor != null) Modifier.blur(3.dp) else Modifier)
+            .graphicsLayer {
+                val s = 1f + 0.028f * sin(breath * PI).toFloat()
+                scaleX = s
+                scaleY = s
+                rotationZ = if (sad) 4f else 0f
+            }
     )
 }
 

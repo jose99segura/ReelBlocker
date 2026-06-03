@@ -199,9 +199,8 @@ private fun ProMascotHero() {
 
 @Composable
 private fun ProEggImage(species: MascotSpecies, size: androidx.compose.ui.unit.Dp) {
-    val eggRes = species.eggRes ?: return
     Image(
-        painter = painterResource(eggRes),
+        painter = painterResource(species.eggRes),
         contentDescription = null,
         modifier = Modifier.size(size),
         contentScale = ContentScale.Fit

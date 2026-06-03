@@ -8,6 +8,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,17 +22,24 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -57,6 +65,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -93,6 +103,10 @@ fun InventoryScreen(
     val isPro = Premium.isProLive
     val haptic = LocalHapticFeedback.current
 
+    // Ficha de re-compartir: al tocar una mascota graduada se abre un sheet
+    // con sus stats y un botón Compartir que regenera la imagen premium.
+    var detail by remember { mutableStateOf<Collection.CollectedMascot?>(null) }
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -125,6 +139,10 @@ fun InventoryScreen(
                 onProTap = {
                     haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                     onOpenPaywall()
+                },
+                onCollectedTap = {
+                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    detail = it
                 }
             )
 
@@ -134,6 +152,13 @@ fun InventoryScreen(
 
             Spacer(Modifier.height(24.dp))
         }
+    }
+
+    detail?.let { collected ->
+        GraduatedMascotSheet(
+            collected = collected,
+            onDismiss = { detail = null }
+        )
     }
 }
 
@@ -184,7 +209,8 @@ private fun Constellation(
     activeDays: Int,
     firstByMember: Map<MascotSpecies, Collection.CollectedMascot>,
     isPro: Boolean,
-    onProTap: () -> Unit
+    onProTap: () -> Unit,
+    onCollectedTap: (Collection.CollectedMascot) -> Unit
 ) {
     // Si la especie activa YA está graduada (firstByMember la contiene), el
     // usuario está en una repetición. En ese caso ELLA TAMBIÉN debe aparecer
@@ -254,6 +280,7 @@ private fun Constellation(
                 collected = collected,
                 isPro = isPro,
                 onProTap = onProTap,
+                onCollectedTap = onCollectedTap,
                 modifier = Modifier
                     .offset(x = p.x, y = p.y)
                     .graphicsLayer { rotationZ = p.rotation }
@@ -297,25 +324,12 @@ private fun ActiveFeaturedTile(
                 ),
             contentAlignment = Alignment.Center
         ) {
-            // En EGG: usar el huevo PNG propio de la especie (mismo asset
-            // que Home), no el primitivo Canvas. En el resto de niveles
-            // sigue siendo MascotCanvas.
-            val eggRes = if (level == MascotLevel.EGG) species.eggRes else null
-            if (eggRes != null) {
-                Image(
-                    painter = painterResource(eggRes),
-                    contentDescription = null,
-                    modifier = Modifier.size(126.dp),
-                    contentScale = ContentScale.Fit
-                )
-            } else {
-                MascotCanvas(
-                    level = level,
-                    species = species,
-                    animate = true,
-                    modifier = Modifier.size(126.dp)
-                )
-            }
+            MascotCanvas(
+                level = level,
+                species = species,
+                animate = true,
+                modifier = Modifier.size(126.dp)
+            )
         }
         Spacer(Modifier.height(10.dp))
         Text(
@@ -333,6 +347,7 @@ private fun SatelliteTile(
     collected: Collection.CollectedMascot?,
     isPro: Boolean,
     onProTap: () -> Unit,
+    onCollectedTap: (Collection.CollectedMascot) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val unlocked = collected != null
@@ -342,11 +357,14 @@ private fun SatelliteTile(
     val proLocked = !isPro && species.isPro && !unlocked
     val lockedCd = stringResource(R.string.cd_inventory_slot_locked_pro_generic)
 
-    val tileModifier = if (proLocked) {
-        modifier
+    val tileModifier = when {
+        // Mascota graduada → tocable para abrir la ficha de re-compartir.
+        collected != null -> modifier.clickable { onCollectedTap(collected) }
+        proLocked -> modifier
             .clickable(onClick = onProTap)
             .semantics { contentDescription = lockedCd }
-    } else modifier
+        else -> modifier
+    }
 
     Column(
         modifier = tileModifier,
@@ -456,6 +474,182 @@ private fun formatAcquired(isoDate: String): String {
         date.format(fmt)
     } catch (_: Exception) {
         isoDate
+    }
+}
+
+/**
+ * Ficha de una mascota graduada: stats del periodo + botón para re-compartir
+ * la imagen premium. Resuelve el momento perdido si el usuario se saltó la
+ * pantalla de graduación. Para mascotas archivadas antes de que se guardaran
+ * las stats del periodo ([Collection.CollectedMascot.secondsSaved] == 0), cae
+ * a stats de por vida para no mostrar ceros.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun GraduatedMascotSheet(
+    collected: Collection.CollectedMascot,
+    onDismiss: () -> Unit
+) {
+    val ctx = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val sheetState = rememberModalBottomSheetState()
+    var sharing by remember { mutableStateOf(false) }
+    val accent = collected.species.accentTint
+
+    val secs = if (collected.secondsSaved > 0)
+        collected.secondsSaved
+    else
+        Stats.totalBlocks(ctx) * Stats.SECONDS_PER_BLOCK
+    val record = if (collected.streakRecord > 0)
+        collected.streakRecord
+    else
+        Streak.current(ctx).record
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
+                .padding(bottom = 32.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(150.dp)
+                    .clip(RoundedCornerShape(28.dp))
+                    .background(
+                        Brush.radialGradient(
+                            colors = listOf(
+                                accent.copy(alpha = 0.32f),
+                                accent.copy(alpha = 0.08f)
+                            )
+                        )
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                MascotCanvas(
+                    level = MascotLevel.ADULT,
+                    species = collected.species,
+                    animate = true,
+                    modifier = Modifier.size(126.dp)
+                )
+            }
+
+            Spacer(Modifier.height(16.dp))
+            Text(
+                text = stringResource(collected.species.displayNameRes),
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Black,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(Modifier.height(4.dp))
+            Text(
+                text = stringResource(R.string.inventory_detail_acquired, formatAcquired(collected.acquiredDate)),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Spacer(Modifier.height(20.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                DetailStat(
+                    label = stringResource(R.string.share_card_stat_time_label),
+                    value = formatTimeSaved(secs),
+                    accent = accent,
+                    modifier = Modifier.weight(1f)
+                )
+                DetailStat(
+                    label = stringResource(R.string.share_card_stat_streak_label),
+                    value = stringResource(R.string.share_card_streak_value, record),
+                    accent = accent,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+
+            Spacer(Modifier.height(24.dp))
+            Button(
+                onClick = {
+                    if (sharing) return@Button
+                    sharing = true
+                    scope.launch {
+                        try {
+                            shareGraduationImage(
+                                ctx = ctx,
+                                species = collected.species,
+                                daysReached = collected.daysToReach,
+                                secondsSaved = secs,
+                                streakRecord = record
+                            )
+                        } finally {
+                            sharing = false
+                        }
+                    }
+                },
+                enabled = !sharing,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(54.dp),
+                shape = RoundedCornerShape(14.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = accent)
+            ) {
+                if (sharing) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(18.dp),
+                        strokeWidth = 2.dp,
+                        color = Color.White
+                    )
+                    Spacer(Modifier.size(10.dp))
+                    Text(
+                        text = stringResource(R.string.share_card_preparing),
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 16.sp,
+                        color = Color.White
+                    )
+                } else {
+                    Text(
+                        text = stringResource(R.string.inventory_share_button),
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 16.sp,
+                        color = Color.White
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun DetailStat(
+    label: String,
+    value: String,
+    accent: Color,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .clip(RoundedCornerShape(18.dp))
+            .background(accent.copy(alpha = 0.10f))
+            .padding(vertical = 16.dp, horizontal = 12.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = value,
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Black,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(Modifier.height(2.dp))
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
     }
 }
 

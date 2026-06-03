@@ -113,6 +113,25 @@
     <string name="graduation_share_text">Llevé %1$d días sin caer en Reels con mi %2$s. Usando Basta! — la app que te saca del vídeo corto.</string>
     <string name="graduation_share_chooser">Compartir mi logro</string>
 
+    <!-- ==================== Tarjeta para compartir (imagen) ==================== -->
+    <string name="share_card_eyebrow">Detox de dopamina</string>
+    <string name="share_card_days">%1$d días</string>
+    <string name="share_card_days_caption">recuperando mi atención</string>
+    <string name="share_card_motto">Menos scroll. Más vida.</string>
+    <string name="share_card_get_on_play">Disponible en Google Play</string>
+    <string name="share_stats_eyebrow">Mi detox de dopamina</string>
+    <string name="share_stats_time_caption">recuperado de por vida</string>
+    <string name="share_stats_blocks_label">Bloqueos totales</string>
+    <string name="share_stats_caption">He bloqueado %1$d Reels/Shorts y recuperado %2$d horas con Basta! — la app que te saca del vídeo corto.</string>
+    <string name="share_stats_chooser">Compartir mis estadísticas</string>
+    <string name="share_card_stat_time_label">Tiempo recuperado</string>
+    <string name="share_card_stat_streak_label">Récord de racha</string>
+    <string name="share_card_streak_value">%1$d días</string>
+    <string name="share_card_tagline">La app que te saca del vídeo corto</string>
+    <string name="share_card_preparing">Preparando…</string>
+    <string name="inventory_share_button">Compartir</string>
+    <string name="inventory_detail_acquired">Graduada el %1$s</string>
+
     <!-- ==================== Confirm disable dialog ==================== -->
     <string name="confirm_disable_title">¿Desactivar la protección?</string>
     <string name="confirm_disable_warning">Perderás la racha y la mascota volverá a huevo.</string>
@@ -142,6 +161,25 @@
     <string name="stats_metric_record_caption">Alcanzado el %1$s</string>
     <string name="stats_pro_upsell_title">Un respiro diario con Pro</string>
     <string name="stats_pro_upsell_body">1 descanso de 10 min sin perder la racha. Para los días que la vida pide otra cosa.</string>
+
+    <!-- ===== Estadísticas avanzadas (Pro) ===== -->
+    <string name="stats_section_advanced">Estadísticas avanzadas</string>
+    <string name="stats_section_monthly">Últimos 30 días</string>
+    <string name="stats_section_by_app_30">Por app · 30 días</string>
+    <string name="stats_metric_lifetime_blocks">Bloqueos totales</string>
+    <string name="stats_metric_lifetime_time">Tiempo recuperado total</string>
+    <string name="stats_metric_daily_avg">Media diaria</string>
+    <string name="stats_metric_best_day">Mejor día</string>
+    <string name="stats_trend_up">▲ %1$d%% vs semana pasada</string>
+    <string name="stats_trend_down">▼ %1$d%% vs semana pasada</string>
+    <string name="stats_trend_flat">Igual que la semana pasada</string>
+    <string name="stats_chart_30d_start">30 d</string>
+    <string name="stats_advanced_locked_title">Estadísticas avanzadas con Pro</string>
+    <string name="stats_advanced_locked_body">Historial de 30 días, totales de por vida, tendencias por app y más.</string>
+    <string name="stats_tab_week">Semana</string>
+    <string name="stats_tab_month">Mes</string>
+    <string name="stats_day_blocks">%1$d bloqueos</string>
+    <string name="stats_export_button">Exportar como imagen</string>
 
     <!-- Format helpers for recovered time -->
     <string name="time_recovered_hours_minutes">%1$dh %2$dm</string>
@@ -280,7 +318,7 @@
     <string name="ppw_compare_breaks">Descansos programables</string>
     <string name="ppw_compare_dm">Permitir Reels desde DMs de amigos</string>
     <string name="ppw_compare_stories">Bloquear Stories de Instagram</string>
-    <string name="ppw_compare_stats">Estadísticas avanzadas y export</string>
+    <string name="ppw_compare_stats">Estadísticas avanzadas</string>
     <string name="ppw_compare_widget">Widget en pantalla de inicio</string>
     <string name="ppw_compare_block_whole">Bloquear apps enteras</string>
     <string name="widget_label">Basta! — racha y mascota</string>

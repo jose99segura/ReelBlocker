@@ -342,46 +342,6 @@ fun SettingsScreen(
             if (BuildConfig.DEBUG) {
                 Spacer(Modifier.height(16.dp))
                 SectionHeader("Dev tools")
-                var eggPreview by remember { mutableStateOf(Stats.devEggPreview(ctx)) }
-                Text(
-                    text = "Huevo (preview)",
-                    modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .horizontalScroll(rememberScrollState())
-                        .padding(horizontal = 24.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    val eggOptions = listOf(
-                        "Off" to Stats.EGG_PREVIEW_NONE,
-                        "Normal" to Stats.EGG_PREVIEW_NORMAL,
-                        "Verde" to Stats.EGG_PREVIEW_VERDE,
-                        "Lila" to Stats.EGG_PREVIEW_LILA,
-                        "Brasa" to Stats.EGG_PREVIEW_BRASA,
-                        "Chispa" to Stats.EGG_PREVIEW_CHISPA
-                    )
-                    eggOptions.forEach { (label, value) ->
-                        val selected = eggPreview == value
-                        if (selected) {
-                            androidx.compose.material3.Button(
-                                onClick = {},
-                                contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 12.dp)
-                            ) { Text(label, style = MaterialTheme.typography.labelMedium) }
-                        } else {
-                            androidx.compose.material3.OutlinedButton(
-                                onClick = {
-                                    Stats.setDevEggPreview(ctx, value)
-                                    eggPreview = value
-                                    refreshKey++
-                                },
-                                contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 12.dp)
-                            ) { Text(label, style = MaterialTheme.typography.labelMedium) }
-                        }
-                    }
-                }
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()

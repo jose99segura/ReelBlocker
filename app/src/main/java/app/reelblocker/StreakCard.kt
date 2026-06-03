@@ -412,20 +412,6 @@ private fun MascotWithRing(
                 },
                 label = "mascot-evolution"
             ) { currentLevel ->
-                val ctxLocal = androidx.compose.ui.platform.LocalContext.current
-                val eggPreviewRes = if (currentLevel == MascotLevel.EGG) {
-                    // Override de dev (selector en Settings); si está en "none",
-                    // se usa el huevo propio de la especie actual.
-                    val devOverride = when (Stats.devEggPreview(ctxLocal)) {
-                        Stats.EGG_PREVIEW_NORMAL -> R.drawable.egg_normal_preview
-                        Stats.EGG_PREVIEW_VERDE -> R.drawable.egg_verde_preview
-                        Stats.EGG_PREVIEW_LILA -> R.drawable.egg_lila_preview
-                        Stats.EGG_PREVIEW_BRASA -> R.drawable.egg_brasa_preview
-                        Stats.EGG_PREVIEW_CHISPA -> R.drawable.egg_chispa_preview
-                        else -> null
-                    }
-                    devOverride ?: species.eggRes
-                } else null
                 val mascotModifier = Modifier
                     .size(180.dp)
                     .graphicsLayer {
@@ -443,21 +429,12 @@ private fun MascotWithRing(
                         indication = null,
                         onClick = onTap
                     )
-                if (eggPreviewRes != null) {
-                    androidx.compose.foundation.Image(
-                        painter = androidx.compose.ui.res.painterResource(eggPreviewRes),
-                        contentDescription = null,
-                        modifier = mascotModifier,
-                        contentScale = androidx.compose.ui.layout.ContentScale.Fit
-                    )
-                } else {
-                    MascotCanvas(
-                        level = currentLevel,
-                        species = species,
-                        animate = animate,
-                        modifier = mascotModifier
-                    )
-                }
+                MascotCanvas(
+                    level = currentLevel,
+                    species = species,
+                    animate = animate,
+                    modifier = mascotModifier
+                )
             }
         }
     }

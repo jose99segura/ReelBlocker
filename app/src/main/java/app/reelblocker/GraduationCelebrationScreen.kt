@@ -1,6 +1,5 @@
 package app.reelblocker
 
-import android.content.Intent
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -16,11 +15,16 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -33,6 +37,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.launch
 import nl.dionsegijn.konfetti.compose.KonfettiView
 import nl.dionsegijn.konfetti.core.Angle
 import nl.dionsegijn.konfetti.core.Party
@@ -59,6 +64,8 @@ fun GraduationCelebrationScreen(
     val ctx = LocalContext.current
     val haptic = LocalHapticFeedback.current
     val accent = graduatedSpecies.accentTint
+    val scope = rememberCoroutineScope()
+    var sharing by remember { mutableStateOf(false) }
 
     // Back físico = mismo efecto que tap "Continuar" — confirma la celebración.
     BackHandler { onContinue() }
@@ -166,31 +173,56 @@ fun GraduationCelebrationScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 val shareLabel = stringResource(R.string.graduation_celebration_share)
-                val shareText = stringResource(
-                    R.string.graduation_share_text,
-                    daysReached,
-                    stringResource(graduatedSpecies.displayNameRes)
-                )
-                val chooserLabel = stringResource(R.string.graduation_share_chooser)
+                val preparingLabel = stringResource(R.string.share_card_preparing)
                 OutlinedButton(
                     onClick = {
+                        if (sharing) return@OutlinedButton
                         haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                        val send = Intent(Intent.ACTION_SEND).apply {
-                            type = "text/plain"
-                            putExtra(Intent.EXTRA_TEXT, shareText)
+                        sharing = true
+                        scope.launch {
+                            try {
+                                // El share ocurre ANTES de consumir la graduación,
+                                // así que las stats del periodo siguen intactas.
+                                val secs = Stats.readLastDays(ctx, daysReached)
+                                    .sumOf { it.counts.total } * Stats.SECONDS_PER_BLOCK
+                                val record = Streak.current(ctx).record
+                                shareGraduationImage(
+                                    ctx = ctx,
+                                    species = graduatedSpecies,
+                                    daysReached = daysReached,
+                                    secondsSaved = secs,
+                                    streakRecord = record
+                                )
+                            } finally {
+                                sharing = false
+                            }
                         }
-                        ctx.startActivity(Intent.createChooser(send, chooserLabel))
                     },
+                    enabled = !sharing,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(52.dp),
                     shape = RoundedCornerShape(14.dp)
                 ) {
-                    Text(
-                        text = shareLabel,
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 16.sp
-                    )
+                    if (sharing) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(18.dp),
+                            strokeWidth = 2.dp,
+                            color = accent
+                        )
+                        Spacer(Modifier.size(10.dp))
+                        Text(
+                            text = preparingLabel,
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 16.sp
+                        )
+                    } else {
+                        Text(
+                            text = shareLabel,
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 16.sp
+                        )
+                    }
                 }
                 Spacer(Modifier.height(10.dp))
                 Button(

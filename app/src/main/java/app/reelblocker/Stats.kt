@@ -15,6 +15,9 @@ object Stats {
     private const val PREFS = "reelblocker_prefs"
     private const val KEY_HISTORY = "history_json"
     private const val KEY_ONBOARDING_DONE = "onboarding_done"
+    // Contador acumulado que NUNCA se purga (a diferencia del historial de
+    // 30 días). Respalda la métrica Pro "bloqueos de por vida".
+    private const val KEY_LIFETIME_TOTAL = "lifetime_blocks"
     private const val MAX_HISTORY_DAYS = 30L
 
     fun isOnboardingDone(ctx: Context): Boolean =
@@ -62,23 +65,6 @@ object Stats {
 
     fun setDmReelsAllowed(ctx: Context, allowed: Boolean) {
         prefs(ctx).edit().putBoolean(KEY_ALLOW_IG_DM, allowed).apply()
-    }
-
-    // Dev-only: previsualizar un PNG de huevo (en vez del Canvas) cuando el nivel es EGG.
-    // Valores: EGG_PREVIEW_NONE (Canvas) / "normal" / "verde" / "lila".
-    private const val KEY_DEV_EGG_PREVIEW = "dev_egg_preview"
-    const val EGG_PREVIEW_NONE = "none"
-    const val EGG_PREVIEW_NORMAL = "normal"
-    const val EGG_PREVIEW_VERDE = "verde"
-    const val EGG_PREVIEW_LILA = "lila"
-    const val EGG_PREVIEW_BRASA = "brasa"
-    const val EGG_PREVIEW_CHISPA = "chispa"
-
-    fun devEggPreview(ctx: Context): String =
-        prefs(ctx).getString(KEY_DEV_EGG_PREVIEW, EGG_PREVIEW_NONE) ?: EGG_PREVIEW_NONE
-
-    fun setDevEggPreview(ctx: Context, value: String) {
-        prefs(ctx).edit().putString(KEY_DEV_EGG_PREVIEW, value).apply()
     }
 
     private const val KEY_BLOCK_IG_STORIES = "block_ig_stories"
@@ -174,7 +160,15 @@ object Stats {
         }
         history.put(today, entry)
 
-        p.edit().putString(KEY_HISTORY, history.toString()).apply()
+        // Contador de por vida: se siembra con la suma del historial vivo la
+        // primera vez (para que usuarios existentes no empiecen en 0) y luego
+        // crece monotónicamente, ajeno a la purga del historial.
+        val prior = if (p.contains(KEY_LIFETIME_TOTAL)) p.getLong(KEY_LIFETIME_TOTAL, 0)
+                    else sumTotals(history) - 1   // history ya incluye el +1 de hoy
+        p.edit()
+            .putString(KEY_HISTORY, history.toString())
+            .putLong(KEY_LIFETIME_TOTAL, prior + 1)
+            .apply()
 
         // XP de perfil: cada bloqueo suma (capa de progresión permanente).
         Profile.addBlockXp(ctx)
@@ -197,6 +191,29 @@ object Stats {
             sum += history.optJSONObject(iter.next())?.optInt("t") ?: 0
         }
         return sum
+    }
+
+    private fun sumTotals(history: JSONObject): Long {
+        var sum = 0L
+        val iter = history.keys()
+        while (iter.hasNext()) {
+            sum += history.optJSONObject(iter.next())?.optInt("t") ?: 0
+        }
+        return sum
+    }
+
+    /**
+     * Bloqueos acumulados de por vida. A diferencia de [totalBlocks] (limitado a
+     * los últimos [MAX_HISTORY_DAYS] días vivos), este contador no se purga.
+     * Se siembra de forma perezosa con la suma del historial actual para que los
+     * usuarios existentes no arranquen en 0.
+     */
+    fun lifetimeBlocks(ctx: Context): Long {
+        val p = prefs(ctx)
+        if (p.contains(KEY_LIFETIME_TOTAL)) return p.getLong(KEY_LIFETIME_TOTAL, 0)
+        val seed = sumTotals(loadHistory(p))
+        p.edit().putLong(KEY_LIFETIME_TOTAL, seed).apply()
+        return seed
     }
 
     /**

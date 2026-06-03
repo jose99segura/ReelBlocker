@@ -27,7 +27,12 @@ object Collection {
     data class CollectedMascot(
         val species: MascotSpecies,
         val acquiredDate: String,   // ISO LocalDate
-        val daysToReach: Int
+        val daysToReach: Int,
+        // Stats del periodo, congeladas al graduarse para que el re-compartir
+        // sea fiel aunque el historial rodante de 30 días ya no las contenga.
+        // 0 en entradas archivadas antes de esta versión (fallback en la UI).
+        val secondsSaved: Long = 0,
+        val streakRecord: Int = 0
     )
 
     private fun prefs(ctx: Context) =
@@ -55,7 +60,9 @@ object Collection {
                         CollectedMascot(
                             species = species,
                             acquiredDate = obj.optString("date"),
-                            daysToReach = obj.optInt("days", 21)
+                            daysToReach = obj.optInt("days", 21),
+                            secondsSaved = obj.optLong("secs", 0),
+                            streakRecord = obj.optInt("record", 0)
                         )
                     )
                 }
@@ -97,10 +104,18 @@ object Collection {
         } catch (_: Exception) {
             JSONArray()
         }
+        // Congelar las stats del periodo ANTES de romper la racha (breakStreak
+        // preserva el récord, pero lo leemos aquí por claridad). El tiempo se
+        // calcula sobre los últimos `daysReached` días del historial.
+        val secsSaved = Stats.readLastDays(ctx, daysReached)
+            .sumOf { it.counts.total } * Stats.SECONDS_PER_BLOCK
+        val record = Streak.current(ctx).record
         arr.put(JSONObject().apply {
             put("species", species.id)
             put("date", today())
             put("days", daysReached)
+            put("secs", secsSaved)
+            put("record", record)
         })
 
         // 2) Elegir la siguiente especie con la colección YA actualizada (incluye

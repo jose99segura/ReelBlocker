@@ -106,6 +106,25 @@
     <string name="graduation_share_text">I went %1$d days without falling into Reels with my %2$s. Using Basta! — the app that pulls you out of short video.</string>
     <string name="graduation_share_chooser">Share my achievement</string>
 
+    <!-- ==================== Share card (image) ==================== -->
+    <string name="share_card_eyebrow">Dopamine detox</string>
+    <string name="share_card_days">%1$d days</string>
+    <string name="share_card_days_caption">reclaiming my focus</string>
+    <string name="share_card_motto">Less scroll. More life.</string>
+    <string name="share_card_get_on_play">Get it on Google Play</string>
+    <string name="share_stats_eyebrow">My dopamine detox</string>
+    <string name="share_stats_time_caption">reclaimed all-time</string>
+    <string name="share_stats_blocks_label">Total blocks</string>
+    <string name="share_stats_caption">I\'ve blocked %1$d Reels/Shorts and reclaimed %2$d hours with Basta! — the app that pulls you out of short video.</string>
+    <string name="share_stats_chooser">Share my stats</string>
+    <string name="share_card_stat_time_label">Time reclaimed</string>
+    <string name="share_card_stat_streak_label">Streak record</string>
+    <string name="share_card_streak_value">%1$d days</string>
+    <string name="share_card_tagline">The app that pulls you out of short video</string>
+    <string name="share_card_preparing">Preparing…</string>
+    <string name="inventory_share_button">Share</string>
+    <string name="inventory_detail_acquired">Graduated %1$s</string>
+
     <!-- ==================== Confirm disable dialog ==================== -->
     <string name="confirm_disable_title">Disable protection?</string>
     <string name="confirm_disable_warning">You\'ll lose the streak and your mascot will go back to an egg.</string>
@@ -135,6 +154,25 @@
     <string name="stats_metric_record_caption">Reached on %1$s</string>
     <string name="stats_pro_upsell_title">A daily break with Pro</string>
     <string name="stats_pro_upsell_body">1 ten-minute break without losing the streak. For the days life asks for something else.</string>
+
+    <!-- ===== Advanced stats (Pro) ===== -->
+    <string name="stats_section_advanced">Advanced stats</string>
+    <string name="stats_section_monthly">Last 30 days</string>
+    <string name="stats_section_by_app_30">By app · 30 days</string>
+    <string name="stats_metric_lifetime_blocks">Total blocks</string>
+    <string name="stats_metric_lifetime_time">Time reclaimed (all-time)</string>
+    <string name="stats_metric_daily_avg">Daily average</string>
+    <string name="stats_metric_best_day">Best day</string>
+    <string name="stats_trend_up">▲ %1$d%% vs last week</string>
+    <string name="stats_trend_down">▼ %1$d%% vs last week</string>
+    <string name="stats_trend_flat">Same as last week</string>
+    <string name="stats_chart_30d_start">30 d</string>
+    <string name="stats_advanced_locked_title">Advanced stats with Pro</string>
+    <string name="stats_advanced_locked_body">30-day history, all-time totals, per-app trends and more.</string>
+    <string name="stats_tab_week">Week</string>
+    <string name="stats_tab_month">Month</string>
+    <string name="stats_day_blocks">%1$d blocks</string>
+    <string name="stats_export_button">Export as image</string>
 
     <string name="time_recovered_hours_minutes">%1$dh %2$dm</string>
     <string name="time_recovered_minutes">%1$dm</string>
@@ -272,7 +310,7 @@
     <string name="ppw_compare_breaks">Scheduled breaks</string>
     <string name="ppw_compare_dm">Allow Reels from friends\' DMs</string>
     <string name="ppw_compare_stories">Block Instagram Stories</string>
-    <string name="ppw_compare_stats">Advanced stats &amp; export</string>
+    <string name="ppw_compare_stats">Advanced stats</string>
     <string name="ppw_compare_widget">Home-screen widget</string>
     <string name="ppw_compare_block_whole">Block whole apps</string>
     <string name="widget_label">Basta! — streak &amp; pet</string>

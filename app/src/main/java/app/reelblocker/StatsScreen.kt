@@ -621,11 +621,14 @@ private fun AdvancedStatsSection(
     var sharing by remember { mutableStateOf(false) }
 
     val sum30 = history30.sumOf { it.counts.total }
-    val avg = sum30 / 30
+    val daysCount = history30.size.coerceAtLeast(1)
+    val avg = sum30 / daysCount
     val best = history30.maxByOrNull { it.counts.total }
-    // Últimos 7 días vs los 7 anteriores (índices 16..22 de los 30 ascendentes).
-    val last7 = history30.takeLast(7).sumOf { it.counts.total }
-    val prev7 = history30.drop(16).take(7).sumOf { it.counts.total }
+    // Últimos 7 días vs los 7 anteriores (o mitad vs mitad si hay <14 días).
+    val recent14 = history30.takeLast(14.coerceAtMost(history30.size))
+    val mid = recent14.size / 2
+    val prev7 = recent14.take(mid).sumOf { it.counts.total }
+    val last7 = recent14.takeLast(recent14.size - mid).sumOf { it.counts.total }
 
     Column(
         modifier = Modifier

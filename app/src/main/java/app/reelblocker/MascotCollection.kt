@@ -153,30 +153,8 @@ object Collection {
     }
 
     /**
-     * Devuelve la siguiente especie respetando el tier del usuario:
-     *  - Free user: solo entre [MascotSpecies.freeSpecies]. Si agota todas
-     *    las free uncollected → marca [KEY_PENDING_PRO_UNLOCK] para que la
-     *    UI dispare el paywall, y devuelve una repetida free.
-     *  - Pro user: pool completo. Si todo coleccionado, aleatoria del total
-     *    excluyendo [justArchived].
-     *  - Excluye siempre [justArchived] de la elección directa para que al
-     *    menos cambie la apariencia.
-     */
-    private fun pickNext(ctx: Context, justArchived: MascotSpecies): MascotSpecies {
-        val collected = read(ctx).map { it.species }.toSet()
-        val isPro = Premium.isPro(ctx)
-        val result = selectNextSpecies(collected, justArchived, isPro)
-        if (result.markPendingProUnlock) {
-            prefs(ctx).edit().putBoolean(KEY_PENDING_PRO_UNLOCK, true).apply()
-            Log.d(TAG, "pickNext: free tier agotado → pending_pro_unlock=true")
-        }
-        return result.next
-    }
-
-    /**
      * Lógica pura de selección, extraída para tests JVM. No toca prefs ni
-     * Context. El caller ([pickNext]) decide qué hacer con
-     * `markPendingProUnlock`.
+     * Context.
      */
     internal data class SelectResult(
         val next: MascotSpecies,

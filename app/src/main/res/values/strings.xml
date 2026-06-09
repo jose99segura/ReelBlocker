@@ -267,6 +267,12 @@
     <string name="app_disable_confirm_disable">Stop blocking</string>
     <string name="app_disable_confirm_alternative">I\'ll take a break instead</string>
 
+    <string name="app_disable_detail_line1">Your %1$s (%2$s, level %3$d of 4) has grown over %4$d days.</string>
+    <string name="app_disable_detail_line2">If you stop blocking %1$s, the streak breaks and your mascot goes back to an egg.</string>
+    <string name="app_disable_detail_line3">Your record of %1$d days will be preserved.</string>
+    <string name="app_disable_countdown">Wait %1$ds…</string>
+    <string name="app_disable_no_streak">You don\'t have an active streak right now. Disabling won\'t break anything.</string>
+
     <!-- ==================== Break (Pro) ==================== -->
     <string name="settings_row_break_title">Request a Pause</string>
     <string name="settings_row_break_subtitle_available">10-min pause · Available</string>
@@ -316,6 +322,18 @@
     <string name="widget_label">Basta! — streak &amp; pet</string>
     <string name="widget_locked_title">Pro widget</string>
     <string name="widget_locked_cta">Tap to unlock</string>
+
+    <!-- Widget info dialog / settings row -->
+    <string name="settings_row_widget_title">Home-screen widget</string>
+    <string name="settings_row_widget_subtitle">See your streak and mascot on your home screen</string>
+    <string name="settings_row_widget_subtitle_off">Unlock with Pro — streak &amp; mascot at a glance</string>
+    <string name="widget_info_label">WIDGET</string>
+    <string name="widget_info_title">Home-screen widget</string>
+    <string name="widget_info_body">Add the Basta! widget to your home screen to see your current streak and mascot without opening the app. It updates automatically as you grow.</string>
+    <string name="widget_info_how_to_add_title">How to add it</string>
+    <string name="widget_info_how_to_add_body">Long-press on your home screen → Widgets → Basta! → Drag the widget where you want it.</string>
+    <string name="widget_info_action_dismiss">Got it</string>
+
     <string name="ppw_compare_no">—</string>
     <string name="ppw_compare_yes">✓</string>
 

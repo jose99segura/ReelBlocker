@@ -34,8 +34,8 @@ class BlockerService : AccessibilityService() {
 
         // Etiquetas (content-description) del item "Perfil" de la barra inferior
         // de TikTok, para redirigir alli en vez de hacer BACK (que no saca del
-        // feed). Cubre es/en/pt; si no hay match se cae a GLOBAL_ACTION_HOME.
-        private val TIKTOK_PROFILE_LABELS = listOf("Perfil", "Profile")
+        // feed). Cubre es/en/pt/fr/de/it; si no hay match se cae a GLOBAL_ACTION_HOME.
+        private val TIKTOK_PROFILE_LABELS = listOf("Perfil", "Profile", "Profil", "Profilo")
 
         // Los hints de Reels/Stories/Shorts viven ahora en [HintConfig]
         // (defaults baked-in + override remoto por JSON). El servicio solo lee
@@ -91,6 +91,15 @@ class BlockerService : AccessibilityService() {
         // Cada cuanto, como maximo, corremos el chequeo de "deteccion rota"
         // ante actividad de IG/YT. Barato pero no en cada evento.
         private const val HEALTH_CHECK_INTERVAL_MS = 30L * 60 * 1000
+
+        // Heartbeat cross-process: el servicio escribe estas prefs para que el
+        // proceso principal sepa si realmente está corriendo (no solo registrado).
+        internal const val KEY_SERVICE_CONNECTED = "service_connected"
+        internal const val KEY_SERVICE_DISCONNECTED_MS = "service_disconnected_ms"
+        // Ventana de gracia tras onUnbind: asumimos que Android re-levantará el
+        // servicio en este tiempo. Pasado este margen, el proceso principal
+        // considera la protección caída aunque el registro siga activo.
+        internal const val SERVICE_GRACE_MS = 30_000L
     }
 
     private var lastActionTime = 0L
@@ -126,6 +135,10 @@ class BlockerService : AccessibilityService() {
         val dm = resources.displayMetrics
         displayWidth = dm.widthPixels
         displayHeight = dm.heightPixels
+        getSharedPreferences("reelblocker_prefs", MODE_PRIVATE).edit()
+            .putBoolean(KEY_SERVICE_CONNECTED, true)
+            .putLong(KEY_SERVICE_DISCONNECTED_MS, 0L)
+            .apply()
         Log.d(TAG, "==> Servicio CONECTADO  pantalla=${displayWidth}x${displayHeight}")
     }
 
@@ -390,7 +403,7 @@ class BlockerService : AccessibilityService() {
         val queue = ArrayDeque<AccessibilityNodeInfo>()
         queue.add(root)
         var visited = 0
-        val maxNodes = 800
+        val maxNodes = 2000
         while (queue.isNotEmpty() && visited < maxNodes) {
             val node = queue.removeFirst()
             visited++
@@ -416,7 +429,7 @@ class BlockerService : AccessibilityService() {
         val queue = ArrayDeque<AccessibilityNodeInfo>()
         queue.add(root)
         var visited = 0
-        val maxNodes = 800
+        val maxNodes = 2000
 
         while (queue.isNotEmpty() && visited < maxNodes) {
             val node = queue.removeFirst()
@@ -546,7 +559,7 @@ class BlockerService : AccessibilityService() {
         val queue = ArrayDeque<AccessibilityNodeInfo>()
         queue.add(root)
         var visited = 0
-        val maxNodes = 800
+        val maxNodes = 2000
         while (queue.isNotEmpty() && visited < maxNodes) {
             val node = queue.removeFirst()
             visited++
@@ -568,6 +581,10 @@ class BlockerService : AccessibilityService() {
         // apago el servicio. Avisar (salvo desactivacion deliberada reciente),
         // porque a partir de ahora los Reels dejan de bloquearse.
         Log.d(TAG, "Servicio desvinculado")
+        getSharedPreferences("reelblocker_prefs", MODE_PRIVATE).edit()
+            .putBoolean(KEY_SERVICE_CONNECTED, false)
+            .putLong(KEY_SERVICE_DISCONNECTED_MS, SystemClock.elapsedRealtime())
+            .apply()
         HealthCheck.notifyProtectionOff(this)
         return super.onUnbind(intent)
     }

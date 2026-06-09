@@ -275,6 +275,12 @@
     <string name="app_disable_confirm_disable">Dejar de bloquear</string>
     <string name="app_disable_confirm_alternative">Mejor tomo un descanso</string>
 
+    <string name="app_disable_detail_line1">Tu %1$s (%2$s, nivel %3$d de 4) ha crecido durante %4$d días.</string>
+    <string name="app_disable_detail_line2">Si dejas de bloquear %1$s, la racha se rompe y tu mascota vuelve a ser un huevo.</string>
+    <string name="app_disable_detail_line3">Tu récord de %1$d días se conservará.</string>
+    <string name="app_disable_countdown">Espera %1$ds…</string>
+    <string name="app_disable_no_streak">No tienes una racha activa ahora mismo. Desactivar no romperá nada.</string>
+
     <!-- ==================== Descanso (Break) Pro ==================== -->
     <string name="settings_row_break_title">Pedir una Pausa</string>
     <string name="settings_row_break_subtitle_available">10 min de pausa · Disponible</string>
@@ -324,6 +330,18 @@
     <string name="widget_label">Basta! — racha y mascota</string>
     <string name="widget_locked_title">Widget Pro</string>
     <string name="widget_locked_cta">Toca para desbloquear</string>
+
+    <!-- Widget info dialog / settings row -->
+    <string name="settings_row_widget_title">Widget en pantalla de inicio</string>
+    <string name="settings_row_widget_subtitle">Tu racha y mascota en la pantalla de inicio</string>
+    <string name="settings_row_widget_subtitle_off">Desbloquea con Pro — racha y mascota a primera vista</string>
+    <string name="widget_info_label">WIDGET</string>
+    <string name="widget_info_title">Widget en pantalla de inicio</string>
+    <string name="widget_info_body">Añade el widget de Basta! a tu pantalla de inicio para ver tu racha actual y tu mascota sin abrir la app. Se actualiza automáticamente según creces.</string>
+    <string name="widget_info_how_to_add_title">Cómo añadirlo</string>
+    <string name="widget_info_how_to_add_body">Mantén pulsado la pantalla de inicio → Widgets → Basta! → Arrastra el widget donde quieras.</string>
+    <string name="widget_info_action_dismiss">Entendido</string>
+
     <string name="ppw_compare_no">—</string>
     <string name="ppw_compare_yes">✓</string>
 

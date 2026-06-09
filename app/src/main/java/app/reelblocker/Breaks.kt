@@ -48,9 +48,14 @@ object Breaks {
 
     /**
      * Arranca un descanso de 10 min. Marca el día como consumido.
-     * Devuelve true si se inició, false si ya estaba consumido hoy.
+     * Requiere Pro. Devuelve true si se inició, false si ya estaba
+     * consumido hoy o el usuario no es Pro.
      */
     fun start(ctx: Context): Boolean {
+        if (!Premium.isPro(ctx)) {
+            Log.d(TAG, "start: usuario no es Pro, ignorando")
+            return false
+        }
         if (!isAvailableToday(ctx)) {
             Log.d(TAG, "start: ya consumido hoy, ignorando")
             return false

@@ -101,17 +101,24 @@ object Profile {
      * (récord de racha, bloqueos de los últimos 30 días, graduaciones). El
      * historial real >30 días ya se purgó, así que es deliberadamente aproximado:
      * solo evita que un usuario fiel arranque en Nv.1.
+     *
+     * Se ejecuta en background para no bloquear el hilo principal la primera vez.
      */
     fun seedIfNeeded(ctx: Context) {
         val p = prefs(ctx)
         if (p.getBoolean(KEY_SEEDED, false)) return
-        val seed = Streak.current(ctx).record * XP_PER_DAY +
-            Stats.totalBlocks(ctx) * XP_PER_BLOCK +
-            Collection.read(ctx).size * XP_PER_GRADUATION
-        p.edit()
-            .putInt(KEY_XP, seed)
-            .putBoolean(KEY_SEEDED, true)
-            .apply()
-        Log.d(TAG, "seedIfNeeded: XP inicial sembrado = $seed (nivel ${levelForXp(seed)})")
+        // Marcar sembrado YA para que llamadas concurrentes (current(), addXp…)
+        // no lancen hilos duplicados mientras este todavía se ejecuta.
+        p.edit().putBoolean(KEY_SEEDED, true).apply()
+        val appCtx = ctx.applicationContext
+        Thread {
+            val seed = Streak.current(appCtx).record * XP_PER_DAY +
+                Stats.totalBlocks(appCtx) * XP_PER_BLOCK +
+                Collection.read(appCtx).size * XP_PER_GRADUATION
+            prefs(appCtx).edit()
+                .putInt(KEY_XP, seed)
+                .apply()
+            Log.d(TAG, "seedIfNeeded: XP inicial sembrado = $seed (nivel ${levelForXp(seed)})")
+        }.apply { isDaemon = true }.start()
     }
 }

@@ -42,7 +42,7 @@ object Premium {
 
     /** Precio post-cutoff. Anchor mostrado en el banner Founder y fallback
      *  cuando la ventana ha pasado. */
-    const val POST_FOUNDER_PRICE = "6,99 €"
+    const val POST_FOUNDER_PRICE = "8,99 €"
 
     /**
      * Fallback display si Play Billing aún no ha devuelto ProductDetails.
@@ -63,16 +63,14 @@ object Premium {
      * "Founder · Pro since X" en lugar de "Pro since X"). Crea urgencia
      * legítima al lanzamiento sin truco — la fecha es pública y fija.
      *
-     * 1_803_859_200_000L = 2027-03-01 00:00 UTC (~6 meses tras el lanzamiento
-     * previsto Q3-Q4 2026). Ajustar este valor antes de release si el
-     * lanzamiento se mueve. Sin servidor, esto es lo más honesto que se
-     * puede hacer: rank global numerado requiere backend (ver memoria
-     * project_launch_marketing).
+     * 1_790_812_799_000L = 2026-09-30 23:59:59 UTC (Founder hasta septiembre).
+     * Ajustar este valor antes de release si el lanzamiento se mueve.
+     * Sin servidor, esto es lo más honesto que se puede hacer.
      *
      * Verificación rápida del valor:
-     *   [DateTimeOffset]::FromUnixTimeMilliseconds(1803859200000).UtcDateTime
+     *   [DateTimeOffset]::FromUnixTimeMilliseconds(1790812799000).UtcDateTime
      */
-    const val FOUNDER_CUTOFF_MS = 1_803_859_200_000L
+    const val FOUNDER_CUTOFF_MS = 1_790_812_799_000L
 
     /** Estado vivo para Compose. */
     var isProLive by mutableStateOf(false)

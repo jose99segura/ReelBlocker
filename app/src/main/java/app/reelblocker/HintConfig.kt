@@ -106,6 +106,7 @@ object HintConfig {
 
     private var cachedAtMs = -1L
     private var cached: Parsed = DEFAULTS
+    @Volatile private var fetching = false
 
     private fun prefs(ctx: Context) =
         ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
@@ -173,6 +174,8 @@ object HintConfig {
         val p = prefs(ctx)
         val last = p.getLong(KEY_FETCHED_MS, 0L)
         if (System.currentTimeMillis() - last in 0 until FETCH_INTERVAL_MS) return
+        if (fetching) return  // ya hay un fetch en vuelo, no duplicar
+        fetching = true
 
         Thread {
             var conn: HttpURLConnection? = null
@@ -202,6 +205,7 @@ object HintConfig {
                 Log.d(TAG, "Fetch hints falló: ${e.message}")
             } finally {
                 conn?.disconnect()
+                fetching = false
             }
         }.apply { isDaemon = true }.start()
     }

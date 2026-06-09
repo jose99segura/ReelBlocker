@@ -42,17 +42,21 @@ import androidx.compose.material.icons.outlined.Restore
 import androidx.compose.material.icons.outlined.School
 import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material.icons.outlined.Stars
+import androidx.compose.material.icons.outlined.Dashboard
 import androidx.compose.material.icons.outlined.WorkspacePremium
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -60,6 +64,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -69,7 +74,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.compose.ui.res.pluralStringResource
+
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
@@ -77,6 +82,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -112,6 +118,7 @@ fun SettingsScreen(
     val breakAvailable = remember(refreshKey) { Breaks.isAvailableToday(ctx) }
     val breakRemainingMs = remember(refreshKey) { Breaks.millisRemaining(ctx) }
     var showBreakDialog by remember { mutableStateOf(false) }
+    var showWidgetInfo by remember { mutableStateOf(false) }
 
     // El hero solo es accionable cuando hay un arreglo de un toque. Si lo que
     // falta es una app apagada, el usuario lo resuelve en la tarjeta de Apps
@@ -211,25 +218,40 @@ fun SettingsScreen(
                 ProUpsellCard(onClick = onOpenPaywall)
                 Spacer(Modifier.height(8.dp))
                 SettingsCard {
-                    BreakRow(
-                        isPro = false,
-                        breakRemainingMs = breakRemainingMs,
-                        breakAvailable = breakAvailable,
-                        onOpenPaywall = onOpenPaywall,
-                        onStartBreak = { showBreakDialog = true },
-                        onRefresh = { refreshKey++ }
-                    )
-                    RowDivider()
-                    SettingsRow(
-                        icon = Icons.Outlined.Restore,
-                        title = stringResource(R.string.settings_row_restore_title),
-                        subtitle = stringResource(R.string.settings_row_restore_subtitle),
-                        onClick = {
-                            Premium.restore(ctx)
-                            Toast.makeText(ctx, ctx.getString(R.string.toast_checking_purchases), Toast.LENGTH_SHORT).show()
-                        }
-                    )
-                }
+                BreakRow(
+                    isPro = false,
+                    breakRemainingMs = breakRemainingMs,
+                    breakAvailable = breakAvailable,
+                    onOpenPaywall = onOpenPaywall,
+                    onStartBreak = { showBreakDialog = true },
+                    onRefresh = { refreshKey++ }
+                )
+                RowDivider()
+                SettingsRow(
+                    icon = Icons.Outlined.Dashboard,
+                    title = stringResource(R.string.settings_row_widget_title),
+                    subtitle = stringResource(R.string.settings_row_widget_subtitle_off),
+                    onClick = onOpenPaywall,
+                    trailing = {
+                        Icon(
+                            imageVector = Icons.Outlined.Lock,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                )
+                RowDivider()
+                SettingsRow(
+                    icon = Icons.Outlined.Restore,
+                    title = stringResource(R.string.settings_row_restore_title),
+                    subtitle = stringResource(R.string.settings_row_restore_subtitle),
+                    onClick = {
+                        Premium.restore(ctx)
+                        Toast.makeText(ctx, ctx.getString(R.string.toast_checking_purchases), Toast.LENGTH_SHORT).show()
+                    }
+                )
+            }
             } else {
                 val purchaseMs = Premium.purchaseDateMs(ctx)
                 val founder = Premium.isFounder(ctx)
@@ -266,6 +288,13 @@ fun SettingsScreen(
                         onOpenPaywall = onOpenPaywall,
                         onStartBreak = { showBreakDialog = true },
                         onRefresh = { refreshKey++ }
+                    )
+                    RowDivider()
+                    SettingsRow(
+                        icon = Icons.Outlined.Dashboard,
+                        title = stringResource(R.string.settings_row_widget_title),
+                        subtitle = stringResource(R.string.settings_row_widget_subtitle),
+                        onClick = { showWidgetInfo = true }
                     )
                 }
             }
@@ -418,45 +447,69 @@ fun SettingsScreen(
     }
 
     if (showBreakDialog) {
-        androidx.compose.material3.AlertDialog(
+        val breakScope = rememberCoroutineScope()
+        val breakSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        ModalBottomSheet(
             onDismissRequest = { showBreakDialog = false },
-            icon = {
+            sheetState = breakSheetState
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp)
+                    .padding(bottom = 48.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
                 Icon(
                     imageVector = Icons.Outlined.Pause,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(48.dp)
                 )
-            },
-            title = {
+                Spacer(Modifier.height(12.dp))
                 Text(
                     text = stringResource(R.string.break_dialog_title),
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Black,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
                 )
-            },
-            text = {
+                Spacer(Modifier.height(8.dp))
                 Text(
                     text = stringResource(R.string.break_dialog_body),
                     textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                     modifier = Modifier.fillMaxWidth(),
                     style = MaterialTheme.typography.bodyMedium
                 )
-            },
-            confirmButton = {
-                androidx.compose.material3.Button(onClick = {
-                    Breaks.start(ctx)
-                    showBreakDialog = false
-                    refreshKey++
-                }) {
+                Spacer(Modifier.height(24.dp))
+                Button(
+                    onClick = {
+                        Breaks.start(ctx)
+                        breakScope.launch { breakSheetState.hide() }.invokeOnCompletion {
+                            if (!breakSheetState.isVisible) showBreakDialog = false
+                        }
+                        refreshKey++
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
                     Text(stringResource(R.string.break_dialog_confirm))
                 }
-            },
-            dismissButton = {
-                androidx.compose.material3.TextButton(onClick = { showBreakDialog = false }) {
+                Spacer(Modifier.height(8.dp))
+                TextButton(
+                    onClick = {
+                        breakScope.launch { breakSheetState.hide() }.invokeOnCompletion {
+                            if (!breakSheetState.isVisible) showBreakDialog = false
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
                     Text(stringResource(R.string.break_dialog_cancel))
                 }
             }
-        )
+        }
+    }
+
+    if (showWidgetInfo) {
+        WidgetInfoDialog(onDismiss = { showWidgetInfo = false })
     }
 }
 
@@ -716,67 +769,22 @@ private fun AppRow(
     }
 
     if (showDisableConfirm) {
-        androidx.compose.material3.AlertDialog(
-            onDismissRequest = { showDisableConfirm = false },
-            icon = {
-                androidx.compose.material3.Icon(
-                    imageVector = Icons.Outlined.Block,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.error
-                )
-            },
-            title = {
-                Text(
-                    text = stringResource(R.string.app_disable_confirm_title, label),
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            },
-            text = {
-                val streakCount = Streak.current(ctx).count
-                val breakAvailable = isPro && Breaks.isAvailableToday(ctx) && !Breaks.isOnBreak(ctx)
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = pluralStringResource(R.plurals.app_disable_confirm_body, streakCount, label, streakCount),
-                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth(),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                    if (breakAvailable) {
-                        Spacer(Modifier.height(16.dp))
-                        androidx.compose.material3.TextButton(
-                            onClick = {
-                                Breaks.start(ctx)
-                                onChanged()
-                                showDisableConfirm = false
-                            }
-                        ) {
-                            Text(stringResource(R.string.app_disable_confirm_alternative))
-                        }
-                    }
+        AppDisableDialog(
+            appLabel = label,
+            breakAvailable = isPro && Breaks.isAvailableToday(ctx) && !Breaks.isOnBreak(ctx),
+            onDismiss = { showDisableConfirm = false },
+            onConfirmDisable = {
+                if (Streak.current(ctx).count > 0) {
+                    Streak.breakStreak(ctx, reason = "app_disabled_$pkg")
                 }
+                Stats.setAppEnabled(ctx, pkg, false)
+                onChanged()
+                showDisableConfirm = false
             },
-            confirmButton = {
-                androidx.compose.material3.Button(onClick = { showDisableConfirm = false }) {
-                    Text(stringResource(R.string.app_disable_confirm_keep))
-                }
-            },
-            dismissButton = {
-                androidx.compose.material3.TextButton(
-                    onClick = {
-                        if (Streak.current(ctx).count > 0) {
-                            Streak.breakStreak(ctx, reason = "app_disabled_$pkg")
-                        }
-                        Stats.setAppEnabled(ctx, pkg, false)
-                        onChanged()
-                        showDisableConfirm = false
-                    },
-                    colors = androidx.compose.material3.ButtonDefaults.textButtonColors(
-                        contentColor = MaterialTheme.colorScheme.error
-                    )
-                ) {
-                    Text(stringResource(R.string.app_disable_confirm_disable))
-                }
+            onTakeBreak = {
+                Breaks.start(ctx)
+                onChanged()
+                showDisableConfirm = false
             }
         )
     }

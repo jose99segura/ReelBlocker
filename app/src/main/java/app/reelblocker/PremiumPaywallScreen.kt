@@ -402,7 +402,7 @@ private fun StickyCta(
 
 /**
  * Banner de ancla mostrado en el paywall solo durante la ventana Founder.
- * Comunica que el precio actual es promocional ("sube a 6,99€ tras 1 mar 2027")
+ * Comunica que el precio actual es promocional ("sube a 8,99€ tras septiembre 2026")
  * sin trucos: la fecha de cutoff es pública y fija en [Premium.FOUNDER_CUTOFF_MS].
  */
 @Composable

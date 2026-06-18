@@ -83,10 +83,20 @@ class BlockerService : AccessibilityService() {
         // este tiempo cualquier nuevo match dispara BACK. 5 min es de
         // sobra para ver un reel pero corta una sesion olvidada.
         private const val DM_VIEW_BUDGET_MS = 300_000L
-        // Si vimos hints DM hace menos de esta ventana, asumimos que el
-        // reel que se acaba de detectar viene de un DM. Cubre la transicion
-        // DM thread -> reel viewer (< 500 ms tipicamente).
-        private const val DM_RECENCY_MS = 2500L
+        // Salvaguarda temporal del contexto DM. El bypass se arma por estado
+        // pegajoso ([dmContextActive], que solo se limpia al volver al feed o al
+        // hacer scroll), NO por una ventana corta de tiempo — antes 2.5 s no
+        // cubrian el caso "abro el DM, lo leo unos segundos sin tocar nada y
+        // luego abro el reel" (sin eventos no se refrescaba el timestamp y el
+        // reel se bloqueaba igual). Este tope solo actua como red de seguridad
+        // por si la deteccion de salida fallara: limita cuanto puede sobrevivir
+        // el contexto DM sin volver a ver hints de DM.
+        private const val DM_CONTEXT_MAX_MS = 30_000L
+        // Ventana de gracia tras armar el bypass DM durante la cual se ignoran
+        // los TYPE_VIEW_SCROLLED: el ViewPager del visor emite un scroll espurio
+        // al abrirse (~300 ms), que no es un swipe del usuario. Un swipe real
+        // para pasar de reel ocurre mucho mas tarde, asi que 1.5 s no estorba.
+        private const val DM_SCROLL_GRACE_MS = 1500L
 
         // Cada cuanto, como maximo, corremos el chequeo de "deteccion rota"
         // ante actividad de IG/YT. Barato pero no en cada evento.
@@ -115,8 +125,13 @@ class BlockerService : AccessibilityService() {
     private var watchingDmReel = false
     private var watchingDmReelStart = 0L
     // Timestamp del ultimo evento donde vimos hints DM en el arbol. Sirve
-    // para decidir si un reel recien detectado viene de un DM.
+    // como red de seguridad temporal del contexto DM (ver DM_CONTEXT_MAX_MS).
     private var lastSeenDmTimestamp = 0L
+    // Estado PEGAJOSO de "el usuario esta en un contexto de DM". Se activa al
+    // ver hints de DM en el arbol y se mantiene (no expira a los pocos ms) hasta
+    // que detectamos el regreso al feed principal (className de salida) o un
+    // scroll en el visor. Es lo que arma el bypass del reel recibido por DM.
+    private var dmContextActive = false
     // Rate-limit del volcado diagnostico de Facebook.
     private var lastFbDumpTime = 0L
     // Rate-limit del chequeo de salud (deteccion rota) ante actividad IG/YT.
@@ -170,13 +185,37 @@ class BlockerService : AccessibilityService() {
         // Detectar swipe dentro del visor: si estabamos viendo un reel
         // permitido por DM y el usuario hace scroll para pasar al siguiente,
         // terminamos el bypass y dejamos que el proximo match dispare BACK.
+        // PERO: el propio ViewPager del visor (clips_viewer_view_pager) emite un
+        // TYPE_VIEW_SCROLLED espurio al abrirse/arrancar el video (~300 ms tras
+        // armar el bypass), que NO es un swipe del usuario. Si lo tratamos como
+        // tal, desarmamos el bypass y el siguiente evento cierra el reel — ese
+        // era el bug "el reel desde DM se cierra igual". Ignoramos scrolls dentro
+        // de una ventana de gracia: un swipe real ocurre segundos despues.
         if (event.eventType == AccessibilityEvent.TYPE_VIEW_SCROLLED &&
             pkg == PKG_INSTAGRAM &&
             watchingDmReel) {
+            if (SystemClock.elapsedRealtime() - watchingDmReelStart < DM_SCROLL_GRACE_MS) {
+                logv { "Scroll espurio de apertura ignorado (dentro de la gracia)" }
+                return
+            }
             Log.d(TAG, "Scroll detectado en visor DM, fin de bypass — proximo reel se bloquea")
             watchingDmReel = false
+            dmContextActive = false
             lastReelsPackage = null
             return
+        }
+
+        // Salida del contexto DM: al volver al feed principal de IG limpiamos el
+        // estado pegajoso, para que un reel del feed NO herede el bypass de DM.
+        // Si los classnames de salida cambiaran y esto no disparara, el tope
+        // DM_CONTEXT_MAX_MS sigue acotando el peor caso.
+        if (event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED &&
+            pkg == PKG_INSTAGRAM && dmContextActive) {
+            val cn = event.className?.toString()
+            if (cn != null && INSTAGRAM_EXIT_CLASSNAMES.any { cn.contains(it, ignoreCase = true) }) {
+                Log.d(TAG, "Salida de contexto DM (className=$cn), bypass desarmado")
+                dmContextActive = false
+            }
         }
 
         val root = rootInActiveWindow
@@ -215,6 +254,7 @@ class BlockerService : AccessibilityService() {
         // el usuario estuvo en una pantalla con thread de DM en el arbol.
         if (pkg == PKG_INSTAGRAM && containsAnyHint(root, INSTAGRAM_DM_HINTS)) {
             lastSeenDmTimestamp = SystemClock.elapsedRealtime()
+            dmContextActive = true
         }
 
         // Salud: el usuario esta usando IG/YT ahora mismo. Si antes
@@ -260,21 +300,24 @@ class BlockerService : AccessibilityService() {
             } else {
                 Log.d(TAG, "Watchdog DM expirado, reanudo bloqueo")
                 watchingDmReel = false
+                dmContextActive = false
                 lastReelsPackage = null
             }
         }
 
-        // Punto critico: si vimos hints DM hace muy poco (< DM_RECENCY_MS),
-        // interpretamos que el reel viene de un DM. La transicion DM thread
-        // -> reel viewer es < 500 ms, asi que 2.5 s cubre el caso con
-        // margen. Esto funciona aunque el visor del reel sustituya el
-        // thread en el arbol (que es lo que pasaba con el approach anterior).
+        // Punto critico: interpretamos que el reel viene de un DM si el contexto
+        // DM pegajoso esta activo. A diferencia del enfoque anterior (ventana de
+        // 2.5 s refrescada por eventos), [dmContextActive] sobrevive aunque el
+        // usuario se quede leyendo el thread sin interactuar y no lleguen eventos
+        // — ese era el caso que fallaba "a veces". DM_CONTEXT_MAX_MS solo acota
+        // el peor caso por si la deteccion de salida fallara.
         val msSinceDm = now - lastSeenDmTimestamp
         val cameFromDm = pkg == PKG_INSTAGRAM &&
+            dmContextActive &&
             lastSeenDmTimestamp > 0 &&
-            msSinceDm < DM_RECENCY_MS
+            msSinceDm < DM_CONTEXT_MAX_MS
         if (dmAllowed && !watchingDmReel && cameFromDm) {
-            Log.d(TAG, "Reel autorizado: vimos DM hace ${msSinceDm}ms (id=$matchedId)")
+            Log.d(TAG, "Reel autorizado: contexto DM activo (hace ${msSinceDm}ms, id=$matchedId)")
             watchingDmReel = true
             watchingDmReelStart = now
             lastReelsPackage = pkg

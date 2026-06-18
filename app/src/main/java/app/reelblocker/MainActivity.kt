@@ -110,6 +110,8 @@ class MainActivity : ComponentActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, true)
         Premium.init(applicationContext)
         Streak.migrateToV21IfNeeded(applicationContext)
+        // Avance de racha en segundo plano (independiente de abrir la app).
+        StreakWorker.schedule(applicationContext)
         setContent {
             ReelBlockerTheme {
                 Surface(color = MaterialTheme.colorScheme.background) {

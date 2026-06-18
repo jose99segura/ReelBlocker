@@ -80,6 +80,7 @@ object Premium {
 
     private var billingClient: BillingClient? = null
     private var productDetails: ProductDetails? = null
+    private var appContext: Context? = null
 
     // ---- Cache persistente (lo que lee BlockerService) ----
 
@@ -123,6 +124,7 @@ object Premium {
 
     /** Llamar una vez en MainActivity.onCreate con applicationContext. */
     fun init(appContext: Context) {
+        this.appContext = appContext
         // Estado inicial desde la cache, para que la UI no parpadee.
         isProLive = isPro(appContext)
         if (billingClient?.isReady == true) return
@@ -202,7 +204,6 @@ object Premium {
             }
             if (owned) {
                 purchases.forEach { handlePurchase(it) }
-                grantPro(ctx)
             } else {
                 revokePro(ctx)
             }
@@ -247,6 +248,9 @@ object Premium {
 
     private fun handlePurchase(purchase: Purchase) {
         if (purchase.purchaseState != Purchase.PurchaseState.PURCHASED) return
+        // Conceder Pro en cuanto la compra llega (cubre el flujo en vivo desde
+        // PurchasesUpdatedListener, no solo el restore al arrancar).
+        appContext?.let { grantPro(it) }
         if (!purchase.isAcknowledged) {
             val client = billingClient ?: return
             val ack = AcknowledgePurchaseParams.newBuilder()

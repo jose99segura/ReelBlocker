@@ -777,6 +777,15 @@ internal fun isAppInstalled(ctx: Context, pkg: String): Boolean = try {
     false
 }
 
+/**
+ * Primer paquete instalado de la familia de [pkg] (YouTube oficial o
+ * cualquiera de sus forks), o null si no hay ninguno. Con esto la fila de
+ * YouTube en Ajustes se muestra y coge el icono correcto aunque el usuario
+ * solo tenga ReVanced instalado.
+ */
+internal fun resolveInstalledVariant(ctx: Context, pkg: String): String? =
+    Stats.packageFamily(pkg).firstOrNull { isAppInstalled(ctx, it) }
+
 internal fun loadAppIcon(ctx: Context, pkg: String): Drawable? = try {
     ctx.packageManager.getApplicationIcon(pkg)
 } catch (_: PackageManager.NameNotFoundException) {

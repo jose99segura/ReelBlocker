@@ -16,6 +16,13 @@
     <queries>
         <package android:name="com.instagram.android" />
         <package android:name="com.google.android.youtube" />
+        <!-- Forks de YouTube (ReVanced non-root, ReVanced Extended, Vanced):
+             misma app repackageada, mismos resource-ids. Se declaran aqui solo
+             para visibilidad (icono + "esta instalada"); los eventos de
+             accesibilidad no dependen de <queries>. -->
+        <package android:name="app.revanced.android.youtube" />
+        <package android:name="app.rvx.android.youtube" />
+        <package android:name="com.vanced.android.youtube" />
         <package android:name="com.facebook.katana" />
         <package android:name="com.zhiliaoapp.musically" />
     </queries>

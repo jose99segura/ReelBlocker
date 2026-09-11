@@ -13,17 +13,17 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     namespace 'app.reelblocker'
-    compileSdk 35
+    compileSdk 36
 
     defaultConfig {
         applicationId "app.reelblocker"
         minSdk 24
-        targetSdk 35
+        targetSdk 36
         // Convención: versionCode = versionName sin puntos × 10.
         // 1.0 → 100, 1.1 → 110, 1.1.1 → 111, 1.2 → 120. Deja hueco para
         // hotfixes (e.g. 1.1 → 110, hotfix → 111) sin saltos raros.
-        versionCode 201
-        versionName "2.0.1"
+        versionCode 202
+        versionName "2.0.2"
     }
 
     signingConfigs {
@@ -88,7 +88,11 @@ dependencies {
     implementation 'androidx.compose.material3:material3'
     implementation 'androidx.compose.material:material-icons-extended'
 
-    implementation 'com.android.billingclient:billing-ktx:7.1.1'
+    // Play Billing 9.x (Play requires >= 8.0.0 from 2026-11-01).
+    // Plain 'billing', not 'billing-ktx': the ktx artifact pulls kotlin-stdlib
+    // 2.2.x, which the Kotlin 1.9.24 compiler used here cannot read. Nothing in
+    // this app uses the ktx coroutine extensions, so the Java API is enough.
+    implementation 'com.android.billingclient:billing:9.1.0'
 
     // Trabajo diario en segundo plano: avanza la racha aunque el usuario no
     // abra la app (ver StreakWorker). Desacopla la racha de los ON_RESUME.

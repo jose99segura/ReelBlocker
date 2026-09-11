@@ -33,6 +33,57 @@ object Stats {
     const val PKG_TIKTOK = "com.zhiliaoapp.musically"
 
     /**
+     * Forks de YouTube que el usuario instala en lugar de la app oficial
+     * (ReVanced non-root, ReVanced Extended, Vanced). Son la MISMA app
+     * repackageada: conservan los resource-ids (`reel_watch_player`, ...), asi
+     * que los hints de Shorts funcionan sin tocar. Lo unico que cambia es el
+     * nombre de paquete, y eso bastaba para que el servicio los ignorara.
+     *
+     * Esta lista es la que se usa para cosas que necesitan un nombre concreto
+     * (visibilidad en <queries>, icono, "esta instalada?"). Para la deteccion
+     * en caliente manda [canonicalPackage], que ademas cubre builds renombradas
+     * a mano.
+     */
+    val YOUTUBE_VARIANTS = listOf(
+        PKG_YOUTUBE,
+        "app.revanced.android.youtube",
+        "app.rvx.android.youtube",
+        "com.vanced.android.youtube"
+    )
+
+    /**
+     * Segmentos que descartan un paquete con "youtube" dentro: son apps
+     * distintas (YouTube Music, Kids, Studio, YouTube TV) que no tienen
+     * superficie de Shorts y que no deben caer bajo el toggle de YouTube —
+     * importa sobre todo con el bloqueo total Pro, que dispara HOME.
+     */
+    private val YOUTUBE_EXCLUDED_SEGMENTS =
+        setOf("music", "kids", "creator", "studio", "unplugged", "tv", "go")
+
+    /**
+     * Normaliza el paquete de un evento al paquete "canonico" que conoce el
+     * resto de la app (toggles, stats, hints). Cualquier variante de YouTube
+     * -> [PKG_YOUTUBE]; el resto se devuelve tal cual.
+     *
+     * Heuristica por segmentos (no substring: "com.google..." contiene "go")
+     * para cubrir tambien forks renombrados que no estan en [YOUTUBE_VARIANTS].
+     */
+    fun canonicalPackage(pkg: String): String {
+        if (pkg in YOUTUBE_VARIANTS) return PKG_YOUTUBE
+        val segments = pkg.lowercase().split('.')
+        if (segments.contains("youtube") &&
+            segments.none { it in YOUTUBE_EXCLUDED_SEGMENTS }) return PKG_YOUTUBE
+        return pkg
+    }
+
+    /**
+     * Todos los paquetes que representan a [pkg] en el dispositivo. Para
+     * YouTube son la oficial + los forks; para las demas, el propio paquete.
+     */
+    fun packageFamily(pkg: String): List<String> =
+        if (pkg == PKG_YOUTUBE) YOUTUBE_VARIANTS else listOf(pkg)
+
+    /**
      * Segundos estimados recuperados por cada bloqueo, usado para la métrica
      * "tiempo recuperado". Si cambias este valor, actualiza también la caption
      * `stats_metric_time_recovered_caption` en strings.xml (EN + ES).

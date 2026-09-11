@@ -650,8 +650,12 @@ private fun AppRow(
     onOpenPaywall: () -> Unit
 ) {
     val ctx = LocalContext.current
-    val installed = remember(refreshKey, pkg) { isAppInstalled(ctx, pkg) }
-    val icon = remember(refreshKey, pkg) { loadAppIcon(ctx, pkg) }
+    // Variante instalada: para YouTube puede ser la oficial o un fork
+    // (ReVanced/RVX/Vanced). El toggle sigue guardandose bajo el paquete
+    // canonico, asi que uno solo gobierna todas las variantes.
+    val variant = remember(refreshKey, pkg) { resolveInstalledVariant(ctx, pkg) }
+    val installed = variant != null
+    val icon = remember(refreshKey, variant) { variant?.let { loadAppIcon(ctx, it) } }
     val enabled = remember(refreshKey, pkg) { Stats.isAppEnabled(ctx, pkg) }
     val isInstagram = pkg == Stats.PKG_INSTAGRAM
     // Toda app instalada y activada puede desplegar opciones avanzadas (al menos

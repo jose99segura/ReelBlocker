@@ -178,11 +178,16 @@ object Premium {
                 )
             )
             .build()
-        client.queryProductDetailsAsync(params) { result, productList ->
+        // Billing 8+: the callback delivers a QueryProductDetailsResult, which
+        // also carries the products Play could not fetch, instead of a bare list.
+        client.queryProductDetailsAsync(params) { result, queryResult ->
             if (result.responseCode == BillingClient.BillingResponseCode.OK) {
-                val details = productList.firstOrNull()
+                val details = queryResult.productDetailsList.firstOrNull()
                 productDetails = details
-                priceLabel = details?.oneTimePurchaseOfferDetails?.formattedPrice
+                // getOneTimePurchaseOfferDetailsList() is the Billing 8+ shape;
+                // the singular getter stays as a fallback for simple products.
+                priceLabel = details?.oneTimePurchaseOfferDetailsList?.firstOrNull()?.formattedPrice
+                    ?: details?.oneTimePurchaseOfferDetails?.formattedPrice
                 Log.d(TAG, "ProductDetails: precio=$priceLabel")
             } else {
                 Log.w(TAG, "queryProductDetails fallo: ${result.responseCode}")

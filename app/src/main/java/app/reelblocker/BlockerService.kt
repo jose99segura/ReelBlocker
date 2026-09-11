@@ -159,9 +159,13 @@ class BlockerService : AccessibilityService() {
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
         if (event == null) return
-        val pkg = event.packageName?.toString() ?: return
+        val rawPkg = event.packageName?.toString() ?: return
+        // Los forks de YouTube (ReVanced, RVX, Vanced) son la misma app con
+        // otro nombre de paquete: se normalizan a com.google.android.youtube
+        // para que toggles, stats y hints funcionen sin duplicar nada.
+        val pkg = Stats.canonicalPackage(rawPkg)
 
-        logv { "Evento pkg=$pkg tipo=${event.eventType}" }
+        logv { "Evento pkg=$rawPkg${if (pkg != rawPkg) " (->$pkg)" else ""} tipo=${event.eventType}" }
 
         if (pkg != PKG_INSTAGRAM && pkg != PKG_YOUTUBE && pkg != PKG_FACEBOOK && pkg != PKG_TIKTOK) return
 

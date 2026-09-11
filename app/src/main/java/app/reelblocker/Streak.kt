@@ -221,7 +221,9 @@ object Streak {
      */
     fun shouldBeProtecting(ctx: Context): Boolean {
         if (!isAccessibilityEnabled(ctx)) return false
-        val installed = Stats.BLOCKABLE_APPS.filter { (pkg, _) -> isAppInstalled(ctx, pkg) }
+        val installed = Stats.BLOCKABLE_APPS.filter { (pkg, _) ->
+            Stats.packageFamily(pkg).any { isAppInstalled(ctx, it) }
+        }
         if (installed.isEmpty()) return false
         return installed.all { (pkg, _) -> Stats.isAppEnabled(ctx, pkg) }
     }

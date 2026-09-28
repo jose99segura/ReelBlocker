@@ -29,7 +29,7 @@ se teclea la búsqueda ("bloquear reels").
 Bloquea Reels de Instagram, Shorts de YouTube y TikTok. Adiós al scroll.
 ```
 
-### Descripción larga (3949/4000)
+### Descripción larga (3958/4000)
 
 ```
 El scroll de vídeos cortos está diseñado para engancharte. Basta! es una herramienta de accesibilidad pensada para personas con TDAH, ansiedad o dificultades de autocontrol frente al vídeo corto adictivo.
@@ -55,7 +55,7 @@ GRATIS, SIN LÍMITE DE TIEMPO
 • Dos especies coleccionables
 • Estadísticas: bloqueos de hoy, historial de 7 días y récord histórico
 • Copia de seguridad automática en Google Drive
-• Español e inglés, tema claro y oscuro
+• Español, inglés y francés, tema claro y oscuro
 
 PRO — PAGO ÚNICO, SIN SUSCRIPCIÓN
 • Tres especies coleccionables más (cinco en total)
@@ -112,7 +112,7 @@ Blocks Instagram Reels, YouTube Shorts and TikTok. Built for ADHD focus.
 Mantiene "ADHD" porque la versión anterior ya lo llevaba y es una señal de
 cumplimiento para la revisión de Play, no solo una keyword.
 
-### Descripción larga (3793/4000)
+### Descripción larga (3801/4000)
 
 ```
 Short-video feeds are engineered to keep you scrolling. Basta! is an accessibility tool built for people with ADHD, anxiety or self-control difficulties around addictive short-form video.
@@ -138,7 +138,7 @@ FREE, WITH NO TIME LIMIT
 • Two collectible species
 • Stats: today's blocks, a 7-day history and your all-time record
 • Automatic backup to Google Drive
-• English and Spanish, light and dark themes
+• English, Spanish and French, light and dark themes
 
 PRO — ONE-TIME PURCHASE, NO SUBSCRIPTION
 • Three more collectible species (five in total)
@@ -171,6 +171,90 @@ CONTACT
 senaprojectai@gmail.com
 
 Basta! Take your attention back.
+```
+
+---
+
+## Ficha en francés (fr-FR)
+
+Mismo tuteo que la app (el tono de marca es cercano, aunque muchas fichas
+francesas usen "vous"). "Basta!" se trata en femenino ("l'app… elle"), igual
+que en las cadenas de la app. Revisar con un nativo antes de publicar.
+
+### Título (30/30)
+
+```
+Basta! Bloquer Reels et Shorts
+```
+
+Infinitivo "Bloquer" por el mismo motivo que en español: es la forma en que
+se teclea la búsqueda ("bloquer reels").
+
+### Descripción corta (73/80)
+
+```
+Bloque les Reels Instagram, les Shorts YouTube et TikTok. Stop au scroll.
+```
+
+### Descripción larga (3955/4000)
+
+```
+Les vidéos courtes sont conçues pour te faire scroller sans fin. Basta! est un outil d’accessibilité pensé pour les personnes atteintes de TDAH, d’anxiété ou ayant des difficultés de maîtrise de soi face aux vidéos courtes addictives.
+
+Dès que tu ouvres les Reels Instagram, les Shorts YouTube ou le fil infini de TikTok, Basta! le détecte et t’en sort automatiquement. Rien à désinstaller. Et tu gardes tout le reste de ces apps.
+
+COMMENT ÇA MARCHE
+Basta! utilise le service d’accessibilité d’Android pour reconnaître l’écran précis du lecteur de vidéos courtes et appuyer sur Retour à ta place. Ça prend moins d’une seconde. Sans connexion internet, sans lire tes messages ni tes photos, sans collecter la moindre donnée.
+
+Elle ne bloque pas Instagram, YouTube ou TikTok en entier. Fil normal, messages, recherche et vidéos longues fonctionnent toujours : seule disparaît la partie conçue pour te piéger. Et pour couper court, tu peux bloquer l’app entière.
+
+CE QU’ELLE BLOQUE
+• Les Reels Instagram
+• Les Shorts YouTube
+• Le fil infini de TikTok
+• Les Stories Instagram (facultatif)
+• Aussi sur les versions alternatives de YouTube : ReVanced, ReVanced Extended et Vanced
+
+GRATUIT, SANS LIMITE DE TEMPS
+• Blocage automatique des Reels, des Shorts et de TikTok
+• Série quotidienne : chaque jour protégé compte
+• Une mascotte qui évolue : de l’œuf à l’adulte en 21 jours
+• Deux espèces à collectionner
+• Statistiques : blocages du jour, historique sur 7 jours et record absolu
+• Sauvegarde automatique sur Google Drive
+• Français, anglais et espagnol, thème clair et sombre
+
+PRO — ACHAT UNIQUE, SANS ABONNEMENT
+• Trois espèces à collectionner en plus (cinq au total)
+• Toutes les futures espèces, sans frais supplémentaires
+• Une pause de 10 minutes par jour sans perdre ta série
+• Autoriser les Reels que tes amis t’envoient en message privé
+• Bloquer l’app entière, pas seulement les vidéos courtes
+• Statistiques avancées et widget pour l’écran d’accueil
+
+Tu paies une fois et c’est tout. Pas d’abonnement. Pas de pub. Jamais.
+
+LA SÉRIE ET LA MASCOTTE
+La volonté seule ne suffit pas. Alors Basta! te donne quelque chose en retour : chaque jour où la protection reste active, ta série grandit et ta mascotte évolue. Au 21e jour — quand l’habitude s’installe —, elle obtient son diplôme et rejoint ta collection, puis un nouvel œuf d’une autre espèce apparaît. Avec le temps, tu les collectionnes toutes.
+
+POUR QUI ?
+Pour qui ouvre Instagram pour une chose précise et en ressort quarante minutes plus tard. Pour qui veut réduire son temps d’écran sans disparaître de partout. Pour qui a un TDAH et sait que la vidéo courte est le pire format possible pour sa tête. Pour qui finit dans une boucle de Shorts à deux heures du matin.
+
+Ce n’est pas une app de bien-être numérique qui t’affiche un graphique en fin de journée. C’est un frein qui agit au moment exact où tu allais perdre ton après-midi.
+
+CONFIDENTIALITÉ
+Basta! fonctionne entièrement sur ton téléphone. Pas de compte, pas de pub, pas d’analytique et pas une seule requête réseau. Le service d’accessibilité se limite à reconnaître la section des vidéos courtes et à déclencher l’action Retour du système : il ne lit ni messages, ni publications, ni images, ni aucune donnée personnelle.
+
+POURQUOI L’AUTORISATION D’ACCESSIBILITÉ ?
+C’est la seule API Android qui permet de savoir quel écran d’une autre app est affiché. Sans elle, impossible de distinguer « je suis dans le lecteur de Reels » de « je suis dans le fil normal », et donc de te sortir uniquement du premier. Basta! est déclarée comme outil d’accessibilité et n’utilise cette autorisation que pour cette seule fonction.
+
+APRÈS L’INSTALLATION
+Active le service dans les Paramètres et exclus l’app de l’optimisation de la batterie (l’app t’y guide). Sur les téléphones Xiaomi, Samsung ou Huawei, active aussi le démarrage automatique pour que le système ne la ferme pas.
+
+CONTACT
+senaprojectai@gmail.com
+
+Basta! Reprends ton attention.
 ```
 
 ---

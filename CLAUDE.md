@@ -93,7 +93,7 @@ All persistent state lives in one `SharedPreferences` file (`reelblocker_prefs`)
 
 ### Internationalization
 
-The app supports **English (default fallback) and Spanish** via `res/values/strings.xml` (English) and `res/values-es/strings.xml` (Spanish). English lives in the unqualified `values/` so any locale Android can't match (French, German, Portuguese…) falls back to English instead of Spanish. Every user-facing string in code uses `stringResource(R.string.xxx)` / `pluralStringResource(R.plurals.xxx)` / `ctx.getString(...)`. Mascot level names and species names are `@StringRes` references on the enum. Rotating tips are a `string-array`. Date formatting respects `Locale.getDefault()` (system locale).
+The app supports **English (default fallback), Spanish and French** via `res/values/strings.xml` (English), `res/values-es/strings.xml` (Spanish) and `res/values-fr/strings.xml` (French). Every locale must also be listed in `res/xml/locales_config.xml` so it shows up in Android 13+'s per-app language picker. In French, species names are injected as "ta mascotte %s" rather than "ton %s", because possessives are gendered and *Tortue* is feminine. English lives in the unqualified `values/` so any locale Android can't match (French, German, Portuguese…) falls back to English instead of Spanish. Every user-facing string in code uses `stringResource(R.string.xxx)` / `pluralStringResource(R.plurals.xxx)` / `ctx.getString(...)`. Mascot level names and species names are `@StringRes` references on the enum. Rotating tips are a `string-array`. Date formatting respects `Locale.getDefault()` (system locale).
 
 ## Common tasks
 

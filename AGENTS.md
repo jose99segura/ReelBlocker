@@ -28,7 +28,7 @@ Source: `app/src/main/java/app/reelblocker/` — 28 files, flat package, no subd
 ## Gotchas
 
 - **`Screen.bottomTabs` is a lazy getter** — eager companion init would read null data objects and break the `when` exhaustiveness in `BottomNavBar`. Keep it lazy.
-- **Facebook is paused** — `HintConfig.DEFAULT_FACEBOOK_REELS` is empty, TikTok is the third active app (`BLOCKABLE_APPS` includes it).
+- **Facebook is Pro-only** — listed in `Stats.PRO_ONLY_APPS`; gate with `Stats.effectiveAppEnabled`, not `isAppEnabled`. FB ids are obfuscated, so its hints (`DEFAULT_FACEBOOK_REELS = ["reel"]`) match **content-descriptions** of a visible near-fullscreen node (`findFacebookReelViewer`), not resource-ids.
 - **`isAccessibilityTool="true"`** in `res/xml/accessibility_config.xml` is load-bearing for Play Store compliance. Never remove or set to false.
 - **`versionCode` convention**: `versionName` string with dots removed × 10. E.g. `"1.8"` → `180`. Leaves gap for hotfix (1.8.1 → 181).
 - **English strings live in `values/strings.xml`** (unqualified — fallback for unsupported locales), Spanish in `values-es/strings.xml`.

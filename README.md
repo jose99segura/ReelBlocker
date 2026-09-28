@@ -2,22 +2,26 @@
 
 > Basta! de Reels infinitos. Recupera tu atención.
 
-App Android que detecta cuando entras en **Reels de Instagram** o **Shorts de
-YouTube** y te saca automáticamente con el botón atrás. No bloquea Instagram
-ni YouTube enteros: solo la sección de vídeos cortos.
+App Android que detecta cuando entras en **Reels de Instagram**, **Shorts de
+YouTube**, el **feed de TikTok** o **Reels de Facebook** (Pro) y te saca
+automáticamente con el botón atrás. No bloquea esas apps enteras: solo la
+sección de vídeos cortos (salvo que actives el bloqueo total, opción Pro).
 
 El nombre interno del proyecto y el repositorio siguen siendo `ReelBlocker`
 (no se cambia para no romper historial). La marca pública y user-facing es
 `Basta! — Reel Blocker` desde la versión 1.0.
 
-**Idiomas soportados**: español (por defecto) e inglés. La app sigue el
-idioma del sistema automáticamente.
+**Idiomas soportados**: inglés (por defecto), español, francés, alemán,
+italiano y portugués. La app sigue el idioma del sistema automáticamente.
 
 ## Cómo funciona
 
-Usa un **AccessibilityService**. Este servicio "ve" la pantalla de Instagram y
-YouTube, busca pistas en los identificadores de los elementos para saber si
-estás en Reels/Shorts y, si te detecta ahí, ejecuta el botón atrás.
+Usa un **AccessibilityService**. Este servicio "ve" la pantalla de Instagram,
+YouTube, TikTok y Facebook, busca pistas en los identificadores de los elementos
+para saber si estás en Reels/Shorts y, si te detecta ahí, ejecuta el botón atrás.
+Facebook oculta esos identificadores, así que ahí se usa la etiqueta de
+accesibilidad del visor ("reel"), exigiendo que sea visible y a pantalla
+completa.
 
 > Una app normal de Android **no puede** borrar ni esconder de verdad el botón de
 > Reels de Instagram, porque cada app está aislada del resto (sandbox). Lo que sí
@@ -78,16 +82,18 @@ bloquear, casi seguro hay que actualizar las listas de pistas en el archivo:
 
 `app/src/main/java/app/reelblocker/BlockerService.kt`
 
-Busca `INSTAGRAM_REEL_HINTS` y `YOUTUBE_SHORTS_HINTS`. Para descubrir los
+Las pistas viven en `HintConfig.kt` (`DEFAULT_INSTAGRAM_REELS`,
+`DEFAULT_YOUTUBE_SHORTS`, `DEFAULT_TIKTOK_FEED`, `DEFAULT_FACEBOOK_REELS`). Para descubrir los
 nuevos identificadores puedes usar `adb shell uiautomator dump` con la
 pantalla del Reel abierta, y mirar los `resource-id` únicos del dump.
 
-## Añadir más apps (TikTok, Facebook, etc.)
+## Añadir más apps
 
 1. Añade el nombre del paquete a `<queries>` en `AndroidManifest.xml` y a
-   `Stats.BLOCKABLE_APPS`.
-2. Crea una nueva lista de pistas en `BlockerService.kt` y enchúfala en el
-   `when (pkg)` del `onAccessibilityEvent`.
+   `Stats.BLOCKABLE_APPS` (y a `Stats.PRO_ONLY_APPS` si es una función Pro,
+   como Facebook).
+2. Crea una nueva lista de pistas en `HintConfig.kt` y enchúfala en
+   `onAccessibilityEvent` de `BlockerService.kt`.
 
 ## Limitaciones honestas
 
@@ -101,8 +107,9 @@ pantalla del Reel abierta, y mirar los `resource-id` únicos del dump.
 
 ## English summary
 
-**Basta! — Reel Blocker** is an Android app that closes Instagram Reels and
-YouTube Shorts the moment you open them. It's not a content filter — it just
+**Basta! — Reel Blocker** is an Android app that closes Instagram Reels,
+YouTube Shorts, the TikTok feed and (Pro) Facebook Reels the moment you open
+them. It's not a content filter — it just
 fires the system Back action when its accessibility service detects you're on
 the short-video screen. Everything else in those apps works normally.
 

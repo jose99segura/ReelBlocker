@@ -52,7 +52,7 @@ se teclea la búsqueda ("bloquear reels").
 Bloquea Reels de Instagram, Shorts de YouTube y TikTok. Adiós al scroll.
 ```
 
-### Descripción larga (3958/4000)
+### Descripción larga (3971/4000)
 
 ```
 El scroll de vídeos cortos está diseñado para engancharte. Basta! es una herramienta de accesibilidad pensada para personas con TDAH, ansiedad o dificultades de autocontrol frente al vídeo corto adictivo.
@@ -68,6 +68,7 @@ QUÉ BLOQUEA
 • Reels de Instagram
 • Shorts de YouTube
 • El feed infinito de TikTok
+• Reels de Facebook (Pro)
 • Historias de Instagram (opcional)
 • También funciona en las versiones alternativas de YouTube: ReVanced, ReVanced Extended y Vanced
 
@@ -78,7 +79,7 @@ GRATIS, SIN LÍMITE DE TIEMPO
 • Dos especies coleccionables
 • Estadísticas: bloqueos de hoy, historial de 7 días y récord histórico
 • Copia de seguridad automática en Google Drive
-• Español, inglés y francés, tema claro y oscuro
+• Seis idiomas, tema claro y oscuro
 
 PRO — PAGO ÚNICO, SIN SUSCRIPCIÓN
 • Tres especies coleccionables más (cinco en total)
@@ -135,7 +136,7 @@ Blocks Instagram Reels, YouTube Shorts and TikTok. Built for ADHD focus.
 Mantiene "ADHD" porque la versión anterior ya lo llevaba y es una señal de
 cumplimiento para la revisión de Play, no solo una keyword.
 
-### Descripción larga (3801/4000)
+### Descripción larga (3810/4000)
 
 ```
 Short-video feeds are engineered to keep you scrolling. Basta! is an accessibility tool built for people with ADHD, anxiety or self-control difficulties around addictive short-form video.
@@ -151,6 +152,7 @@ WHAT IT BLOCKS
 • Instagram Reels
 • YouTube Shorts
 • The endless TikTok feed
+• Facebook Reels (Pro)
 • Instagram Stories (optional)
 • Alternative YouTube builds too: ReVanced, ReVanced Extended and Vanced
 
@@ -161,7 +163,7 @@ FREE, WITH NO TIME LIMIT
 • Two collectible species
 • Stats: today's blocks, a 7-day history and your all-time record
 • Automatic backup to Google Drive
-• English, Spanish and French, light and dark themes
+• Six languages, light and dark themes
 
 PRO — ONE-TIME PURCHASE, NO SUBSCRIPTION
 • Three more collectible species (five in total)
@@ -219,7 +221,7 @@ se teclea la búsqueda ("bloquer reels").
 Bloque les Reels Instagram, les Shorts YouTube et TikTok. Stop au scroll.
 ```
 
-### Descripción larga (3955/4000)
+### Descripción larga (3964/4000)
 
 ```
 Les vidéos courtes sont conçues pour te faire scroller sans fin. Basta! est un outil d’accessibilité pensé pour les personnes atteintes de TDAH, d’anxiété ou ayant des difficultés de maîtrise de soi face aux vidéos courtes addictives.
@@ -235,6 +237,7 @@ CE QU’ELLE BLOQUE
 • Les Reels Instagram
 • Les Shorts YouTube
 • Le fil infini de TikTok
+• Les Reels Facebook (Pro)
 • Les Stories Instagram (facultatif)
 • Aussi sur les versions alternatives de YouTube : ReVanced, ReVanced Extended et Vanced
 
@@ -245,7 +248,7 @@ GRATUIT, SANS LIMITE DE TEMPS
 • Deux espèces à collectionner
 • Statistiques : blocages du jour, historique sur 7 jours et record absolu
 • Sauvegarde automatique sur Google Drive
-• Français, anglais et espagnol, thème clair et sombre
+• Six langues, thème clair et sombre
 
 PRO — ACHAT UNIQUE, SANS ABONNEMENT
 • Trois espèces à collectionner en plus (cinq au total)
@@ -298,7 +301,7 @@ Basta! Reels & Shorts Blocker
 Blockiert Instagram Reels, YouTube Shorts und TikTok. Gemacht für ADHS-Fokus.
 ```
 
-### Descripción larga (3970/4000)
+### Descripción larga (3993/4000)
 
 ```
 Kurzvideo-Feeds sind gebaut, damit du endlos scrollst. Basta! ist ein Bedienungshilfe-Tool für Menschen mit ADHS, Angstzuständen oder Schwierigkeiten mit der Selbstkontrolle bei süchtig machenden Kurzvideos.
@@ -314,6 +317,7 @@ WAS BASTA! BLOCKIERT
 • Instagram Reels
 • YouTube Shorts
 • Den endlosen TikTok-Feed
+• Facebook-Reels (Pro)
 • Instagram Stories (optional)
 • Auch alternative YouTube-Versionen: ReVanced, ReVanced Extended und Vanced
 
@@ -384,7 +388,7 @@ Basta! Bloccare Reels e Shorts
 Blocca Reels di Instagram, Shorts di YouTube e TikTok. Pensata per l’ADHD.
 ```
 
-### Descripción larga (3967/4000)
+### Descripción larga (3995/4000)
 
 ```
 I video brevi sono progettati per farti scrollare all’infinito. Basta! è uno strumento di accessibilità pensato per persone con ADHD, ansia o difficoltà di autocontrollo nei confronti dei video brevi che creano dipendenza.
@@ -400,6 +404,7 @@ COSA BLOCCA
 • I Reels di Instagram
 • Gli Shorts di YouTube
 • Il feed infinito di TikTok
+• I Reels di Facebook (Pro)
 • Le Storie di Instagram (facoltativo)
 • Anche le versioni alternative di YouTube: ReVanced, ReVanced Extended e Vanced
 
@@ -470,7 +475,7 @@ Basta! Bloquear Reels e Shorts
 Bloqueia Reels do Instagram, Shorts do YouTube e TikTok. Feito para TDAH.
 ```
 
-### Descripción larga (3853/4000)
+### Descripción larga (3882/4000)
 
 ```
 Os feeds de vídeos curtos são feitos para você não parar de rolar. O Basta! é uma ferramenta de acessibilidade criada para pessoas com TDAH, ansiedade ou dificuldades de autocontrole diante de vídeos curtos viciantes.
@@ -486,6 +491,7 @@ O QUE ELE BLOQUEIA
 • Instagram Reels
 • YouTube Shorts
 • O feed infinito do TikTok
+• Os Reels do Facebook (Pro)
 • Stories do Instagram (opcional)
 • Versões alternativas do YouTube: ReVanced, ReVanced Extended e Vanced
 
@@ -603,6 +609,10 @@ la versión", una etiqueta por idioma.
 
 - **TikTok estaba ausente de toda la ficha** pese a que la app lo bloquea.
   Ahora aparece en la descripción corta y varias veces en la larga.
+- **Reels de Facebook (Pro, 28-09-2026)** figuran en "Qué bloquea" de las
+  seis descripciones largas, marcados "(Pro)". No entran en la descripción
+  corta ni en el título (sin espacio, y el núcleo gratuito es IG/YT/TikTok).
+  Si se reescribe la ficha, considerar mencionarlos también en la lista Pro.
 - **La descripción larga usaba 1.817 de 4.000 caracteres.** Play indexa el
   campo entero; el espacio libre era ranking regalado. Ahora ~3.900 en ambos
   idiomas, escritas para leerse, no para acumular keywords (Play penaliza el
@@ -630,7 +640,7 @@ la versión", una etiqueta por idioma.
 ## Etiquetas / keywords sugeridas
 
 Basta!, reels, shorts, focus, productividad, anti-distracción, bloqueador,
-instagram, youtube, screen time, atención, dopamina, pokédex, mascota,
+instagram, youtube, tiktok, facebook, facebook reels, screen time, atención, dopamina, pokédex, mascota,
 streak, racha, coleccionable, gamificación
 
 ---
@@ -649,17 +659,21 @@ https://jose99segura.github.io/ReelBlocker/privacy.html
 
 ```
 Basta! uses the AccessibilityService API for a single, clearly-disclosed
-user-facing feature: detecting when the user has navigated into the
-Instagram Reels viewer or the YouTube Shorts viewer, so the app can
-trigger the system back action and return the user to a less addictive
-surface. This is the only Android API that exposes which specific
-in-app screen is visible, which is necessary to distinguish "Reels
-viewer" from the normal Instagram feed or YouTube watch screen. The
-app reads only resource-ids of UI containers (e.g.
+user-facing feature: detecting when the user has navigated into a
+short-form video viewer (Instagram Reels, YouTube Shorts, the TikTok
+feed, or Facebook Reels), so the app can trigger the system back action
+and return the user to a less addictive surface. This is the only
+Android API that exposes which specific in-app screen is visible, which
+is necessary to distinguish "Reels viewer" from the normal feed or watch
+screen. The app reads resource-ids of UI containers (e.g.
 clips_viewer_view_pager) and the active Activity/Fragment class name.
-It never reads message content, post content, images, or any personal
-data. No information is transmitted off-device; the app makes no
-network requests. Source code is publicly available for audit.
+Facebook obfuscates its resource-ids, so there the app checks whether
+the accessibility label of a visible full-screen container contains the
+word "reel"; on TikTok it finds the "Profile" button by its label to
+navigate there. Labels are compared in memory and discarded. The app
+never stores, logs or transmits message content, post content, images,
+or any personal data. No information is transmitted off-device. Source
+code is publicly available for audit.
 ```
 
 ---

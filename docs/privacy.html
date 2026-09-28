@@ -23,7 +23,7 @@
 <body>
 <a class="lang" href="#english">English version below ↓</a>
 <h1>Basta! — Reel Blocker — Política de Privacidad</h1>
-<p class="updated">Última actualización: 21 de mayo de 2026</p>
+<p class="updated">Última actualización: 28 de septiembre de 2026</p>
 
 <h2>Resumen en una frase</h2>
 <p>Basta! — Reel Blocker funciona <strong>100% en tu dispositivo</strong>. No envía ni recoge
@@ -31,26 +31,31 @@ ningún dato fuera de tu móvil, no tiene analítica, no tiene cuentas de usuari
 no comparte nada con terceros.</p>
 
 <h2>Qué hace la app</h2>
-<p>Basta! — Reel Blocker detecta cuando entras en Reels de Instagram o Shorts de YouTube y
-ejecuta la acción "atrás" del sistema para sacarte. Usa el servicio de Accesibilidad
+<p>Basta! — Reel Blocker detecta cuando entras en Reels de Instagram, Shorts de YouTube, el feed de
+TikTok o Reels de Facebook y ejecuta la acción "atrás" del sistema para sacarte. Usa el servicio de Accesibilidad
 de Android, que es la única forma en Android de detectar qué pantalla concreta de
 otra app estás viendo.</p>
 
 <h2>Qué información lee</h2>
 <p>Mientras el servicio está activo, el sistema operativo le entrega eventos de
-accesibilidad de Instagram y YouTube. Para cada evento, la app:</p>
+accesibilidad de Instagram, YouTube, TikTok y Facebook. Para cada evento, la app:</p>
 <ul>
   <li>Lee los <em>resource-id</em> de los elementos visibles (cadenas como
       <code>clips_viewer_view_pager</code>) para reconocer si estás en el visor
       de Reels o Shorts.</li>
+  <li>En Facebook, que oculta esos ids, comprueba si la <em>etiqueta de
+      accesibilidad</em> de un elemento visible a pantalla completa contiene la
+      palabra "reel" (p. ej. <code>Detalles del reel</code>). En TikTok busca
+      la etiqueta del botón "Perfil" para llevarte ahí. Las etiquetas se
+      comparan en memoria en ese instante y se descartan.</li>
   <li>Comprueba el nombre de la <em>Activity</em> o <em>Fragment</em> activo
       (p. ej. <code>InstagramMainActivity</code>) para distinguir contextos como
       mensajes directos del feed principal.</li>
 </ul>
-<p>La app <strong>no</strong> lee el contenido de los mensajes, ni el texto de los
-posts, ni los nombres de las personas con las que hablas, ni las imágenes, ni
-ninguna información personal de Instagram o YouTube. Solo identifica
-contenedores genéricos por su id.</p>
+<p>La app <strong>no</strong> guarda, registra ni envía el contenido de los
+mensajes, el texto de los posts, los nombres de las personas con las que hablas,
+las imágenes ni ninguna información personal de esas apps. Solo reconoce
+contenedores genéricos por su id o su etiqueta.</p>
 
 <h2>Qué información guarda en el dispositivo</h2>
 <p>En las <em>SharedPreferences</em> internas de la app se guarda, exclusivamente:</p>
@@ -77,8 +82,8 @@ Puedes confirmarlo revisando el código fuente del proyecto.</p>
   <li><code>REQUEST_IGNORE_BATTERY_OPTIMIZATIONS</code> — para que el sistema
       no mate el servicio en segundo plano. Es opcional.</li>
   <li><em>Consulta de paquetes instalados</em> (<code>QUERY_ALL_PACKAGES</code>
-      no se solicita; usamos consultas concretas sobre Instagram y YouTube) —
-      para detectar si tienes Instagram o YouTube instalado y mostrar los
+      no se solicita; usamos consultas concretas sobre Instagram, YouTube, TikTok y Facebook) —
+      para detectar si las tienes instaladas y mostrar los
       switches correspondientes.</li>
 </ul>
 
@@ -100,7 +105,7 @@ actualizará la fecha de "Última actualización" arriba.</p>
 <hr>
 
 <h1 id="english">Basta! — Reel Blocker — Privacy Policy (English)</h1>
-<p class="updated">Last updated: 21 May 2026</p>
+<p class="updated">Last updated: 28 September 2026</p>
 
 <h2>One-line summary</h2>
 <p>Basta! — Reel Blocker runs <strong>100% on your device</strong>. It does not send or
@@ -108,25 +113,30 @@ collect any data outside your phone, no analytics, no user accounts, no
 third-party sharing.</p>
 
 <h2>What the app does</h2>
-<p>Basta! — Reel Blocker detects when you enter Instagram Reels or YouTube Shorts and
-triggers the system "back" action to get you out. It uses the Android
+<p>Basta! — Reel Blocker detects when you enter Instagram Reels, YouTube Shorts, the
+TikTok feed or Facebook Reels and triggers the system "back" action to get you out. It uses the Android
 Accessibility Service, the only Android API that can detect which specific
 screen of another app is currently visible.</p>
 
 <h2>What it reads</h2>
 <p>While the service is active, the OS delivers accessibility events from
-Instagram and YouTube. For each event, the app:</p>
+Instagram, YouTube, TikTok and Facebook. For each event, the app:</p>
 <ul>
   <li>Reads the <em>resource-ids</em> of visible UI elements (strings such as
       <code>clips_viewer_view_pager</code>) to recognize whether you are in
       the Reels or Shorts viewer.</li>
+  <li>On Facebook, which hides those ids, checks whether the <em>accessibility
+      label</em> of a visible full-screen element contains the word "reel"
+      (e.g. <code>Reel details</code>). On TikTok it looks up the label of the
+      "Profile" button to take you there. Labels are compared in memory at that
+      moment and discarded.</li>
   <li>Checks the active Activity/Fragment class name (e.g.
       <code>InstagramMainActivity</code>) to distinguish contexts such as
       direct messages vs. the main feed.</li>
 </ul>
-<p>The app <strong>does not</strong> read message content, post text, user
-names, images, or any personal information from Instagram or YouTube. It only
-identifies generic UI containers by id.</p>
+<p>The app <strong>does not</strong> store, log or transmit message content,
+post text, user names, images, or any personal information from those apps. It
+only recognizes generic UI containers by id or label.</p>
 
 <h2>What it stores on the device</h2>
 <p>The app's local SharedPreferences hold exclusively:</p>
@@ -149,8 +159,8 @@ verify this by reviewing the source code.</p>
       screens. You enable this manually under Settings → Accessibility.</li>
   <li><code>REQUEST_IGNORE_BATTERY_OPTIMIZATIONS</code> — so the OS doesn't kill
       the background service. Optional.</li>
-  <li><em>Specific package queries</em> against Instagram and YouTube — to
-      detect whether they are installed and show the corresponding switches.
+  <li><em>Specific package queries</em> against Instagram, YouTube, TikTok and
+      Facebook — to detect whether they are installed and show the corresponding switches.
       We do not request <code>QUERY_ALL_PACKAGES</code>.</li>
 </ul>
 

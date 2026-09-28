@@ -791,8 +791,10 @@ internal fun isBatteryExempt(ctx: Context): Boolean {
  */
 internal fun openAccessibilitySettings(ctx: Context) {
     HealthCheck.suppressProtectionOffNotice(ctx)
-    val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
-    ctx.startActivity(intent)
+    // Solo la lista general: la ficha del propio servicio
+    // (ACTION_ACCESSIBILITY_DETAILS_SETTINGS) exige OPEN_ACCESSIBILITY_DETAILS_SETTINGS,
+    // un permiso de sistema que una app de Play no puede tener (SecurityException).
+    ctx.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
 }
 
 @Suppress("BatteryLife")

@@ -8,6 +8,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.Icon
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -103,6 +111,10 @@ fun OnboardingScreen(
     }
 
     val accessibilityOn = remember(refreshKey) { actions.isAccessibilityEnabled() }
+    // Se marca al pulsar el CTA de accesibilidad: si el usuario vuelve sin
+    // activarlo, la página cambia a un segundo intento con más ayuda en vez de
+    // enseñarle el mismo muro.
+    var accessibilityAttempted by remember { mutableStateOf(false) }
     val batteryOk = remember(refreshKey) { actions.isBatteryExempt() }
 
     val p3Granted = stringResource(R.string.onboarding_p3_granted)
@@ -123,10 +135,19 @@ fun OnboardingScreen(
         OnboardingPage(
             title = stringResource(R.string.onboarding_p3_title),
             body = stringResource(R.string.onboarding_p3_body),
+            customContent = { AccessibilityTrustCard() },
             statusContent = { acts, granted ->
-                if (granted) GrantedBadge(p3Granted)
-                else Button(onClick = { acts.openAccessibility() }) {
-                    Text(p3Cta)
+                when {
+                    granted -> GrantedBadge(p3Granted)
+                    accessibilityAttempted -> AccessibilityRetry(
+                        onRetry = { acts.openAccessibility() }
+                    )
+                    else -> Button(onClick = {
+                        accessibilityAttempted = true
+                        acts.openAccessibility()
+                    }) {
+                        Text(p3Cta)
+                    }
                 }
             },
             isGranted = { it.isAccessibilityEnabled() }
@@ -196,8 +217,15 @@ fun OnboardingScreen(
                 }
             }
 
+            BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+            // Centrado vertical mientras cabe; con scroll cuando no (la página
+            // del permiso es más alta que las demás en pantallas pequeñas).
             Column(
-                modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
+                    .heightIn(min = maxHeight)
+                    .padding(horizontal = 8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
@@ -267,10 +295,11 @@ fun OnboardingScreen(
                 }
 
                 if (page.statusContent != null) {
-                    Spacer(Modifier.height(32.dp))
+                    Spacer(Modifier.height(24.dp))
                     @Suppress("UNUSED_EXPRESSION") refreshKey
                     page.statusContent.invoke(actions, granted)
                 }
+            }
             }
         }
 
@@ -424,6 +453,125 @@ private fun highlightStats(text: String): AnnotatedString {
             lastEnd = match.range.last + 1
         }
         append(text.substring(lastEnd))
+    }
+}
+
+/**
+ * Bloque de confianza + pasos de la página del permiso. Android enseña un
+ * aviso genérico ("control total del dispositivo") que asusta; aquí se
+ * adelanta con lo que Basta! hace y no hace, y con los pasos exactos.
+ * Todo debe seguir siendo cierto: el servicio recibe eventos de todas las
+ * apps (no hay packageNames en accessibility_config.xml) y los descarta en
+ * código, por eso el texto dice "ignora", no "no puede ver".
+ */
+@Composable
+private fun AccessibilityTrustCard() {
+    val green = if (isSystemInDarkTheme()) Color(0xFF66BB6A) else Color(0xFF2E7D32)
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+            .padding(16.dp)
+    ) {
+        Text(
+            text = stringResource(R.string.onboarding_p3_trust_title),
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(Modifier.height(8.dp))
+        listOf(
+            R.string.onboarding_p3_trust_1,
+            R.string.onboarding_p3_trust_2,
+            R.string.onboarding_p3_trust_3
+        ).forEach { res ->
+            Row(modifier = Modifier.padding(vertical = 3.dp)) {
+                Icon(
+                    imageVector = Icons.Filled.Check,
+                    contentDescription = null,
+                    tint = green,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(Modifier.size(8.dp))
+                Text(
+                    text = stringResource(res),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+        Spacer(Modifier.height(8.dp))
+        Text(
+            text = stringResource(R.string.onboarding_p3_warning_note),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+        )
+
+        Spacer(Modifier.height(16.dp))
+        Text(
+            text = stringResource(R.string.onboarding_p3_steps_title),
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(Modifier.height(8.dp))
+        listOf(
+            R.string.onboarding_p3_step_1,
+            R.string.onboarding_p3_step_2,
+            R.string.onboarding_p3_step_3
+        ).forEachIndexed { i, res ->
+            Row(modifier = Modifier.padding(vertical = 3.dp)) {
+                Box(
+                    modifier = Modifier
+                        .size(20.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primary),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "${i + 1}",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                }
+                Spacer(Modifier.size(10.dp))
+                Text(
+                    text = stringResource(res),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
+}
+
+/**
+ * Segundo intento: el usuario fue a Ajustes y volvió sin activar el servicio.
+ * Tono cálido y la pista de dónde suele esconderse según el fabricante.
+ */
+@Composable
+private fun AccessibilityRetry(onRetry: () -> Unit) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(
+            text = stringResource(R.string.onboarding_p3_retry_title),
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(Modifier.height(6.dp))
+        Text(
+            text = stringResource(R.string.onboarding_p3_retry_body),
+            style = MaterialTheme.typography.bodyMedium,
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(Modifier.height(16.dp))
+        Button(onClick = onRetry) {
+            Text(stringResource(R.string.onboarding_p3_retry_cta))
+        }
     }
 }
 

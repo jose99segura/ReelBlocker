@@ -539,6 +539,66 @@ Basta! Retome sua atenção.
 
 ---
 
+## Notas de la versión 2.0.5 (versionCode 205)
+
+Máx. 500 caracteres por idioma. Pegar en Play Console → versión → "Notas de
+la versión", una etiqueta por idioma.
+
+```
+<es-ES>
+• Estrellas: cuando completas tu colección, eliges qué criatura volver a criar y cada graduación le suma una estrella, hasta ★5.
+• Al bloquear un Reel o un Short verás un aviso discreto con tu mascota y los bloqueos de hoy.
+• Mejoras y correcciones.
+</es-ES>
+<es-419>
+• Estrellas: cuando completas tu colección, eliges qué criatura volver a criar y cada graduación le suma una estrella, hasta ★5.
+• Al bloquear un Reel o un Short verás un aviso discreto con tu mascota y los bloqueos de hoy.
+• Mejoras y correcciones.
+</es-419>
+<en-US>
+• Stars: once your collection is complete, choose which creature to raise again — every graduation earns it a star, up to ★5.
+• When a Reel or Short is blocked, a discreet pill shows your mascot and today's blocks.
+• Improvements and fixes.
+</en-US>
+<en-GB>
+• Stars: once your collection is complete, choose which creature to raise again — every graduation earns it a star, up to ★5.
+• When a Reel or Short is blocked, a discreet pill shows your mascot and today's blocks.
+• Improvements and fixes.
+</en-GB>
+<fr-FR>
+• Étoiles : une fois ta collection complète, choisis quelle créature élever à nouveau — chaque diplôme lui donne une étoile, jusqu’à ★5.
+• Quand un Reel ou un Short est bloqué, un petit badge discret affiche ta mascotte et les blocages du jour.
+• Améliorations et corrections.
+</fr-FR>
+<fr-CA>
+• Étoiles : une fois ta collection complète, choisis quelle créature élever à nouveau — chaque diplôme lui donne une étoile, jusqu’à ★5.
+• Quand un Reel ou un Short est bloqué, un petit badge discret affiche ta mascotte et les blocages du jour.
+• Améliorations et corrections.
+</fr-CA>
+<de-DE>
+• Sterne: Ist deine Sammlung komplett, wählst du, welches Wesen du erneut großziehst – jeder Abschluss bringt ihm einen Stern, bis ★5.
+• Wird ein Reel oder Short blockiert, zeigt ein dezenter Hinweis dein Maskottchen und die heutigen Blockierungen.
+• Verbesserungen und Fehlerbehebungen.
+</de-DE>
+<it-IT>
+• Stelle: quando la collezione è completa, scegli quale creatura crescere di nuovo — ogni diploma le dà una stella, fino a ★5.
+• Quando un Reel o uno Short viene bloccato, un avviso discreto mostra la tua mascotte e i blocchi di oggi.
+• Miglioramenti e correzioni.
+</it-IT>
+<pt-BR>
+• Estrelas: com a coleção completa, você escolhe qual criatura criar de novo — cada formatura dá uma estrela a ela, até ★5.
+• Ao bloquear um Reel ou Short, um aviso discreto mostra sua mascote e os bloqueios de hoje.
+• Melhorias e correções.
+</pt-BR>
+<pt-PT>
+• Estrelas: com a coleção completa, escolhes que criatura criar de novo — cada formatura dá-lhe uma estrela, até ★5.
+• Ao bloquear um Reel ou Short, um aviso discreto mostra a tua mascote e os bloqueios de hoje.
+• Melhorias e correções.
+</pt-PT>
+```
+
+---
+
 ## Notas de ASO
 
 - **TikTok estaba ausente de toda la ficha** pese a que la app lo bloquea.
@@ -547,11 +607,10 @@ Basta! Retome sua atenção.
   campo entero; el espacio libre era ranking regalado. Ahora ~3.900 en ambos
   idiomas, escritas para leerse, no para acumular keywords (Play penaliza el
   relleno).
-- **Las especies no se nombran por tier.** El código reparte Clásica y Dragón
-  como gratis, mientras que la documentación del proyecto dice Clásica y
-  Tortuga. Hasta que se resuelva esa contradicción, la ficha dice "dos
-  especies coleccionables" y "tres más" sin nombrarlas, que es cierto en
-  cualquiera de los dos casos. Si se alinean, conviene volver a nombrarlas:
+- **Las especies no se nombran por tier.** La ficha dice "dos especies
+  coleccionables" y "tres más" sin nombrarlas. La contradicción con la
+  documentación ya está resuelta (28-09-2026): las gratis son **Clásica y
+  Dragón**. Conviene volver a nombrarlas en la próxima revisión de la ficha:
   concretar convierte mejor.
 - El marco de herramienta asistiva (TDAH, ansiedad, autocontrol) abre la
   descripción larga en los dos idiomas. Es lo que sostiene

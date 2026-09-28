@@ -45,7 +45,7 @@ fun ConfirmDisableDialog(
 ) {
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val levelName = stringResource(level.displayNameRes).lowercase()
+    val levelName = stringResource(level.displayNameRes)
     val daysText = pluralStringResource(R.plurals.plural_days_count, streakCount, streakCount)
     val part1 = stringResource(R.string.confirm_disable_body_part1)
     val part2 = stringResource(R.string.confirm_disable_body_part2)

@@ -131,8 +131,8 @@
     <string name="confirm_disable_keep">Keep active</string>
     <string name="confirm_disable_action">Disable</string>
     <string name="confirm_disable_body_part1">You\'ll lose your streak of </string>
-    <string name="confirm_disable_body_part2">" and your "</string>
-    <string name="confirm_disable_body_part3">" will go back to an egg."</string>
+    <string name="confirm_disable_body_part2">" and your mascot ("</string>
+    <string name="confirm_disable_body_part3">") will go back to an egg."</string>
 
     <!-- ==================== Stats screen ==================== -->
     <string name="stats_title">The Journal</string>

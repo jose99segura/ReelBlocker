@@ -134,8 +134,8 @@
     <string name="confirm_disable_keep">Rester actif</string>
     <string name="confirm_disable_action">Désactiver</string>
     <string name="confirm_disable_body_part1">Tu perdras ta série de </string>
-    <string name="confirm_disable_body_part2">" et ta mascotte "</string>
-    <string name="confirm_disable_body_part3">" redeviendra un œuf."</string>
+    <string name="confirm_disable_body_part2">" et ta mascotte ("</string>
+    <string name="confirm_disable_body_part3">") redeviendra un œuf."</string>
 
     <!-- ==================== Stats screen ==================== -->
     <string name="stats_title">Le Journal</string>

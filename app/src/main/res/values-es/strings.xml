@@ -138,8 +138,8 @@
     <string name="confirm_disable_keep">Mantener activo</string>
     <string name="confirm_disable_action">Desactivar</string>
     <string name="confirm_disable_body_part1">Perderás tu racha de </string>
-    <string name="confirm_disable_body_part2">" y tu "</string>
-    <string name="confirm_disable_body_part3">" volverá a ser un huevo."</string>
+    <string name="confirm_disable_body_part2">" y tu mascota ("</string>
+    <string name="confirm_disable_body_part3">") volverá a ser un huevo."</string>
 
     <!-- ==================== Stats screen ==================== -->
     <string name="stats_title">El Diario</string>

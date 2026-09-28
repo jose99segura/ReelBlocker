@@ -5,7 +5,29 @@ ficha en Play Console.
 
 ---
 
-## Ficha en español (es-ES) — predeterminada
+## Idiomas configurados en Play Console (28-09-2026)
+
+Play elige la ficha por el **idioma del dispositivo**, no por el país. Si no
+hay traducción para ese idioma, muestra la predeterminada. Hasta esta fecha la
+predeterminada era es-ES, así que un móvil en francés (o alemán, italiano…)
+veía la ficha en español y no encontraba la app buscando en su idioma.
+
+| Idioma | Texto | Gráficos |
+|---|---|---|
+| **en-US (predeterminado)** | ficha inglesa, ortografía US | EN (`marketing/…/en/`) |
+| en-GB | ficha inglesa | hereda en-US |
+| es-ES | ficha española | ES propios |
+| es-419, es-US | ficha española con "video"/"celular" | ES (mismos que es-ES) |
+| fr-FR, fr-CA | ficha francesa (misma en ambos) | hereda en-US |
+
+Al cambiar el predeterminado, Play exige que cada producto in-app tenga
+traducción en ese idioma: `basta_pro` tiene "Basta Pro" en todos.
+
+Pendiente: capturas en francés (ahora heredan las inglesas).
+
+---
+
+## Ficha en español (es-ES)
 
 Optimizada para ASO el 11-09-2026. Los tres campos se indexan en la búsqueda
 de Play; el título es el de más peso. Cuentan los caracteres exactos: el
@@ -92,7 +114,7 @@ Basta! Recupera tu atención.
 
 ---
 
-## Ficha en inglés (en-GB)
+## Ficha en inglés (en-US predeterminada, en-GB)
 
 El título se localiza por idioma: no hay que elegir un único compromiso entre
 "bloquear" y "block". Cada ficha ataca las búsquedas de su idioma.
@@ -175,7 +197,7 @@ Basta! Take your attention back.
 
 ---
 
-## Ficha en francés (fr-FR)
+## Ficha en francés (fr-FR, fr-CA)
 
 Mismo tuteo que la app (el tono de marca es cercano, aunque muchas fichas
 francesas usen "vous"). "Basta!" se trata en femenino ("l'app… elle"), igual

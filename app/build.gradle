@@ -22,8 +22,8 @@ android {
         // Convención: versionCode = versionName sin puntos × 10.
         // 1.0 → 100, 1.1 → 110, 1.1.1 → 111, 1.2 → 120. Deja hueco para
         // hotfixes (e.g. 1.1 → 110, hotfix → 111) sin saltos raros.
-        versionCode 203
-        versionName "2.0.3"
+        versionCode 204
+        versionName "2.0.4"
     }
 
     signingConfigs {
@@ -93,6 +93,12 @@ dependencies {
     // 2.2.x, which the Kotlin 1.9.24 compiler used here cannot read. Nothing in
     // this app uses the ktx coroutine extensions, so the Java API is enough.
     implementation 'com.android.billingclient:billing:9.1.0'
+
+    // In-app review prompt (day-7 streak milestone). Plain 'review', not
+    // 'review-ktx', for the same reason as billing above: the ktx artifact
+    // needs a newer kotlin-stdlib than this project's Kotlin 1.9.24 compiler
+    // can read. The Task<ReviewInfo> callback API is enough here.
+    implementation 'com.google.android.play:review:2.0.2'
 
     // Trabajo diario en segundo plano: avanza la racha aunque el usuario no
     // abra la app (ver StreakWorker). Desacopla la racha de los ON_RESUME.

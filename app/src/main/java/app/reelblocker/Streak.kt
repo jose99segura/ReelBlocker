@@ -31,6 +31,7 @@ object Streak {
     private const val KEY_PENDING_EVOLUTION_FROM = "streak_pending_evolution_from"
     private const val KEY_PENDING_MILESTONE_DAY = "streak_pending_milestone_day"
     private const val KEY_MIGRATION_V21_DONE = "migration_v21_done"
+    private const val KEY_REVIEW_REQUESTED = "review_requested"
 
     /**
      * Días intermedios de la racha que disparan una celebración compartible
@@ -185,6 +186,15 @@ object Streak {
         val v = pendingMilestone(ctx) ?: return null
         prefs(ctx).edit().remove(KEY_PENDING_MILESTONE_DAY).apply()
         return v
+    }
+
+    /** True si ya se ha lanzado (o intentado) el prompt de valoración de Play. */
+    fun isReviewRequested(ctx: Context): Boolean =
+        prefs(ctx).getBoolean(KEY_REVIEW_REQUESTED, false)
+
+    /** Marca el prompt de valoración como lanzado, para que no vuelva a pedirse. */
+    fun setReviewRequested(ctx: Context) {
+        prefs(ctx).edit().putBoolean(KEY_REVIEW_REQUESTED, true).apply()
     }
 
     fun current(ctx: Context): State {

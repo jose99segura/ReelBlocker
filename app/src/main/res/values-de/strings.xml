@@ -1,0 +1,438 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- ==================== App / system ==================== -->
+    <string name="app_name">Basta!</string>
+    <string name="app_tagline">Scrollen stiehlt dir dein Leben.</string>
+    <string name="service_label">Basta! — Reel Blocker</string>
+    <string name="service_description">Assistenz-Tool für Menschen mit ADHS, Angstzuständen oder Schwierigkeiten mit der Selbstkontrolle bei süchtig machenden Kurzvideos. Erkennt, wenn du Instagram Reels oder YouTube Shorts öffnest, und hilft dir, diesen Bereich wieder zu verlassen. Liest nur Bildschirmkennungen, niemals Nachrichteninhalte. Alles bleibt auf deinem Gerät.</string>
+    <string name="toast_blocked">Basta!</string>
+
+    <!-- ==================== Bottom navigation ==================== -->
+    <string name="nav_home">Start</string>
+    <string name="nav_stats">Tagebuch</string>
+    <string name="nav_inventory">Bestiarium</string>
+    <string name="nav_settings">Optionen</string>
+
+    <!-- ==================== Home top bar / actions ==================== -->
+    <string name="home_title">Basta!</string>
+    <string name="cd_how_it_works">So funktioniert’s</string>
+    <string name="cd_inventory">Inventar</string>
+    <string name="cd_settings">Einstellungen</string>
+    <string name="cd_stats">Statistiken</string>
+    <string name="cd_back">Zurück</string>
+    <string name="cd_inventory_pending_badge">Abschluss ausstehend</string>
+    <string name="cd_mascot_tap">Tippe dein Maskottchen an, um Hallo zu sagen</string>
+
+    <string name="badge_pro">Pro</string>
+    <string name="chip_upgrade">Upgrade</string>
+
+    <!-- Profile level (lifetime XP) -->
+    <string name="profile_level_chip">Lv. %1$d</string>
+    <string name="profile_level_dialog_title">Level %1$d</string>
+    <string name="profile_xp_progress">%1$d / %2$d XP</string>
+    <string name="profile_xp_to_next">%1$d XP bis Level %2$d</string>
+    <string name="profile_level_dialog_body">Du sammelst XP für jeden Tag, an dem du geschützt bleibst, für jedes blockierte Reel oder Short und jedes Mal, wenn ein Maskottchen seinen Abschluss macht. Dein Level sinkt nie — nicht mal, wenn deine Serie reißt.</string>
+
+    <string name="home_action_accessibility_title">Bedienungshilfe aktivieren</string>
+    <string name="home_action_accessibility_body">Ohne sie kann Basta! keine Reels erkennen. Tippe hier und aktiviere Basta! in der Liste.</string>
+    <string name="home_action_accessibility_cta">Einstellungen öffnen</string>
+    <string name="home_action_battery_title">Von der Akku-Optimierung ausnehmen</string>
+    <string name="home_action_battery_body">Sonst kann das System den Dienst nach ein paar Stunden beenden.</string>
+    <string name="home_action_battery_cta">Vom Akku ausnehmen</string>
+
+    <string name="home_external_disable_title">Der Faden ist gerissen</string>
+    <string name="home_external_disable_body">Wir haben bemerkt, dass du den Schutz deaktiviert hast.</string>
+    <plurals name="external_disable_dialog_body">
+        <item quantity="one">Du hast den Schutz deaktiviert. Deine Serie von %1$d Tag ist weg und dein Maskottchen %2$s ist wieder ein Ei.</item>
+        <item quantity="other">Du hast den Schutz deaktiviert. Deine Serie von %1$d Tagen ist weg und dein Maskottchen %2$s ist wieder ein Ei.</item>
+    </plurals>
+    <string name="action_dismiss">Verstanden</string>
+
+    <string name="metric_today">Heute</string>
+    <string name="metric_recovered">Gewonnen</string>
+    <string name="metric_record">Rekord</string>
+    <string name="metric_dash">—</string>
+    <string name="metric_record_days">%1$d T</string>
+    <string name="status_active_in">Aktiv in</string>
+    <string name="home_status_active">Dienst aktiv</string>
+    <string name="home_blocking_label">Blockiert</string>
+
+    <string name="streak_tap_hint">Tippe dein Maskottchen an, um Hallo zu sagen</string>
+    <string name="streak_label_level_format">%1$s</string>
+
+    <string name="streak_state_service_off">Aktiviere den Dienst, um deine Serie zu starten</string>
+    <string name="streak_state_new">Starte eine neue Serie — der Tag zählt um Mitternacht</string>
+    <string name="streak_state_ready_to_graduate">Bereit für den Abschluss — öffne die App zum Bestätigen</string>
+    <string name="streak_state_tomorrow_graduates">Morgen kannst du dein Maskottchen %1$s im Inventar sichern</string>
+    <string name="streak_state_days_until_graduation">Noch %1$d Tage, bis du dein Maskottchen %2$s sicherst</string>
+    <!-- Discreet, mysterious variants shown on home before graduation. -->
+    <string name="streak_state_mystery_one">···  morgen regt sich etwas  ···</string>
+    <string name="streak_state_mystery_many">···  in %1$d Tagen regt sich etwas  ···</string>
+
+    <plurals name="plural_days">
+        <item quantity="one">Tag</item>
+        <item quantity="other">Tage</item>
+    </plurals>
+    <plurals name="plural_days_count">
+        <item quantity="one">%d Tag</item>
+        <item quantity="other">%d Tage</item>
+    </plurals>
+
+    <!-- ==================== How it works dialog ==================== -->
+    <string name="howitworks_label">SO FUNKTIONIERT’S</string>
+    <string name="howitworks_title">Basta!</string>
+    <string name="howitworks_section_what_title">Was die App macht</string>
+    <string name="howitworks_section_what_body">Wenn du Reels (Instagram) oder Shorts (YouTube) öffnest, erkennt Basta! den Bildschirm und drückt für dich auf Zurück. Du bist raus, bevor das Scrollen anfängt. Der Rest der App bleibt unberührt.</string>
+    <string name="howitworks_section_streak_title">Der Faden</string>
+    <string name="howitworks_section_streak_body">Jeder Tag mit aktivem Dienst verlängert deine Serie um einen Tag. Wenn du ihn deaktivierst oder einen ganzen Tag auslässt, fällt sie auf 0 zurück. Dein Allzeit-Rekord bleibt erhalten, auch wenn die Serie reißt.</string>
+    <string name="howitworks_section_grows_title">Dein Maskottchen wächst</string>
+    <string name="howitworks_section_grows_body">Das Maskottchen entwickelt sich mit dir:\n  · Tag 0  →  Ei\n  · Tag 3  →  Angeknackst\n  · Tag 8  →  Jungtier\n  · Tag 21 →  Erwachsen</string>
+    <string name="howitworks_section_graduation_title">Abschluss an Tag 21</string>
+    <string name="howitworks_section_graduation_body">Wenn du Tag 21 erreichst, macht dein Maskottchen seinen Abschluss: Es wird in deinem Inventar gesichert und ein neues Ei einer anderen Art erscheint. Es gibt insgesamt 5 Arten (Klassik, Drache, Schildkröte, Wolf, Eule). Neu gestartet wird nur beim Abschluss — reißt deine Serie vorher, behältst du dieselbe Art.</string>
+    <string name="howitworks_section_inventory_title">Das Bestiarium</string>
+    <string name="howitworks_section_inventory_body">Das Pfoten-Symbol 🐾 in der unteren Leiste öffnet deine Sammlung. Dort siehst du die Maskottchen mit Abschluss, die, die dir noch fehlen, und wie viele Tage das aktuelle schon bei dir ist.</string>
+    <string name="howitworks_section_important_title">Wichtig</string>
+    <string name="howitworks_section_important_body">Damit es funktioniert, muss die Bedienungshilfe aktiviert und die App von der Akku-Optimierung ausgenommen sein. Wenn Android den Dienst beendet, sagen wir dir Bescheid, sobald du zurückkommst.</string>
+
+    <!-- ==================== Graduation dialog ==================== -->
+    <string name="graduation_label">ABSCHLUSS</string>
+    <string name="graduation_title">Dein Maskottchen %1$s hat es geschafft!</string>
+    <string name="graduation_body">Nach %1$d Tagen zieht es weiter. Es wird in deinem Inventar gesichert.</string>
+    <string name="graduation_body_secondary">Ein neues Ei einer anderen Art wartet schon.</string>
+    <string name="graduation_confirm">Neue Art starten</string>
+    <string name="graduation_celebration_label">Erfolg freigeschaltet</string>
+    <string name="graduation_celebration_share">Teilen</string>
+    <string name="graduation_celebration_continue">Nächste Art →</string>
+    <string name="graduation_share_text">Ich war %1$d Tage lang nicht in Reels versunken – mit meinem Maskottchen %2$s. Dank Basta!, der App, die dich aus Kurzvideos rausholt.</string>
+    <string name="graduation_share_chooser">Meinen Erfolg teilen</string>
+
+    <!-- ==================== Share card (image) ==================== -->
+    <string name="share_card_eyebrow">Dopamin-Detox</string>
+    <string name="share_card_days">%1$d Tage</string>
+    <string name="share_card_days_caption">hole ich mir meinen Fokus zurück</string>
+    <string name="share_card_motto">Weniger Scrollen. Mehr Leben.</string>
+    <string name="share_card_get_on_play">Jetzt bei Google Play</string>
+    <string name="share_stats_eyebrow">Mein Dopamin-Detox</string>
+    <string name="share_stats_time_caption">insgesamt zurückgewonnen</string>
+    <string name="share_stats_blocks_label">Blockaden gesamt</string>
+    <string name="share_stats_caption">Ich habe %1$d Reels/Shorts blockiert und %2$d Stunden zurückgewonnen – mit Basta!, der App, die dich aus Kurzvideos rausholt.</string>
+    <string name="share_stats_chooser">Meine Statistik teilen</string>
+    <string name="share_card_stat_time_label">Gewonnene Zeit</string>
+    <string name="share_card_stat_streak_label">Serien-Rekord</string>
+    <string name="share_card_streak_value">%1$d Tage</string>
+    <string name="share_card_tagline">Die App, die dich aus Kurzvideos rausholt</string>
+    <string name="share_card_preparing">Wird vorbereitet…</string>
+    <string name="inventory_share_button">Teilen</string>
+    <string name="inventory_detail_acquired">Abschluss am %1$s</string>
+
+    <!-- ==================== Confirm disable dialog ==================== -->
+    <string name="confirm_disable_title">Schutz deaktivieren?</string>
+    <string name="confirm_disable_warning">Du verlierst deine Serie und dein Maskottchen wird wieder zum Ei.</string>
+    <string name="confirm_disable_keep">Aktiv lassen</string>
+    <string name="confirm_disable_action">Deaktivieren</string>
+    <string name="confirm_disable_body_part1">Du verlierst deine Serie (</string>
+    <string name="confirm_disable_body_part2">") und dein Maskottchen im Stadium "</string>
+    <string name="confirm_disable_body_part3">" wird wieder zum Ei."</string>
+
+    <!-- ==================== Stats screen ==================== -->
+    <string name="stats_title">Das Tagebuch</string>
+    <string name="stats_hero_today">Heute</string>
+    <string name="stats_hero_zero_subtitle">Noch kein Rückfall in Reels. Gut so.</string>
+    <string name="stats_hero_subtitle">Reels und Shorts ausgewichen</string>
+    <string name="stats_distribution_instagram">Instagram</string>
+    <string name="stats_distribution_youtube">YouTube</string>
+    <string name="stats_distribution_tiktok">TikTok</string>
+    <string name="stats_section_weekly">Letzte 7 Tage</string>
+    <string name="stats_no_history">Noch keine Daten. Komm morgen wieder — sie sammeln sich an.</string>
+    <string name="stats_chart_today">Heute</string>
+    <string name="stats_metric_time_recovered">Gewonnene Zeit</string>
+    <string name="stats_metric_time_recovered_caption">%1$d Blockaden × ca. 30 s</string>
+    <string name="stats_metric_time_recovered_empty">Die Zählung beginnt nach deiner ersten Blockade</string>
+    <string name="stats_metric_record">Allzeit-Rekord</string>
+    <string name="stats_metric_record_value_singular">%1$d Tag</string>
+    <string name="stats_metric_record_value_plural">%1$d Tage</string>
+    <string name="stats_metric_record_caption">Erreicht am %1$s</string>
+    <string name="stats_pro_upsell_title">Eine tägliche Pause mit Pro</string>
+    <string name="stats_pro_upsell_body">1 Pause von zehn Minuten, ohne die Serie zu verlieren. Für die Tage, an denen das Leben etwas anderes verlangt.</string>
+
+    <!-- ===== Advanced stats (Pro) ===== -->
+    <string name="stats_section_advanced">Erweiterte Statistiken</string>
+    <string name="stats_section_monthly">Letzte 30 Tage</string>
+    <string name="stats_section_by_app_30">Nach App · 30 Tage</string>
+    <string name="stats_metric_lifetime_blocks">Blockaden gesamt</string>
+    <string name="stats_metric_lifetime_time">Gewonnene Zeit (gesamt)</string>
+    <string name="stats_metric_daily_avg">Tagesdurchschnitt</string>
+    <string name="stats_metric_best_day">Bester Tag</string>
+    <string name="stats_trend_up">▲ %1$d %% ggü. Vorwoche</string>
+    <string name="stats_trend_down">▼ %1$d %% ggü. Vorwoche</string>
+    <string name="stats_trend_flat">Wie letzte Woche</string>
+    <string name="stats_chart_30d_start">30 T</string>
+    <string name="stats_advanced_locked_title">Erweiterte Statistiken mit Pro</string>
+    <string name="stats_advanced_locked_body">30-Tage-Verlauf, Gesamtwerte, Trends pro App und mehr.</string>
+    <string name="stats_tab_week">Woche</string>
+    <string name="stats_tab_month">Monat</string>
+    <string name="stats_day_blocks">%1$d Blockaden</string>
+    <string name="stats_export_button">Als Bild exportieren</string>
+
+    <string name="time_recovered_hours_minutes">%1$d h %2$d min</string>
+    <string name="time_recovered_minutes">%1$d min</string>
+
+    <!-- ==================== Inventory screen ==================== -->
+    <string name="inventory_title">Das Bestiarium</string>
+    <string name="inventory_hero_label">Arten</string>
+    <string name="inventory_hero_value">%1$d / %2$d</string>
+    <string name="inventory_hero_subtitle_progress">Erreiche Tag 21 mit aktiver Serie, damit ein Maskottchen seinen Abschluss macht.</string>
+    <string name="inventory_hero_subtitle_complete">Du hast alle 5 Arten gesammelt. Neue können sich wiederholen.</string>
+    <string name="inventory_empty_title">Noch kein Maskottchen hat seinen Abschluss gemacht</string>
+    <string name="inventory_empty_body">Dein erster Abschluss kommt an Tag 21 einer aktiven Serie.</string>
+    <string name="inventory_active_now">Gerade aktiv</string>
+    <string name="inventory_active_species_level">%1$s · %2$s</string>
+    <string name="inventory_active_day_progress">Tag %1$d / %2$d</string>
+    <string name="inventory_active_waiting">Wartet auf den ersten Tag</string>
+    <string name="inventory_slot_locked_name">—</string>
+    <string name="inventory_slot_locked_caption">Noch zu entdecken</string>
+    <string name="inventory_slot_pro_caption">Mit Pro freischalten</string>
+    <string name="cd_inventory_slot_locked_pro">%1$s gesperrt. Tippe, um es mit Pro freizuschalten.</string>
+    <string name="cd_inventory_slot_locked_pro_generic">Gesperrtes Maskottchen. Tippe, um es mit Pro freizuschalten.</string>
+    <string name="inventory_repeats_singular">Außerdem hat 1 doppeltes Maskottchen seinen Abschluss gemacht.</string>
+    <string name="inventory_repeats_plural">Außerdem haben %1$d doppelte Maskottchen ihren Abschluss gemacht.</string>
+
+    <!-- ==================== Onboarding ==================== -->
+    <string name="onboarding_p1_title">Basta!</string>
+    <string name="onboarding_p1_body">95 Min./Tag. So viel verlieren wir im Schnitt an Reels und Shorts. Fast anderthalb Stunden. Jeden Tag.\n\nWenn du reingehst, holt dich diese App wieder raus. Keine Motivationscoaches, keine Predigten.</string>
+    <string name="onboarding_p2_title">Lerne deinen Begleiter kennen</string>
+    <string name="onboarding_p2_body">Mit jedem Tag, an dem Basta! aktiv ist, wächst dein Maskottchen. An Tag 21 macht es seinen Abschluss und landet in deinem Inventar, und ein Ei einer anderen Art erscheint. Es gibt 5 zu sammeln.</string>
+    <string name="onboarding_p3_title">Aktiviere den Dienst</string>
+    <string name="onboarding_p3_body">Nur so kann Android Reels erkennen. Er liest nur Bildschirmkennungen, niemals den Inhalt deiner Nachrichten.</string>
+    <string name="onboarding_p3_granted">Dienst aktiviert</string>
+    <string name="onboarding_p3_cta">Bedienungshilfen öffnen</string>
+    <string name="onboarding_p4_title">Und sag dem Akku, dass er uns nicht beenden soll</string>
+    <string name="onboarding_p4_body">Sonst beendet das System den Dienst nach ein paar Stunden und Basta! ist weg.</string>
+    <string name="onboarding_p4_granted">Akku: ausgenommen</string>
+    <string name="onboarding_p4_cta">Vom Akku ausnehmen</string>
+    <string name="onboarding_skip">Überspringen</string>
+    <string name="onboarding_next">Weiter</string>
+    <string name="onboarding_start">Los geht’s</string>
+    <string name="onboarding_day_label">Tag %1$d</string>
+    <string name="onboarding_source_prefix">Quelle: %1$s</string>
+
+    <!-- ==================== Settings ==================== -->
+    <string name="settings_title">Einstellungen</string>
+    <string name="settings_status_protected_title">Du bist geschützt</string>
+    <string name="settings_status_protected_sub">Reels und Shorts schließen sich von selbst</string>
+    <string name="settings_status_battery_title">Geschützt — aber gefährdet</string>
+    <string name="settings_status_battery_sub">Nimm Basta! von der Akku-Optimierung aus, damit das System den Dienst nicht stoppen kann</string>
+    <string name="settings_status_off_title">Du bist nicht geschützt</string>
+    <string name="settings_status_off_sub_service">Aktiviere die Bedienungshilfe, um zu starten</string>
+    <string name="settings_status_off_sub_app">Schalte deine blockierten Apps wieder ein, um den Schutz fortzusetzen</string>
+    <string name="settings_section_apps">Die Schutzzone</string>
+    <string name="settings_section_protection">System</string>
+    <string name="settings_section_pro">Basta! Pro</string>
+    <string name="settings_section_about">Einstellungen &amp; Hilfe</string>
+    <string name="about_manifesto">Basta! hat genau eine Aufgabe: Wenn du in Reels oder Shorts landest, holt es dich raus, bevor die Stunde weg ist. Klein, lokal, leise — der Rest gehört dir.</string>
+
+    <string name="settings_row_accessibility_title">Bedienungshilfe</string>
+    <string name="settings_row_accessibility_subtitle_on">Aktiv</string>
+    <string name="settings_row_accessibility_subtitle_off">Inaktiv — tippen zum Aktivieren</string>
+    <string name="settings_row_battery_title">Von der Akku-Optimierung ausnehmen</string>
+    <string name="settings_row_battery_subtitle_on">Ausgenommen</string>
+    <string name="settings_row_battery_subtitle_off">Nicht ausgenommen — das System kann den Dienst beenden</string>
+    <string name="settings_row_disable_title">Schutz deaktivieren</string>
+    <string name="settings_row_disable_subtitle">Öffnet die Bedienungshilfen, um den Dienst auszuschalten. Deine Serie reißt und dein Maskottchen wird wieder zum Ei.</string>
+
+    <string name="settings_row_pro_on_title">Pro aktiv</string>
+    <string name="settings_row_pro_on_title_founder">Founder-Mitglied</string>
+    <string name="settings_row_pro_on_subtitle">Pro seit %1$s</string>
+    <string name="settings_row_pro_on_subtitle_founder">Founder Edition · Pro seit %1$s</string>
+    <string name="settings_row_pro_on_subtitle_generic">Du hast Zugriff auf alle erweiterten Optionen</string>
+    <string name="settings_row_pro_off_title">Pro-Vorteile ansehen</string>
+    <string name="settings_row_pro_off_subtitle">Einmalzahlung — kein Abo</string>
+    <string name="settings_row_restore_title">Kauf wiederherstellen</string>
+    <string name="settings_row_restore_subtitle">Falls du Pro schon auf einem anderen Gerät oder vor einer Neuinstallation gekauft hast</string>
+
+    <string name="settings_row_version_title">Version</string>
+    <string name="settings_row_version_subtitle">Basta! Reel Blocker · v%1$s</string>
+    <string name="settings_row_tutorial_title">Tutorial erneut ansehen</string>
+    <string name="settings_row_tutorial_subtitle">Öffnet die Einführung Schritt für Schritt</string>
+    <string name="settings_row_privacy_title">Datenschutzerklärung</string>
+    <string name="settings_row_privacy_subtitle">Welche Daten die App berührt — und welche nicht</string>
+
+    <string name="settings_app_status_not_installed">Nicht installiert</string>
+    <string name="app_disable_confirm_title">%1$s nicht mehr blockieren?</string>
+    <plurals name="app_disable_confirm_body">
+        <item quantity="one">Wenn du es ausschaltest, reißt deine Serie von %2$d Tag und dein Maskottchen wird wieder zum Ei.</item>
+        <item quantity="other">Wenn du es ausschaltest, reißt deine Serie von %2$d Tagen und dein Maskottchen wird wieder zum Ei.</item>
+    </plurals>
+    <string name="app_disable_confirm_keep">Weiter blockieren</string>
+    <string name="app_disable_confirm_disable">Nicht mehr blockieren</string>
+    <string name="app_disable_confirm_alternative">Lieber eine Pause machen</string>
+
+    <string name="app_disable_detail_line1">Dein Maskottchen %1$s (%2$s, Stufe %3$d von 4) ist %4$d Tage lang gewachsen.</string>
+    <string name="app_disable_detail_line2">Wenn du %1$s nicht mehr blockierst, reißt die Serie und dein Maskottchen wird wieder zum Ei.</string>
+    <string name="app_disable_detail_line3">Dein Rekord von %1$d Tagen bleibt erhalten.</string>
+    <string name="app_disable_countdown">Warte %1$d s…</string>
+    <string name="app_disable_no_streak">Du hast gerade keine aktive Serie. Beim Deaktivieren geht nichts verloren.</string>
+
+    <!-- ==================== Break (Pro) ==================== -->
+    <string name="settings_row_break_title">Pause einlegen</string>
+    <string name="settings_row_break_subtitle_available">10-Min.-Pause · Verfügbar</string>
+    <string name="settings_row_break_subtitle_in_use">Noch %1$s · Beenden</string>
+    <string name="settings_row_break_subtitle_consumed">Heute schon genutzt</string>
+    <string name="break_dialog_title">Schutz für 10 Minuten pausieren</string>
+    <string name="break_dialog_body">Die Serie reißt nicht. Das Maskottchen macht ein Nickerchen. Wir sagen dir Bescheid, wenn es wieder da ist.</string>
+    <string name="break_dialog_confirm">Pause starten</string>
+    <string name="break_dialog_cancel">Abbrechen</string>
+    <string name="break_home_label">🌙 In Pause · %1$s</string>
+
+    <!-- ==================== Paywall ==================== -->
+    <string name="paywall_title">Basta! Pro</string>
+    <string name="paywall_subtitle">Hol dir zurück, was dir das Scrollen gestohlen hat.</string>
+    <string name="paywall_feature_break">Eine tägliche 10-Min.-Pause — die Serie reißt nicht, das Maskottchen stirbt nicht</string>
+    <string name="paywall_feature_dm">Reels erlauben, die Freunde dir per DM schicken</string>
+    <string name="paywall_feature_stories">Stories blockieren (optional)</string>
+    <string name="paywall_emotional">Kein Algorithmus. Kein Tracking. Niemand, der von deiner Aufmerksamkeit lebt.</string>
+    <string name="paywall_one_time">Einmalkauf. Kein Abo.</string>
+    <string name="paywall_cta_purchase">Pro freischalten</string>
+    <string name="paywall_cta_restore">Käufe wiederherstellen</string>
+    <string name="paywall_disclaimer">Auch ohne Pro blockiert die App weiterhin Reels und Shorts. Pro ist für alle, die genauer steuern wollen, was durchgelassen wird.</string>
+
+    <!-- ==================== Privacy promise (shown in paywall + settings) ==================== -->
+    <string name="privacy_promise_heading">Deine Privatsphäre</string>
+    <string name="privacy_promise_bullet_local">Alles bleibt auf deinem Gerät.</string>
+    <string name="privacy_promise_bullet_no_tracking">Wir verkaufen deine Daten nicht. Wir sammeln sie nicht einmal.</string>
+    <string name="privacy_promise_bullet_drive">Dein Fortschritt reist per Google Drive mit dir (von Google verschlüsselt).</string>
+    <string name="privacy_promise_compact">Nur lokal · Kein Tracking, kein Datenverkauf · Verschlüsseltes Backup über Google Drive.</string>
+
+    <!-- ==================== Premium paywall (full-screen) ==================== -->
+    <string name="ppw_headline">Hol dir zurück, was dir das Scrollen gestohlen hat.</string>
+    <string name="ppw_sub">Alle aktuellen und künftigen Arten. Echte Pausen. Das ganze Bestiarium.</string>
+    <string name="ppw_compare_title">Was sich mit Pro ändert</string>
+    <string name="ppw_compare_free">Gratis</string>
+    <string name="ppw_compare_pro">Pro</string>
+    <string name="ppw_compare_block">Reels- &amp; Shorts-Blocker</string>
+    <string name="ppw_compare_species">Sammelbare Arten</string>
+    <string name="ppw_compare_species_free">2 Arten</string>
+    <string name="ppw_compare_species_pro">Alle + künftige</string>
+    <string name="ppw_compare_breaks">Geplante Pausen</string>
+    <string name="ppw_compare_dm">Reels aus DMs von Freunden</string>
+    <string name="ppw_compare_stories">Instagram Stories blockieren</string>
+    <string name="ppw_compare_stats">Erweiterte Statistiken</string>
+    <string name="ppw_compare_widget">Startbildschirm-Widget</string>
+    <string name="ppw_compare_block_whole">Ganze Apps blockieren</string>
+    <string name="widget_label">Basta! — Serie &amp; Maskottchen</string>
+    <string name="widget_locked_title">Pro-Widget</string>
+    <string name="widget_locked_cta">Tippen zum Freischalten</string>
+
+    <!-- Widget info dialog / settings row -->
+    <string name="settings_row_widget_title">Startbildschirm-Widget</string>
+    <string name="settings_row_widget_subtitle">Sieh deine Serie und dein Maskottchen auf dem Startbildschirm</string>
+    <string name="settings_row_widget_subtitle_off">Mit Pro freischalten — Serie &amp; Maskottchen auf einen Blick</string>
+    <string name="widget_info_label">WIDGET</string>
+    <string name="widget_info_title">Startbildschirm-Widget</string>
+    <string name="widget_info_body">Füge das Basta!-Widget zu deinem Startbildschirm hinzu, um deine aktuelle Serie und dein Maskottchen zu sehen, ohne die App zu öffnen. Es aktualisiert sich automatisch, während du wächst.</string>
+    <string name="widget_info_how_to_add_title">So fügst du es hinzu</string>
+    <string name="widget_info_how_to_add_body">Lange auf den Startbildschirm drücken → Widgets → Basta! → Widget an die gewünschte Stelle ziehen.</string>
+    <string name="widget_info_action_dismiss">Verstanden</string>
+
+    <string name="ppw_compare_no">—</string>
+    <string name="ppw_compare_yes">✓</string>
+
+    <string name="ppw_cta_buy">Pro freischalten</string>
+    <string name="ppw_secondary_continue_free">Gratis weiter mit der Art %1$s</string>
+    <string name="ppw_restore">Kauf wiederherstellen</string>
+    <string name="cd_paywall_close">Schließen</string>
+
+    <string name="paywall_founder_banner_title">Founder Edition</string>
+    <string name="paywall_founder_banner_body">Ab dem %2$s steigt der Preis auf %1$s</string>
+    <string name="settings_app_status_blocking">Blockiert Reels</string>
+    <string name="settings_app_status_disabled">Deaktiviert</string>
+    <string name="settings_app_status_show_advanced">Erweiterte Optionen</string>
+    <string name="settings_app_status_hide_advanced">Erweiterte Optionen ausblenden</string>
+
+    <string name="ig_suboption_dm_title">Reels aus DMs erlauben</string>
+    <string name="ig_suboption_dm_description">Reels, die dir Freunde per Direktnachricht schicken, werden nicht blockiert.</string>
+    <string name="ig_suboption_stories_title">Stories blockieren</string>
+    <string name="ig_suboption_stories_description">Standardmäßig werden sie nicht blockiert. Aktiviere es, wenn du sie auch loswerden willst.</string>
+    <string name="suboption_block_whole_title">Ganze App blockieren</string>
+    <string name="suboption_block_whole_description">%1$s komplett schließen, nicht nur die Reels</string>
+    <string name="suboption_whole_active_note">Die ganze App schließt sich beim Öffnen, daher gelten die anderen Instagram-Optionen nicht.</string>
+    <string name="ig_suboption_pro_cd">Pro</string>
+
+    <string name="toast_checking_purchases">Käufe werden geprüft…</string>
+
+    <string name="battery_state_optimized">Akku: Das System kann den Dienst beenden ⚠</string>
+    <string name="battery_state_excluded">Akku: ausgenommen ✅</string>
+    <string name="battery_action">Von der Akku-Optimierung ausnehmen</string>
+    <string name="oem_hint">Auf deinem Handy (%1$s) musst du neben der Akku-Ausnahme auch unter Einstellungen → Apps → Basta! → Autostart die Option aktivieren. Sonst beendet das System den Hintergrunddienst.</string>
+
+    <string name="stats_format">Heute: %1$d blockiert   (Instagram: %2$d  ·  YouTube: %3$d)</string>
+
+    <!-- ==================== Mascot levels ==================== -->
+    <string name="mascot_level_egg">Ei</string>
+    <string name="mascot_level_cracking">Angeknackst</string>
+    <string name="mascot_level_hatchling">Jungtier</string>
+    <string name="mascot_level_adult">Erwachsen</string>
+
+    <!-- ==================== Mascot species ==================== -->
+    <string name="mascot_species_classic">Klassik</string>
+    <string name="mascot_species_dragon">Drache</string>
+    <string name="mascot_species_turtle">Schildkröte</string>
+    <string name="mascot_species_wolf">Wolf</string>
+    <string name="mascot_species_owl">Eule</string>
+
+    <!-- ==================== Tip quotes ==================== -->
+    <string-array name="tips_quotes">
+        <item>Im Schnitt verbringen Nutzer 95 Min./Tag mit Reels und Shorts. Fast ein ganzer Film.</item>
+        <item>Dein Gehirn braucht 23 Min., um nach jeder Ablenkung wieder in den Fokus zu kommen.</item>
+        <item>Reels spielt 30 Videos in 5 Min. ab. 30 Mikrodosen Dopamin.</item>
+        <item>Endloses Scrollen ist so gebaut, dass dein Gehirn nie beschließt aufzuhören.</item>
+        <item>1 Stunde Bildschirm vor dem Schlafen = 22 Min. weniger Tiefschlaf.</item>
+        <item>70 % der Nutzer verlieren bei Reels das Zeitgefühl.</item>
+        <item>TikTok fesselt dich nach 8 Min. Nutzung. Schneller als Kaffee.</item>
+        <item>Eine durchschnittliche Reels-Session dauert 24 Min. Fast eine halbe Folge von etwas Gutem.</item>
+        <item>Je jünger die Nutzer, desto mehr Zeit mit Kurzvideos. Bei Großeltern sieht man das kaum.</item>
+        <item>Jedes Like, das du bei Reels bekommst, gehört nicht dir. Der Algorithmus entscheidet für dich.</item>
+        <item>Teens mit über 3 h/Tag Kurzvideos haben doppelt so viele Angstsymptome.</item>
+        <item>60 % der Menschen schauen in den ersten 10 Min. nach dem Aufwachen aufs Handy.</item>
+        <item>Wir verbringen im Schnitt 3 h 15 min/Tag am Handy. Das sind 49 volle Tage im Jahr.</item>
+        <item>Blaues Bildschirmlicht verzögert die Melatonin-Ausschüttung um 1,5 Stunden.</item>
+        <item>5 Min. Reels = 5 Min. Lesen. Wann hast du zuletzt ein ganzes Buch beendet?</item>
+        <item>Wenn du 20 Min. hast, geh spazieren. Beim Doomscrolling siehst du keine Sonne.</item>
+        <item>Ruf einen Freund an. Ein Gespräch schlägt 100 Reels zusammen.</item>
+        <item>Langeweile ist das Signal, dass dein Gehirn gleich etwas erschaffen will. Schalt sie nicht ab.</item>
+        <item>Koch etwas Einfaches statt zu scrollen. Du isst besser und bekommst, was du wolltest.</item>
+        <item>10 Min. Dehnen nach dem Aufwachen &gt; 10 Min. Reels im Bett.</item>
+        <item>Schreib 3 Dinge auf, die du heute tun willst. Fang mit einem an, ohne nachzudenken.</item>
+        <item>Geh für 2 Min. auf den Balkon. Der Bildschirm läuft dir nicht weg.</item>
+        <item>20 Kniebeugen jetzt geben dir mehr Energie als 20 Reels.</item>
+        <item>Eine lange Nachricht an jemanden, der dir wichtig ist, bewegt mehr als jedes Scrollen.</item>
+        <item>Ein Kaffee mit jemandem in echt schlägt eine Woche Stories.</item>
+        <item>Wenn dir langweilig ist, schau 30 Sekunden aus dem Fenster. Im Ernst.</item>
+        <item>Hör ein Lied mit geschlossenen Augen. Reicht völlig als Pause.</item>
+        <item>Mach ein Lied an und tanz 3 Minuten. Dein Körper dankt es dir.</item>
+        <item>30 Sekunden kalt duschen. Setzt dich besser zurück als 50 Reels.</item>
+        <item>Gieß eine Pflanze. Das bringt dein Gehirn zu etwas Langsamem und Lebendigem.</item>
+        <item>Das erste Scrollen ist nicht das Problem. Das fünfzigste schon.</item>
+        <item>Du musst nicht ständig produktiv sein. Ein bisschen Langeweile ist okay.</item>
+        <item>Das Schwierige ist nicht, mit Reels aufzuhören. Sondern sie nicht gedankenlos zu öffnen.</item>
+        <item>Der Algorithmus denkt jede Sekunde an dich. Wie oft denkst du an den Algorithmus?</item>
+        <item>Jedes Mal, wenn dich diese App rausholt, gewinnst du Zeit, die du nicht gehen gesehen hast.</item>
+        <item>Deine Freizeit ist keine „tote Zeit“. Es sind einige der wenigen Momente, die dir gehören.</item>
+        <item>Wähl deine Ablenkungen bewusst. Die, die dich überraschen, tun am meisten weh.</item>
+        <item>Wenn du Reels öffnest, um dich „auszuruhen“, bist du danach müder. Bestätigt.</item>
+        <item>Echte Neugier hält Stunden. Die von Reels 8 Sekunden.</item>
+        <item>Schließ 10 Sekunden die Augen. Das ist erholsamer als eine halbe Stunde Scrollen.</item>
+        <item>Gute Dinge brauchen Zeit. Reels kommen in 15 Sekunden und sind genauso schnell wieder weg.</item>
+        <item>Aufmerksamkeit ist die knappste Ressource des Jahrhunderts. Und du verschenkst sie.</item>
+        <item>Frage: Von wem war das letzte Reel, das du gesehen hast? Eben.</item>
+        <item>Bevor du zum Handy greifst, atme dreimal durch. Manchmal geht der Drang vorbei.</item>
+    </string-array>
+
+    <!-- ==================== Health / self-diagnosis notifications ==================== -->
+    <string name="health_channel_name">Schutz-Warnungen</string>
+    <string name="health_channel_desc">Warnt dich, wenn Basta! keine Reels und Shorts mehr blockiert.</string>
+    <string name="health_protection_off_title">Schutz ausgeschaltet</string>
+    <string name="health_protection_off_body">Basta! blockiert keine Reels und Shorts mehr. Tippe, um es wieder einzuschalten.</string>
+    <string name="health_breakage_title">Funktioniert Basta! noch?</string>
+    <string name="health_breakage_body">Wir haben eine Weile nichts blockiert, obwohl du diese Apps weiter nutzt. Vielleicht hat ein Update die Erkennung kaputt gemacht — öffne Basta!, um es zu prüfen oder zu melden.</string>
+</resources>

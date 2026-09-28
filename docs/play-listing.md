@@ -19,6 +19,7 @@ veía la ficha en español y no encontraba la app buscando en su idioma.
 | es-ES | ficha española | ES propios |
 | es-419, es-US | ficha española con "video"/"celular" | ES (mismos que es-ES) |
 | fr-FR, fr-CA | ficha francesa (misma en ambos) | hereda en-US |
+| de-DE, it-IT, pt-BR, pt-PT | fichas nuevas (28-09-2026) | heredan en-US |
 
 Al cambiar el predeterminado, Play exige que cada producto in-app tenga
 traducción en ese idioma: `basta_pro` tiene "Basta Pro" en todos.
@@ -277,6 +278,263 @@ CONTACT
 senaprojectai@gmail.com
 
 Basta! Reprends ton attention.
+```
+
+---
+
+## Ficha en alemán (de-DE)
+
+Redactada el 28-09-2026 junto con la traducción de la app (`values-de`). Pendiente de revisión por un nativo antes de publicar.
+
+### Título (29/30)
+
+```
+Basta! Reels & Shorts Blocker
+```
+
+### Descripción corta (77/80)
+
+```
+Blockiert Instagram Reels, YouTube Shorts und TikTok. Gemacht für ADHS-Fokus.
+```
+
+### Descripción larga (3970/4000)
+
+```
+Kurzvideo-Feeds sind gebaut, damit du endlos scrollst. Basta! ist ein Bedienungshilfe-Tool für Menschen mit ADHS, Angstzuständen oder Schwierigkeiten mit der Selbstkontrolle bei süchtig machenden Kurzvideos.
+
+Sobald du Instagram Reels, YouTube Shorts oder den TikTok-Feed öffnest, erkennt Basta! das und holt dich sofort wieder raus. Nichts deinstallieren, der Rest der Apps bleibt.
+
+SO FUNKTIONIERT ES
+Basta! nutzt die Bedienungshilfen von Android, um den Kurzvideo-Player auf dem Bildschirm zu erkennen, und drückt für dich auf Zurück. Das dauert weniger als eine Sekunde. Ohne Internetverbindung, ohne deine Nachrichten oder Fotos zu lesen, ohne irgendwelche Daten zu sammeln.
+
+Instagram, YouTube oder TikTok werden nicht komplett gesperrt. Feed, Nachrichten, Suche und lange Videos funktionieren weiter – nur der Teil, der dich festhalten soll, verschwindet. Wenn du ganz Schluss machen willst, kannst du auch die ganze App blockieren.
+
+WAS BASTA! BLOCKIERT
+• Instagram Reels
+• YouTube Shorts
+• Den endlosen TikTok-Feed
+• Instagram Stories (optional)
+• Auch alternative YouTube-Versionen: ReVanced, ReVanced Extended und Vanced
+
+KOSTENLOS, OHNE ZEITLIMIT
+• Automatisches Blockieren von Reels, Shorts und TikTok
+• Tägliche Serie: Jeder geschützte Tag zählt
+• Ein Begleiter, der in 21 Tagen vom Ei zum Erwachsenen heranwächst
+• Zwei sammelbare Arten
+• Statistiken: Blockaden von heute, 7-Tage-Verlauf und dein Allzeit-Rekord
+• Automatisches Backup in Google Drive
+• Deutsch, Englisch, Spanisch, Französisch, Italienisch und Portugiesisch, helles und dunkles Design
+
+PRO – EINMALKAUF, KEIN ABO
+• Drei weitere sammelbare Arten (insgesamt fünf)
+• Alle Arten aus künftigen Updates ohne Aufpreis
+• Eine tägliche 10-Minuten-Pause, ohne die Serie zu verlieren
+• Reels erlauben, die dir Freunde per Direktnachricht schicken
+• Die ganze App blockieren, nicht nur Kurzvideos
+• Erweiterte Statistiken und ein Widget für den Startbildschirm
+
+Einmal zahlen, fertig. Kein Abo. Keine Werbung. Niemals.
+
+DIE SERIE UND DER BEGLEITER
+Willenskraft allein stoppt das Scrollen nicht. Deshalb gibt dir Basta! etwas zurück: An jedem Tag, an dem der Schutz aktiv bleibt, wächst deine Serie und dein Begleiter entwickelt sich weiter. An Tag 21 – wenn sich die Gewohnheit festigt – macht er seinen Abschluss, zieht in deine Sammlung ein, und ein neues Ei einer anderen Art erscheint. Mit der Zeit sammelst du sie alle.
+
+FÜR WEN IST BASTA!?
+Für alle, die Instagram für eine bestimmte Sache öffnen und vierzig Minuten später wieder auftauchen. Für alle, die weniger Bildschirmzeit wollen, ohne sich überall abzumelden. Für alle mit ADHS, die wissen, dass Kurzvideos das schlimmste Format für ihr Gehirn sind. Für alle, die um zwei Uhr nachts in einer Shorts-Schleife landen.
+
+Keine Wellbeing-App, die dir abends ein Diagramm zeigt, sondern eine Bremse, die genau dann greift, wenn du sonst den Nachmittag verloren hättest.
+
+DATENSCHUTZ
+Basta! läuft komplett auf deinem Handy. Kein Konto, keine Werbung, keine Analyse-Tools und keine einzige Netzwerkanfrage. Die Bedienungshilfe tut genau eine Sache: den Kurzvideo-Bereich erkennen und die Zurück-Aktion des Systems auslösen. Sie liest weder Nachrichten noch Beiträge, Bilder oder andere persönliche Daten.
+
+WARUM DIE BEDIENUNGSHILFEN-BERECHTIGUNG?
+Sie ist die einzige Android-Schnittstelle, die verrät, welcher Bildschirm einer anderen App gerade sichtbar ist. Ohne sie lässt sich „ich bin im Reels-Player“ nicht von „ich bin im normalen Feed“ unterscheiden. Basta! ist offiziell als Bedienungshilfe-Tool deklariert und nutzt die Berechtigung nur für diesen einen, klar erklärten Zweck.
+
+NACH DER INSTALLATION
+Aktiviere den Dienst in den Einstellungen und nimm die App von der Akku-Optimierung aus – die App führt dich zu beiden Bildschirmen. Auf Xiaomi-, Samsung- oder Huawei-Handys aktiviere außerdem den Autostart, damit das System sie im Hintergrund nicht beendet.
+
+KONTAKT
+senaprojectai@gmail.com
+
+Basta! Hol dir deine Aufmerksamkeit zurück.
+```
+
+### Notas de la versión
+
+```
+• Jetzt auch auf Deutsch.
+• Kleinere Verbesserungen und Fehlerbehebungen.
+```
+
+---
+
+## Ficha en italiano (it-IT)
+
+Redactada el 28-09-2026 junto con la traducción de la app (`values-it`). Pendiente de revisión por un nativo antes de publicar.
+
+### Título (30/30)
+
+```
+Basta! Bloccare Reels e Shorts
+```
+
+### Descripción corta (74/80)
+
+```
+Blocca Reels di Instagram, Shorts di YouTube e TikTok. Pensata per l’ADHD.
+```
+
+### Descripción larga (3967/4000)
+
+```
+I video brevi sono progettati per farti scrollare all’infinito. Basta! è uno strumento di accessibilità pensato per persone con ADHD, ansia o difficoltà di autocontrollo nei confronti dei video brevi che creano dipendenza.
+
+Appena apri i Reels di Instagram, gli Shorts di YouTube o il feed infinito di TikTok, Basta! lo rileva e ti tira fuori subito. Niente da disinstallare. E tutto il resto di quelle app rimane com’è.
+
+COME FUNZIONA
+Basta! usa il servizio di accessibilità di Android per riconoscere la schermata del lettore di video brevi e premere Indietro al posto tuo. Ci mette meno di un secondo. Non serve internet, non legge i tuoi messaggi né le tue foto e non raccoglie nessun dato.
+
+Non blocca Instagram, YouTube o TikTok per intero. Feed normale, messaggi, ricerca e video lunghi continuano a funzionare: sparisce solo la parte progettata per intrappolarti. E se preferisci tagliare del tutto, puoi bloccare l’intera app.
+
+COSA BLOCCA
+• I Reels di Instagram
+• Gli Shorts di YouTube
+• Il feed infinito di TikTok
+• Le Storie di Instagram (facoltativo)
+• Anche le versioni alternative di YouTube: ReVanced, ReVanced Extended e Vanced
+
+GRATIS, SENZA LIMITI DI TEMPO
+• Blocco automatico di Reels, Shorts e TikTok
+• Serie giornaliera: ogni giorno protetto conta
+• Una mascotte che si evolve: dall’uovo all’adulto in 21 giorni
+• Due specie da collezionare
+• Statistiche: blocchi di oggi, storico di 7 giorni e record assoluto
+• Backup automatico su Google Drive
+• Italiano, inglese, spagnolo, francese, tedesco e portoghese, tema chiaro e scuro
+
+PRO — ACQUISTO UNICO, NESSUN ABBONAMENTO
+• Altre tre specie da collezionare (cinque in totale)
+• Tutte le specie aggiunte nei prossimi aggiornamenti, senza costi extra
+• Una pausa di 10 minuti al giorno senza perdere la serie
+• Consenti i Reels che ti mandano gli amici nei messaggi diretti
+• Blocca l’intera app, non solo i video brevi
+• Statistiche avanzate e widget per la schermata home
+
+Paghi una volta e basta. Nessun abbonamento. Nessuna pubblicità. Mai.
+
+LA SERIE E LA MASCOTTE
+La forza di volontà da sola non basta a smettere di scrollare. Per questo Basta! ti dà qualcosa in cambio: ogni giorno in cui la protezione resta attiva, la tua serie cresce e la tua mascotte si evolve. Al giorno 21 — quando l’abitudine si consolida — si diploma ed entra nella tua collezione, poi compare un nuovo uovo di un’altra specie. Col tempo le collezioni tutte.
+
+PER CHI È
+Per chi apre Instagram per una cosa precisa e ne esce quaranta minuti dopo. Per chi vuole ridurre il tempo davanti allo schermo senza sparire da ovunque. Per chi ha l’ADHD e sa che i video brevi sono il formato peggiore possibile per la sua testa. Per chi prova a dormire e finisce in un loop di Shorts alle due di notte.
+
+Non è un’app di benessere digitale che ti mostra un grafico a fine giornata. È un freno che agisce nel momento esatto in cui stavi per perdere il pomeriggio.
+
+PRIVACY
+Basta! funziona interamente sul tuo telefono. Niente account, niente pubblicità, niente analytics e nemmeno una richiesta di rete. Il servizio di accessibilità si limita a riconoscere la sezione dei video brevi e ad attivare l’azione Indietro del sistema: non legge il contenuto di messaggi, post, immagini né alcuna informazione personale.
+
+PERCHÉ SERVE IL PERMESSO DI ACCESSIBILITÀ
+È l’unica API di Android che permette di sapere quale schermata di un’altra app è visibile. Senza, non c’è modo di distinguere “sono nel lettore dei Reels” da “sono nel feed normale”, e quindi di farti uscire solo dal primo. Basta! è dichiarata formalmente come strumento di accessibilità e usa questo permesso per un’unica funzione, visibile e spiegata.
+
+DOPO L’INSTALLAZIONE
+Attiva il servizio nelle Impostazioni ed escludi l’app dall’ottimizzazione della batteria (l’app ti guida). Sui telefoni Xiaomi, Samsung o Huawei, attiva anche l’avvio automatico così il sistema non la chiude in background.
+
+CONTATTI
+senaprojectai@gmail.com
+
+Basta! Riprenditi la tua attenzione.
+```
+
+### Notas de la versión
+
+```
+• Ora anche in italiano.
+• Piccoli miglioramenti e correzioni.
+```
+
+---
+
+## Ficha en portugués (pt-BR, pt-PT)
+
+Redactada el 28-09-2026 junto con la traducción de la app (`values-pt`). Pendiente de revisión por un nativo antes de publicar.
+
+### Título (30/30)
+
+```
+Basta! Bloquear Reels e Shorts
+```
+
+### Descripción corta (73/80)
+
+```
+Bloqueia Reels do Instagram, Shorts do YouTube e TikTok. Feito para TDAH.
+```
+
+### Descripción larga (3853/4000)
+
+```
+Os feeds de vídeos curtos são feitos para você não parar de rolar. O Basta! é uma ferramenta de acessibilidade criada para pessoas com TDAH, ansiedade ou dificuldades de autocontrole diante de vídeos curtos viciantes.
+
+Assim que você abre o Instagram Reels, o YouTube Shorts ou o feed do TikTok, o Basta! detecta e tira você de lá na hora. Nada para desinstalar. Nada perdido nas partes desses apps que você realmente quer usar.
+
+COMO FUNCIONA
+O Basta! usa o serviço de acessibilidade do Android para reconhecer na tela o visualizador de vídeos curtos e apertar Voltar por você. Leva menos de um segundo. Não precisa de internet, nunca lê suas mensagens nem suas fotos e não coleta nenhum dado.
+
+Ele não bloqueia o Instagram, o YouTube ou o TikTok inteiros. Seu feed normal, as mensagens, a busca e os vídeos longos continuam funcionando — só some a parte feita para prender você. E se preferir cortar de vez, há uma opção para bloquear o app inteiro.
+
+O QUE ELE BLOQUEIA
+• Instagram Reels
+• YouTube Shorts
+• O feed infinito do TikTok
+• Stories do Instagram (opcional)
+• Versões alternativas do YouTube: ReVanced, ReVanced Extended e Vanced
+
+GRÁTIS, SEM LIMITE DE TEMPO
+• Bloqueio automático de Reels, Shorts e TikTok
+• Sequência diária: cada dia protegido conta
+• Uma mascote que evolui de ovo a adulta em 21 dias
+• Duas espécies colecionáveis
+• Estatísticas: bloqueios de hoje, histórico de 7 dias e seu recorde
+• Backup automático no Google Drive
+• Português, inglês, espanhol, francês, alemão e italiano, temas claro e escuro
+
+PRO — COMPRA ÚNICA, SEM ASSINATURA
+• Mais três espécies colecionáveis (cinco no total)
+• Todas as espécies adicionadas em atualizações futuras, sem custo extra
+• Uma pausa diária de 10 minutos sem perder a sequência
+• Permitir os Reels que seus amigos enviam por mensagem direta
+• Bloquear o app inteiro, não só os vídeos curtos
+• Estatísticas avançadas e widget na tela inicial
+
+Pague uma vez e pronto. Sem assinatura. Sem anúncios. Nunca.
+
+A SEQUÊNCIA E A MASCOTE
+Só força de vontade não faz você parar de rolar. Por isso o Basta! devolve algo em troca: a cada dia com a proteção ativa, sua sequência cresce e sua mascote evolui. No dia 21 — quando o hábito se consolida — ela se forma, entra na sua coleção e aparece um novo ovo de outra espécie. Com o tempo, você coleciona todas.
+
+PARA QUEM É
+Para quem abre o Instagram para uma coisa específica e volta quarenta minutos depois. Para quem quer menos tempo de tela sem sumir de todas as redes. Para quem tem TDAH e sabe que o vídeo curto é o pior formato possível para o próprio cérebro. Para quem tenta dormir e acaba num loop de Shorts às duas da manhã.
+
+Este não é um app de bem-estar digital que mostra um gráfico no fim do dia. É um freio que age no exato momento em que você ia perder a tarde.
+
+PRIVACIDADE
+O Basta! funciona inteiramente no seu celular. Sem contas, sem anúncios, sem análises e sem nenhuma conexão de rede. O serviço de acessibilidade faz uma única coisa: reconhecer a seção de vídeos curtos e acionar o Voltar do sistema. Ele não lê o conteúdo de mensagens, publicações, imagens nem qualquer informação pessoal.
+
+POR QUE PRECISA DA PERMISSÃO DE ACESSIBILIDADE
+É a única API do Android que revela qual tela de outro app está visível. Sem ela, não há como distinguir "estou no visualizador de Reels" de "estou no feed normal" e, portanto, não há como tirar você só do primeiro. O Basta! é declarado formalmente como ferramenta de acessibilidade e usa a permissão para um único propósito, visível e claramente explicado.
+
+DEPOIS DE INSTALAR
+Ative o serviço nas Configurações e exclua o app da otimização de bateria — o próprio app leva você às duas telas. Em celulares Xiaomi, Samsung ou Huawei, ative também a inicialização automática para que o sistema não o encerre em segundo plano.
+
+CONTATO
+senaprojectai@gmail.com
+
+Basta! Retome sua atenção.
+```
+
+### Notas de la versión
+
+```
+• Agora também em português.
 ```
 
 ---

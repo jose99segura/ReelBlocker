@@ -231,6 +231,7 @@ private fun AppRoot(onResetOnboarding: () -> Unit) {
                     )
                 } else if (nowProtecting) {
                     Streak.tick(ctx)
+                    ReviewPrompt.maybeRequest(ctx)
                 }
                 Streak.setProtectingSeen(ctx, nowProtecting)
                 pendingGraduation = Collection.pendingGraduation(ctx)

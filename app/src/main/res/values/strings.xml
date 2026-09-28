@@ -88,7 +88,7 @@
     <string name="howitworks_section_grows_title">Your mascot grows</string>
     <string name="howitworks_section_grows_body">The mascot evolves with you:\n  · Day 0  →  Egg\n  · Day 3  →  Cracking\n  · Day 8  →  Hatchling\n  · Day 21 →  Adult</string>
     <string name="howitworks_section_graduation_title">Graduation at day 21</string>
-    <string name="howitworks_section_graduation_body">When you reach day 21, your mascot graduates: it\'s saved in your inventory and a new egg of a different species appears. There are 5 species in total (Classic, Dragon, Turtle, Wolf, Owl). The reset only happens at graduation — if you break the streak before, you keep the same species.</string>
+    <string name="howitworks_section_graduation_body">When you reach day 21, your mascot graduates: it\'s saved in your inventory and a new egg of a different species appears. There are 5 species in total (Classic, Dragon, Turtle, Wolf, Owl). The reset only happens at graduation — if you break the streak before, you keep the same species. Once your collection is complete, you choose which species to raise next: each new graduation earns it a star, up to ★5.</string>
     <string name="howitworks_section_inventory_title">The Bestiary</string>
     <string name="howitworks_section_inventory_body">The paw icon 🐾 in the bottom bar opens your collection. You\'ll see the mascots you\'ve graduated, the ones you still need, and how many days the active one has been with you.</string>
     <string name="howitworks_section_important_title">Important</string>
@@ -182,7 +182,7 @@
     <string name="inventory_hero_label">Species</string>
     <string name="inventory_hero_value">%1$d / %2$d</string>
     <string name="inventory_hero_subtitle_progress">Reach day 21 with the streak active to graduate a mascot.</string>
-    <string name="inventory_hero_subtitle_complete">You\'ve collected all 5 species. New ones can repeat.</string>
+    <string name="inventory_hero_subtitle_complete">You\'ve collected all 5 species. Graduate them again to earn stars, up to ★5.</string>
     <string name="inventory_empty_title">You haven\'t graduated any mascot yet</string>
     <string name="inventory_empty_body">Your first graduation arrives at day 21 of an active streak.</string>
     <string name="inventory_active_now">Active now</string>
@@ -194,8 +194,6 @@
     <string name="inventory_slot_pro_caption">Unlock with Pro</string>
     <string name="cd_inventory_slot_locked_pro">%1$s locked. Tap to unlock with Pro.</string>
     <string name="cd_inventory_slot_locked_pro_generic">Locked mascot. Tap to unlock with Pro.</string>
-    <string name="inventory_repeats_singular">You\'ve also graduated 1 repeated mascot.</string>
-    <string name="inventory_repeats_plural">You\'ve also graduated %1$d repeated mascots.</string>
 
     <!-- ==================== Onboarding ==================== -->
     <string name="onboarding_p1_title">Basta!</string>
@@ -435,4 +433,15 @@
     <string name="health_protection_off_body">Basta! is no longer blocking Reels and Shorts. Tap to turn it back on.</string>
     <string name="health_breakage_title">Is Basta! still working?</string>
     <string name="health_breakage_body">We haven\'t blocked anything in a while even though you keep using these apps. An update may have broken detection — open Basta! to check or report it.</string>
+
+    <!-- Mascot stars (re-graduating a collected species) -->
+    <string name="graduation_title_levelup">Your %1$s rises to ★%2$d!</string>
+    <string name="graduation_title_max">Your %1$s reached max level!</string>
+    <string name="graduation_choose_prompt">Collection complete! Who do you want to level up next?</string>
+    <string name="graduation_choose_continue">Hatch %1$s →</string>
+    <string name="cd_mascot_stars">%1$d of %2$d stars</string>
+    <plurals name="inventory_detail_graduations">
+        <item quantity="one">Graduated %d time</item>
+        <item quantity="other">Graduated %d times</item>
+    </plurals>
 </resources>

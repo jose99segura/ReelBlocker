@@ -88,7 +88,7 @@
     <string name="howitworks_section_grows_title">Dein Maskottchen wächst</string>
     <string name="howitworks_section_grows_body">Das Maskottchen entwickelt sich mit dir:\n  · Tag 0  →  Ei\n  · Tag 3  →  Angeknackst\n  · Tag 8  →  Jungtier\n  · Tag 21 →  Erwachsen</string>
     <string name="howitworks_section_graduation_title">Abschluss an Tag 21</string>
-    <string name="howitworks_section_graduation_body">Wenn du Tag 21 erreichst, macht dein Maskottchen seinen Abschluss: Es wird in deinem Inventar gesichert und ein neues Ei einer anderen Art erscheint. Es gibt insgesamt 5 Arten (Klassik, Drache, Schildkröte, Wolf, Eule). Neu gestartet wird nur beim Abschluss — reißt deine Serie vorher, behältst du dieselbe Art.</string>
+    <string name="howitworks_section_graduation_body">Wenn du Tag 21 erreichst, macht dein Maskottchen seinen Abschluss: Es wird in deinem Inventar gesichert und ein neues Ei einer anderen Art erscheint. Es gibt insgesamt 5 Arten (Klassik, Drache, Schildkröte, Wolf, Eule). Neu gestartet wird nur beim Abschluss — reißt deine Serie vorher, behältst du dieselbe Art. Ist die Sammlung komplett, wählst du, welche Art du als Nächstes aufwertest: Jeder neue Abschluss bringt ihr einen Stern, bis ★5.</string>
     <string name="howitworks_section_inventory_title">Das Bestiarium</string>
     <string name="howitworks_section_inventory_body">Das Pfoten-Symbol 🐾 in der unteren Leiste öffnet deine Sammlung. Dort siehst du die Maskottchen mit Abschluss, die, die dir noch fehlen, und wie viele Tage das aktuelle schon bei dir ist.</string>
     <string name="howitworks_section_important_title">Wichtig</string>
@@ -182,7 +182,7 @@
     <string name="inventory_hero_label">Arten</string>
     <string name="inventory_hero_value">%1$d / %2$d</string>
     <string name="inventory_hero_subtitle_progress">Erreiche Tag 21 mit aktiver Serie, damit ein Maskottchen seinen Abschluss macht.</string>
-    <string name="inventory_hero_subtitle_complete">Du hast alle 5 Arten gesammelt. Neue können sich wiederholen.</string>
+    <string name="inventory_hero_subtitle_complete">Du hast alle 5 Arten gesammelt. Schließe sie erneut ab, um Sterne zu verdienen – bis ★5.</string>
     <string name="inventory_empty_title">Noch kein Maskottchen hat seinen Abschluss gemacht</string>
     <string name="inventory_empty_body">Dein erster Abschluss kommt an Tag 21 einer aktiven Serie.</string>
     <string name="inventory_active_now">Gerade aktiv</string>
@@ -194,8 +194,6 @@
     <string name="inventory_slot_pro_caption">Mit Pro freischalten</string>
     <string name="cd_inventory_slot_locked_pro">%1$s gesperrt. Tippe, um es mit Pro freizuschalten.</string>
     <string name="cd_inventory_slot_locked_pro_generic">Gesperrtes Maskottchen. Tippe, um es mit Pro freizuschalten.</string>
-    <string name="inventory_repeats_singular">Außerdem hat 1 doppeltes Maskottchen seinen Abschluss gemacht.</string>
-    <string name="inventory_repeats_plural">Außerdem haben %1$d doppelte Maskottchen ihren Abschluss gemacht.</string>
 
     <!-- ==================== Onboarding ==================== -->
     <string name="onboarding_p1_title">Basta!</string>
@@ -435,4 +433,15 @@
     <string name="health_protection_off_body">Basta! blockiert keine Reels und Shorts mehr. Tippe, um es wieder einzuschalten.</string>
     <string name="health_breakage_title">Funktioniert Basta! noch?</string>
     <string name="health_breakage_body">Wir haben eine Weile nichts blockiert, obwohl du diese Apps weiter nutzt. Vielleicht hat ein Update die Erkennung kaputt gemacht — öffne Basta!, um es zu prüfen oder zu melden.</string>
+
+    <!-- Mascot stars (re-graduating a collected species) -->
+    <string name="graduation_title_levelup">Dein Maskottchen %1$s steigt auf ★%2$d!</string>
+    <string name="graduation_title_max">Dein Maskottchen %1$s hat die Höchststufe erreicht!</string>
+    <string name="graduation_choose_prompt">Sammlung komplett! Wen möchtest du als Nächstes aufleveln?</string>
+    <string name="graduation_choose_continue">%1$s ausbrüten →</string>
+    <string name="cd_mascot_stars">%1$d von %2$d Sternen</string>
+    <plurals name="inventory_detail_graduations">
+        <item quantity="one">%d-mal abgeschlossen</item>
+        <item quantity="other">%d-mal abgeschlossen</item>
+    </plurals>
 </resources>

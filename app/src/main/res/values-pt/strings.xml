@@ -91,7 +91,7 @@
     <string name="howitworks_section_grows_title">Sua mascote cresce</string>
     <string name="howitworks_section_grows_body">A mascote evolui com você:\n  · Dia 0  →  Ovo\n  · Dia 3  →  Rachando\n  · Dia 8  →  Filhote\n  · Dia 21 →  Adulto</string>
     <string name="howitworks_section_graduation_title">Formatura no dia 21</string>
-    <string name="howitworks_section_graduation_body">Quando você chega ao dia 21, sua mascote se forma: ela é guardada no seu inventário e aparece um novo ovo de outra espécie. São 5 espécies no total (Clássica, Dragão, Tartaruga, Lobo, Coruja). A troca só acontece na formatura — se você romper a sequência antes, continua com a mesma espécie.</string>
+    <string name="howitworks_section_graduation_body">Quando você chega ao dia 21, sua mascote se forma: ela é guardada no seu inventário e aparece um novo ovo de outra espécie. São 5 espécies no total (Clássica, Dragão, Tartaruga, Lobo, Coruja). A troca só acontece na formatura — se você romper a sequência antes, continua com a mesma espécie. Com a coleção completa, você escolhe qual espécie subir: cada nova formatura dá uma estrela a ela, até ★5.</string>
     <string name="howitworks_section_inventory_title">O Bestiário</string>
     <string name="howitworks_section_inventory_body">O ícone de pata 🐾 na barra inferior abre sua coleção. Lá você vê as mascotes que já se formaram, as que ainda faltam e há quantos dias a atual está com você.</string>
     <string name="howitworks_section_important_title">Importante</string>
@@ -185,7 +185,7 @@
     <string name="inventory_hero_label">Espécies</string>
     <string name="inventory_hero_value">%1$d / %2$d</string>
     <string name="inventory_hero_subtitle_progress">Chegue ao dia 21 com a sequência ativa para formar uma mascote.</string>
-    <string name="inventory_hero_subtitle_complete">Você colecionou as 5 espécies. As próximas podem se repetir.</string>
+    <string name="inventory_hero_subtitle_complete">Você colecionou as 5 espécies. Forme-as de novo para ganhar estrelas, até ★5.</string>
     <string name="inventory_empty_title">Nenhuma mascote se formou ainda</string>
     <string name="inventory_empty_body">Sua primeira formatura chega no dia 21 de uma sequência ativa.</string>
     <string name="inventory_active_now">Ativa agora</string>
@@ -197,8 +197,6 @@
     <string name="inventory_slot_pro_caption">Desbloqueie com o Pro</string>
     <string name="cd_inventory_slot_locked_pro">%1$s: bloqueada. Toque para desbloquear com o Pro.</string>
     <string name="cd_inventory_slot_locked_pro_generic">Mascote bloqueada. Toque para desbloquear com o Pro.</string>
-    <string name="inventory_repeats_singular">Você também formou 1 mascote repetida.</string>
-    <string name="inventory_repeats_plural">Você também formou %1$d mascotes repetidas.</string>
 
     <!-- ==================== Onboarding ==================== -->
     <string name="onboarding_p1_title">Basta!</string>
@@ -439,4 +437,16 @@
     <string name="health_protection_off_body">O Basta! não está mais bloqueando Reels e Shorts. Toque para reativar.</string>
     <string name="health_breakage_title">O Basta! ainda está funcionando?</string>
     <string name="health_breakage_body">Não bloqueamos nada há um tempo, embora você continue usando esses apps. Uma atualização pode ter quebrado a detecção — abra o Basta! para verificar ou relatar.</string>
+
+    <!-- Mascot stars (re-graduating a collected species) -->
+    <string name="graduation_title_levelup">%1$s subiu para ★%2$d!</string>
+    <string name="graduation_title_max">%1$s atingiu o nível máximo!</string>
+    <string name="graduation_choose_prompt">Coleção completa! Quem você quer subir de nível agora?</string>
+    <string name="graduation_choose_continue">Chocar %1$s →</string>
+    <string name="cd_mascot_stars">%1$d de %2$d estrelas</string>
+    <plurals name="inventory_detail_graduations" tools:ignore="ImpliedQuantity">
+        <item quantity="one">Formada %d vez</item>
+        <item quantity="many">Formada %d vezes</item>
+        <item quantity="other">Formada %d vezes</item>
+    </plurals>
 </resources>

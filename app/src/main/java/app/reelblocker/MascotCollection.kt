@@ -10,8 +10,9 @@ import java.time.ZoneId
 /**
  * Inventario de mascotas graduadas. Al alcanzar [MascotLevel.ADULT] la mascota
  * actual se archiva aquí y un huevo nuevo emerge con una especie distinta
- * (aleatoria entre las aún no coleccionadas; cuando están las 5, aleatoria del
- * pool completo).
+ * (aleatoria entre las aún no coleccionadas). Con el pool del tier completo, el
+ * usuario elige qué especie repetir y cada repetición le suma una estrella
+ * (ver [stars]).
  *
  * Comparte el mismo SharedPreferences que [Stats] y [Streak].
  */
@@ -23,6 +24,9 @@ object Collection {
     private const val KEY_CURRENT_SPECIES = "current_species"
     private const val KEY_PENDING_GRADUATION = "pending_graduation_from"
     private const val KEY_PENDING_PRO_UNLOCK = "pending_pro_unlock"
+
+    /** Tope visual de estrellas por especie (★5 = nivel máximo). */
+    const val MAX_STARS = 5
 
     data class CollectedMascot(
         val species: MascotSpecies,
@@ -93,7 +97,11 @@ object Collection {
      * especie y devuelve la especie recién archivada. Es una no-op si no
      * hay graduación pendiente.
      */
-    fun consumePendingGraduation(ctx: Context, daysReached: Int): MascotSpecies? {
+    fun consumePendingGraduation(
+        ctx: Context,
+        daysReached: Int,
+        chosenNext: MascotSpecies? = null
+    ): MascotSpecies? {
         val species = pendingGraduation(ctx) ?: return null
 
         // 1) Releer la colección y añadir la mascota graduada EN MEMORIA (permite
@@ -126,7 +134,13 @@ object Collection {
                 MascotSpecies.fromIdOrNull(arr.getJSONObject(i).optString("species"))?.let { add(it) }
             }
         }
-        val selection = selectNextSpecies(collected, justArchived = species, isPro = Premium.isPro(ctx))
+        val isPro = Premium.isPro(ctx)
+        val selection = selectNextSpecies(collected, justArchived = species, isPro = isPro)
+        // Con el pool completo el usuario elige a quién subir de estrellas; la
+        // elección solo se respeta si es una opción válida para su tier.
+        val next = chosenNext
+            ?.takeIf { it in (levelUpChoices(collected, species, isPro) ?: emptyList()) }
+            ?: selection.next
 
         // Romper la racha antes de la escritura final. Es idempotente (no-op si ya
         // está a 0), así que reintentarlo tras un crash es seguro.
@@ -138,7 +152,7 @@ object Collection {
         //    mascota nunca se archiva dos veces.
         val editor = prefs(ctx).edit()
             .putString(KEY_COLLECTION_JSON, arr.toString())
-            .putString(KEY_CURRENT_SPECIES, selection.next.id)
+            .putString(KEY_CURRENT_SPECIES, next.id)
             .remove(KEY_PENDING_GRADUATION)
         if (selection.markPendingProUnlock) {
             editor.putBoolean(KEY_PENDING_PRO_UNLOCK, true)
@@ -148,7 +162,7 @@ object Collection {
 
         // XP de perfil: la graduación es el hito gordo de progresión permanente.
         Profile.addGraduationXp(ctx)
-        Log.d(TAG, "consumePendingGraduation: archivada=${species.id} próxima=${selection.next.id}")
+        Log.d(TAG, "consumePendingGraduation: archivada=${species.id} próxima=${next.id}")
         return species
     }
 
@@ -181,6 +195,50 @@ object Collection {
         }
         return SelectResult(next, markPendingProUnlock = mark)
     }
+
+    /**
+     * Estrellas por especie = número de veces que se ha graduado. La primera
+     * graduación da ★1; cada repetición sube una, hasta [MAX_STARS] (el
+     * contador sigue creciendo, la UI lo acota).
+     */
+    fun stars(ctx: Context): Map<MascotSpecies, Int> = starsFrom(read(ctx))
+
+    internal fun starsFrom(entries: List<CollectedMascot>): Map<MascotSpecies, Int> =
+        entries.groupingBy { it.species }.eachCount()
+
+    /**
+     * Especies entre las que el usuario puede elegir el siguiente huevo tras
+     * graduar [graduated], o null si aún quedan especies por descubrir en su
+     * tier (entonces manda la ruleta). Se llama ANTES de consumir la graduación.
+     */
+    fun levelUpChoices(ctx: Context, graduated: MascotSpecies): List<MascotSpecies>? =
+        levelUpChoices(read(ctx).map { it.species }.toSet(), graduated, Premium.isPro(ctx))
+
+    internal fun levelUpChoices(
+        collected: Set<MascotSpecies>,
+        justArchived: MascotSpecies,
+        isPro: Boolean
+    ): List<MascotSpecies>? {
+        val pool = if (isPro) MascotSpecies.entries.toList() else MascotSpecies.freeSpecies()
+        val afterArchive = collected + justArchived
+        return if (pool.all { it in afterArchive }) pool else null
+    }
+
+    /**
+     * Preselección del selector: la especie con menos estrellas, evitando
+     * repetir la recién graduada si hay empate. [stars] ya incluye la
+     * graduación en curso.
+     */
+    internal fun defaultLevelUpPick(
+        choices: List<MascotSpecies>,
+        stars: Map<MascotSpecies, Int>,
+        justArchived: MascotSpecies
+    ): MascotSpecies =
+        choices.minWith(
+            compareBy<MascotSpecies> { stars[it] ?: 0 }
+                .thenBy { it == justArchived }
+                .thenBy { it.ordinal }
+        )
 
     /** ¿Hay un paywall pendiente por agotar las especies free? */
     fun pendingProUnlock(ctx: Context): Boolean =

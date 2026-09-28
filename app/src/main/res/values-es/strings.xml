@@ -95,7 +95,7 @@
     <string name="howitworks_section_grows_title">Tu mascota crece</string>
     <string name="howitworks_section_grows_body">La mascota evoluciona contigo:\n  · Día 0  →  Huevo\n  · Día 3  →  Se agrieta\n  · Día 8  →  Cría\n  · Día 21 →  Adulta</string>
     <string name="howitworks_section_graduation_title">Graduación a los 21 días</string>
-    <string name="howitworks_section_graduation_body">Cuando llegas al día 21, tu mascota se gradúa: se guarda en tu inventario y aparece un huevo nuevo de otra especie. Hay 5 especies en total (Clásica, Dragón, Tortuga, Lobo, Búho). El reset solo pasa al graduar — si rompes la racha antes, mantienes la misma especie.</string>
+    <string name="howitworks_section_graduation_body">Cuando llegas al día 21, tu mascota se gradúa: se guarda en tu inventario y aparece un huevo nuevo de otra especie. Hay 5 especies en total (Clásica, Dragón, Tortuga, Lobo, Búho). El reset solo pasa al graduar — si rompes la racha antes, mantienes la misma especie. Cuando completas la colección, eliges qué especie subir: cada nueva graduación le da una estrella, hasta ★5.</string>
     <string name="howitworks_section_inventory_title">El Bestiario</string>
     <string name="howitworks_section_inventory_body">El icono de pata 🐾 en la barra inferior abre tu colección. Verás las mascotas que has graduado, las que aún te faltan, y cuántos días lleva la que tienes activa.</string>
     <string name="howitworks_section_important_title">Importante</string>
@@ -190,7 +190,7 @@
     <string name="inventory_hero_label">Especies</string>
     <string name="inventory_hero_value">%1$d / %2$d</string>
     <string name="inventory_hero_subtitle_progress">Llega al día 21 con la racha activa para graduar una mascota.</string>
-    <string name="inventory_hero_subtitle_complete">Has coleccionado las 5 especies. Las nuevas pueden repetirse.</string>
+    <string name="inventory_hero_subtitle_complete">Has coleccionado las 5 especies. Gradúalas otra vez para ganar estrellas, hasta ★5.</string>
     <string name="inventory_empty_title">Aún no has graduado ninguna mascota</string>
     <string name="inventory_empty_body">Tu primera graduación llega al día 21 de racha activa.</string>
     <string name="inventory_active_now">Activa ahora</string>
@@ -202,8 +202,6 @@
     <string name="inventory_slot_pro_caption">Desbloquear con Pro</string>
     <string name="cd_inventory_slot_locked_pro">%1$s bloqueada. Toca para desbloquear con Pro.</string>
     <string name="cd_inventory_slot_locked_pro_generic">Mascota bloqueada. Toca para desbloquear con Pro.</string>
-    <string name="inventory_repeats_singular">También has graduado 1 mascota repetida.</string>
-    <string name="inventory_repeats_plural">También has graduado %1$d mascotas repetidas.</string>
 
     <!-- ==================== Onboarding ==================== -->
     <string name="onboarding_p1_title">Basta!</string>
@@ -445,4 +443,15 @@
     <string name="health_protection_off_body">Basta! ya no está bloqueando Reels ni Shorts. Toca para volver a activarlo.</string>
     <string name="health_breakage_title">¿Sigue funcionando Basta!?</string>
     <string name="health_breakage_body">Llevamos un tiempo sin bloquear nada aunque sigues usando estas apps. Puede que una actualización haya roto la detección — abre Basta! para comprobarlo o avisarnos.</string>
+
+    <!-- Mascot stars (re-graduating a collected species) -->
+    <string name="graduation_title_levelup">¡Tu %1$s sube a ★%2$d!</string>
+    <string name="graduation_title_max">¡Tu %1$s alcanza el nivel máximo!</string>
+    <string name="graduation_choose_prompt">¡Colección completa! ¿A quién quieres subir de nivel ahora?</string>
+    <string name="graduation_choose_continue">Incubar %1$s →</string>
+    <string name="cd_mascot_stars">%1$d de %2$d estrellas</string>
+    <plurals name="inventory_detail_graduations">
+        <item quantity="one">Graduada %d vez</item>
+        <item quantity="other">Graduada %d veces</item>
+    </plurals>
 </resources>

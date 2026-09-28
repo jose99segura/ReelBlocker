@@ -56,6 +56,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -97,6 +98,7 @@ fun InventoryScreen(
         entries.groupBy { it.species }.mapValues { it.value.first() }
     }
     val uniqueCount = firstByMember.size
+    val stars = remember(refreshKey) { Collection.starsFrom(entries) }
     val totalSpecies = MascotSpecies.entries.size
     val currentSpecies = remember(refreshKey) { Collection.currentSpecies(ctx) }
     val streakState = remember(refreshKey) { Streak.current(ctx) }
@@ -135,6 +137,7 @@ fun InventoryScreen(
                 activeLevel = streakState.level,
                 activeDays = streakState.count,
                 firstByMember = firstByMember,
+                stars = stars,
                 isPro = isPro,
                 onProTap = {
                     haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
@@ -146,10 +149,6 @@ fun InventoryScreen(
                 }
             )
 
-            if (entries.size > uniqueCount) {
-                RepeatsHint(repeats = entries.size - uniqueCount)
-            }
-
             Spacer(Modifier.height(24.dp))
         }
     }
@@ -157,6 +156,7 @@ fun InventoryScreen(
     detail?.let { collected ->
         GraduatedMascotSheet(
             collected = collected,
+            stars = stars[collected.species] ?: 1,
             onDismiss = { detail = null }
         )
     }
@@ -208,6 +208,7 @@ private fun Constellation(
     activeLevel: MascotLevel,
     activeDays: Int,
     firstByMember: Map<MascotSpecies, Collection.CollectedMascot>,
+    stars: Map<MascotSpecies, Int>,
     isPro: Boolean,
     onProTap: () -> Unit,
     onCollectedTap: (Collection.CollectedMascot) -> Unit
@@ -269,7 +270,11 @@ private fun Constellation(
         ActiveFeaturedTile(
             species = activeSpecies,
             level = activeLevel,
-            days = activeDays
+            days = activeDays,
+            // En una repetición, la graduación en curso dará la siguiente estrella.
+            nextStar = stars[activeSpecies]
+                ?.takeIf { it < Collection.MAX_STARS }
+                ?.let { it + 1 }
         )
 
         // Tiles satélite — colocados con offset + rotación aleatoria.
@@ -278,6 +283,7 @@ private fun Constellation(
             SatelliteTile(
                 species = p.species,
                 collected = collected,
+                stars = stars[p.species] ?: 0,
                 isPro = isPro,
                 onProTap = onProTap,
                 onCollectedTap = onCollectedTap,
@@ -302,7 +308,8 @@ private data class TilePlacement(
 private fun ActiveFeaturedTile(
     species: MascotSpecies,
     level: MascotLevel,
-    days: Int
+    days: Int,
+    nextStar: Int?
 ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Box(
@@ -333,7 +340,10 @@ private fun ActiveFeaturedTile(
         }
         Spacer(Modifier.height(10.dp))
         Text(
-            text = "$days / ${MascotLevel.ADULT.minDays}",
+            text = if (nextStar != null)
+                "$days / ${MascotLevel.ADULT.minDays}  →  ★$nextStar"
+            else
+                "$days / ${MascotLevel.ADULT.minDays}",
             style = MaterialTheme.typography.labelMedium,
             fontWeight = FontWeight.Bold,
             color = species.accentTint
@@ -345,6 +355,7 @@ private fun ActiveFeaturedTile(
 private fun SatelliteTile(
     species: MascotSpecies,
     collected: Collection.CollectedMascot?,
+    stars: Int,
     isPro: Boolean,
     onProTap: () -> Unit,
     onCollectedTap: (Collection.CollectedMascot) -> Unit,
@@ -395,7 +406,9 @@ private fun SatelliteTile(
                     level = MascotLevel.ADULT,
                     species = species,
                     animate = false,
-                    modifier = Modifier.size(82.dp)
+                    modifier = Modifier
+                        .size(82.dp)
+                        .starAura(stars, species.accentTint)
                 )
                 proLocked -> {
                     MascotCanvas(
@@ -438,6 +451,8 @@ private fun SatelliteTile(
         }
         if (collected != null) {
             Spacer(Modifier.height(6.dp))
+            StarRow(stars = stars, accent = species.accentTint)
+            Spacer(Modifier.height(2.dp))
             Text(
                 text = formatAcquired(collected.acquiredDate),
                 style = MaterialTheme.typography.labelSmall,
@@ -455,22 +470,6 @@ private fun SatelliteTile(
             )
         }
     }
-}
-
-@Composable
-private fun RepeatsHint(repeats: Int) {
-    Text(
-        text = if (repeats == 1)
-            stringResource(R.string.inventory_repeats_singular)
-        else
-            stringResource(R.string.inventory_repeats_plural, repeats),
-        style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 24.dp),
-        textAlign = TextAlign.Center
-    )
 }
 
 private fun formatAcquired(isoDate: String): String {
@@ -494,6 +493,7 @@ private fun formatAcquired(isoDate: String): String {
 @Composable
 private fun GraduatedMascotSheet(
     collected: Collection.CollectedMascot,
+    stars: Int,
     onDismiss: () -> Unit
 ) {
     val ctx = LocalContext.current
@@ -540,11 +540,15 @@ private fun GraduatedMascotSheet(
                     level = MascotLevel.ADULT,
                     species = collected.species,
                     animate = true,
-                    modifier = Modifier.size(126.dp)
+                    modifier = Modifier
+                        .size(126.dp)
+                        .starAura(stars, accent)
                 )
             }
 
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(12.dp))
+            StarRow(stars = stars, accent = accent, starSize = 20.dp)
+            Spacer(Modifier.height(8.dp))
             Text(
                 text = stringResource(collected.species.displayNameRes),
                 style = MaterialTheme.typography.headlineSmall,
@@ -553,7 +557,10 @@ private fun GraduatedMascotSheet(
             )
             Spacer(Modifier.height(4.dp))
             Text(
-                text = stringResource(R.string.inventory_detail_acquired, formatAcquired(collected.acquiredDate)),
+                text = if (stars > 1)
+                    pluralStringResource(R.plurals.inventory_detail_graduations, stars, stars)
+                else
+                    stringResource(R.string.inventory_detail_acquired, formatAcquired(collected.acquiredDate)),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

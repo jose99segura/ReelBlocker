@@ -315,11 +315,17 @@ private fun AppRoot(onResetOnboarding: () -> Unit) {
         // dentro del onContinue, no en HomeScreen.
         pendingGraduation?.let { graduated ->
             val actualDays = Streak.current(ctx).count
+            val starsBefore = remember(graduated) { Collection.stars(ctx) }
+            val newStars = (starsBefore[graduated] ?: 0) + 1
+            val levelUpChoices = remember(graduated) { Collection.levelUpChoices(ctx, graduated) }
             GraduationCelebrationScreen(
                 graduatedSpecies = graduated,
                 daysReached = actualDays,
-                onContinue = {
-                    Collection.consumePendingGraduation(ctx, daysReached = actualDays)
+                newStars = newStars,
+                levelUpChoices = levelUpChoices,
+                starsAfter = starsBefore + (graduated to newStars),
+                onContinue = { chosenNext ->
+                    Collection.consumePendingGraduation(ctx, daysReached = actualDays, chosenNext = chosenNext)
                     pendingGraduation = null
                     // Forzar relectura del Home en sitio: el huevo nuevo entra
                     // animado y la racha baja a 0 sin esperar a un ON_RESUME.

@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ReelBlocker (in-app brand: **Basta!**) is a single-module Android app that detects when the user is inside Instagram Reels or YouTube Shorts and immediately fires the system Back action to leave that surface. By default it does not block the host apps themselves — only the short-video surface inside them. The one exception is the **opt-in Pro "block whole app" toggle** (per app, `Stats.isWholeAppBlocked`): when a user explicitly enables it, the service fires `GLOBAL_ACTION_HOME` on any foreground event from that app, kicking them to the launcher. It is off by default and user-chosen, so the surface-only framing still holds for the default experience.
 
-On top of the core detection, the app has a gamification layer: a daily streak with an evolving mascot, a **Pokédex-style collection** of mascot species unlocked by reaching day 21 of an active streak (where the habit consolidates) (mascot graduates → archived in inventory → new egg of a different species emerges), and full stats. The collection ships with 5 species (Classic, Dragon, Turtle, Wolf, Owl) and is designed to grow over time — new species will be added in future releases as the main "what's new" hook for retention and Pro value.
+On top of the core detection, the app has a gamification layer: a daily streak with an evolving mascot, a **Pokédex-style collection** of mascot species unlocked by reaching day 21 of an active streak (where the habit consolidates) (mascot graduates → archived in inventory → new egg of a different species emerges), **per-species stars** for re-graduating a species once the collection is complete (★1–★5, the long-tail goal after the Pokédex is full), and full stats. The collection ships with 5 species (Classic, Dragon, Turtle, Wolf, Owl) and is designed to grow over time — new species will be added in future releases as the main "what's new" hook for retention and Pro value.
 
 ## Play Store positioning (load-bearing — do not soften)
 
@@ -23,8 +23,8 @@ The flag must be defended in Play Console review with matching listing copy. The
 
 ### Free / Pro split rule (stable across future species additions)
 
-- **Free tier (frozen at 2 base species forever):** core block (Reels + Shorts + TikTok), streak + mascot evolution, **Classic + Turtle** as the only free-collectible species, basic stats (today + 7-day chart + record), tip quotes, Auto Backup.
-- **Pro tier (grows over time):** the remaining 3 v1 species (**Dragon, Wolf, Owl**) plus **every future species added in updates**. Also: 10-min daily break without streak loss, allow Reels from DMs, block Stories, **per-app "block whole app"** (opt-in, fires HOME on any visit — see Project note above), advanced stats, widget. The species list growing over time is the main retention/Pro-value loop — existing Pro buyers get new species free as part of their one-time purchase, which compounds the perceived value of upgrading.
+- **Free tier (frozen at 2 base species forever):** core block (Reels + Shorts + TikTok), streak + mascot evolution, **Classic + Dragon** as the only free-collectible species, basic stats (today + 7-day chart + record), tip quotes, Auto Backup.
+- **Pro tier (grows over time):** the remaining 3 v1 species (**Turtle, Wolf, Owl**) plus **every future species added in updates**. Also: 10-min daily break without streak loss, allow Reels from DMs, block Stories, **per-app "block whole app"** (opt-in, fires HOME on any visit — see Project note above), advanced stats, widget. The species list growing over time is the main retention/Pro-value loop — existing Pro buyers get new species free as part of their one-time purchase, which compounds the perceived value of upgrading.
 - Core block is **never** behind the paywall. Pro is expansion, not extortion. Reviews are downstream of this discipline.
 
 ### Founder Edition (launch lever)
@@ -34,7 +34,7 @@ Any Pro purchase made before `Premium.FOUNDER_CUTOFF_MS` (currently 2027-03-01 0
 The Founder mechanic is the headline call-to-action for the launch marketing push: scarcity is honest (a public, fixed date — not a fake countdown), it rewards early supporters without locking them into anything renewable, and it gives the first social-media wave of users an artifact ("Founder member" badge) to screenshot and share. See memory `project_launch_marketing` for the full launch playbook.
 
 **Future expansions of the Founder identity (deferred, document only):**
-- Exclusive shiny Clásica variant for Founders (requires Canvas drawing work in `MascotSpecies.kt`).
+- Exclusive shiny Clásica variant for Founders (requires a new set of webp sprites + a variant lookup in `MascotSpecies.spriteRes`).
 - Global "Pro #N" rank requires a backend (architecture says no server today); revisit only if there is a clear product reason.
 - Founders-only annual themed packs as a recurring perk.
 
@@ -43,7 +43,7 @@ The Founder mechanic is the headline call-to-action for the launch marketing pus
 - Open in Android Studio and let Gradle sync, then Run on a connected device, **or**:
 - `./gradlew assembleDebug` (use `gradlew.bat` on Windows) to produce an APK under `app/build/outputs/apk/`.
 - Windows toolchain needs `JAVA_HOME` set; the JDK shipped with Android Studio works (`C:\Program Files\Android\Android Studio1\jbr`).
-- No unit/instrumentation tests configured. No lint/format config beyond Android defaults.
+- JVM unit tests for pure logic live in `app/src/test/` (`./gradlew testDebugUnitTest`) — collection/species selection, stars, hint config, package canonicalization, health check. No instrumentation tests. No lint/format config beyond Android defaults.
 - After install: user must manually enable the service at Settings → Accessibility → Basta!. The in-app Onboarding deep-links to that screen.
 - Live logs: `adb logcat -s ReelBlocker.Service ReelBlocker.Streak ReelBlocker.Collection` (tags defined per file).
 
@@ -65,16 +65,17 @@ All persistent state lives in one `SharedPreferences` file (`reelblocker_prefs`)
 
 - **`Stats.kt`** — per-day block counts (Instagram + YouTube split), 30-day rolling history, per-app enable toggles, Pro feature flags, onboarding-done flag.
 - **`Streak.kt`** — daily streak engine. `tick()` increments by 1 if called the day after the last valid date, resets to 1 if a day was skipped, no-ops if same-day. `breakStreak()` zeros the count but preserves the record. On the transition into `MascotLevel.ADULT` (day 21), `tick()` writes a `pending_graduation_from` flag. `shouldBeProtecting(ctx)` enforces the **strict per-app model**: returns true only if accessibility is on AND *all* installed `BLOCKABLE_APPS` are enabled — toggling any app off counts as "stopped protecting" and breaks the streak.
-- **`MascotCollection.kt`** (`object Collection`) — collected-mascot inventory. Reads the pending-graduation flag, archives the mascot, breaks the streak with reason `"graduation"`, picks a next species (random from uncollected; falls back to random-of-all when complete). Exposes `currentSpecies(ctx)`, `read(ctx)`, `pendingGraduation(ctx)`, `consumePendingGraduation(ctx, daysReached)`, `uniqueCount(ctx)`.
+- **`MascotCollection.kt`** (`object Collection`) — collected-mascot inventory. Reads the pending-graduation flag, archives the mascot, breaks the streak with reason `"graduation"`, picks a next species (random from the uncollected species of the user's tier pool). Once that pool is complete, the graduation screen lets the user **choose** which species to hatch next (`levelUpChoices`, preselected by `defaultLevelUpPick`) and passes it as `chosenNext`. **Stars** = number of times a species has graduated (`stars(ctx)` counts duplicates in `collection_json`, no extra storage; display capped at `MAX_STARS` = 5, gold at max). Exposes `currentSpecies(ctx)`, `read(ctx)`, `pendingGraduation(ctx)`, `consumePendingGraduation(ctx, daysReached, chosenNext)`, `stars(ctx)`, `levelUpChoices(ctx, graduated)`, `uniqueCount(ctx)`.
 - **`Premium.kt`** — Play Billing wrapper for the Pro one-time purchase. Caches `is_pro_purchased` in the same prefs so `BlockerService` (separate process) can read it without re-querying Billing.
 - **`Breaks.kt`** — Pro feature. Time-boxed pause of the blocker (`break_end_ms`) with one-per-day quota (`break_consumed_date`). The home subtext switches to a countdown while `millisRemaining(ctx)` is non-null.
 
 **Backup**: `AndroidManifest.xml` declares `allowBackup="true"` plus explicit rules at `res/xml/backup_rules.xml` (Android ≤ 11) and `res/xml/data_extraction_rules.xml` (Android 12+). Both include only `sharedpref/reelblocker_prefs.xml`. Auto Backup ships the user's progress to Google Drive and restores it on reinstall / device migration. No other stores to back up.
 
-### Mascot rendering (Canvas)
+### Mascot rendering (webp sprites)
 
-- **`MascotEvolution.kt`** — the `MascotLevel` enum (Egg=day 0, Cracking=3, Hatchling=8, Adult=21 — graduation point) with palette + `@StringRes displayNameRes`, plus the `MascotCanvas` Composable that draws the mascot on a `Canvas` using primitive shapes (ovals, paths, gradients). Drawing dispatches by species via the species-specific functions in MascotSpecies.kt.
-- **`MascotSpecies.kt`** — the `MascotSpecies` enum (5 entries: CLASICA, DRAGON, TORTUGA, LOBO, BUHO) with `accentTint` + `@StringRes displayNameRes` + per-species drawing functions (`drawDragonBody`, `drawTortugaBody`, `drawLoboBody`, `drawBuhoBody`). The CLASICA species uses the original `drawCreature` flags from MascotEvolution.kt. Egg / Cracking phases share the same primitive across species, tinted by `species.accentTint`.
+- **`MascotEvolution.kt`** — the `MascotLevel` enum (Egg=day 0, Cracking=3, Hatchling=8, Adult=21 — graduation point) with palette + `@StringRes displayNameRes`, plus the `MascotCanvas` Composable, which (despite the name) renders the species' webp sprite with a subtle breathing animation, and optional `sad` (desaturated + tilted) and `silhouetteColor` (blurred Pokédex placeholder) modes. `renderMascotBitmap` renders the same sprite off-composition for the widget and share cards.
+- **`MascotSpecies.kt`** — the `MascotSpecies` enum (5 entries: CLASICA, DRAGON, TORTUGA, LOBO, BUHO) with `accentTint`, `@StringRes displayNameRes`, `tier` (FREE: CLASICA + DRAGON; PRO: the rest) and `spriteRes(level)` mapping each species × level to a 3D-rendered webp in `res/drawable-nodpi/` (`mascot_<id>_<level>.webp`). The sprite is the single source of truth for the art.
+- **`MascotStars.kt`** — `StarRow` (filled/dim stars, gold at max) and `Modifier.starAura` (radial halo behind the sprite that intensifies from ★2 to ★5). The visual reward for re-graduating a species, with no extra art.
 
 ### UI (Compose)
 
@@ -93,7 +94,7 @@ All persistent state lives in one `SharedPreferences` file (`reelblocker_prefs`)
 
 ### Internationalization
 
-The app supports **English (default fallback), Spanish and French** via `res/values/strings.xml` (English), `res/values-es/strings.xml` (Spanish) and `res/values-fr/strings.xml` (French). Every locale must also be listed in `res/xml/locales_config.xml` so it shows up in Android 13+'s per-app language picker. In French, species names are injected as "ta mascotte %s" rather than "ton %s", because possessives are gendered and *Tortue* is feminine. English lives in the unqualified `values/` so any locale Android can't match (French, German, Portuguese…) falls back to English instead of Spanish. Every user-facing string in code uses `stringResource(R.string.xxx)` / `pluralStringResource(R.plurals.xxx)` / `ctx.getString(...)`. Mascot level names and species names are `@StringRes` references on the enum. Rotating tips are a `string-array`. Date formatting respects `Locale.getDefault()` (system locale).
+The app supports **English (default fallback), Spanish, French, German, Italian and Portuguese** via `res/values/strings.xml` (English) and `res/values-{es,fr,de,it,pt}/strings.xml`. Every new string must be added to all six. Every locale must also be listed in `res/xml/locales_config.xml` so it shows up in Android 13+'s per-app language picker. In French, species names are injected as "ta mascotte %s" rather than "ton %s", because possessives are gendered and *Tortue* is feminine. English lives in the unqualified `values/` so any locale Android can't match falls back to English instead of Spanish. Every user-facing string in code uses `stringResource(R.string.xxx)` / `pluralStringResource(R.plurals.xxx)` / `ctx.getString(...)`. Mascot level names and species names are `@StringRes` references on the enum. Rotating tips are a `string-array`. Date formatting respects `Locale.getDefault()` (system locale).
 
 ## Common tasks
 
@@ -111,14 +112,14 @@ The app supports **English (default fallback), Spanish and French** via `res/val
 
 ### Adding a sixth mascot species
 
-1. New enum entry in `MascotSpecies` with `id`, `displayNameRes`, `accentTint`.
-2. New drawing function (e.g. `drawFoxBody`) using the helpers in `MascotSpecies.kt`.
-3. New dispatch branch in `drawMascot` inside `MascotEvolution.kt`.
-4. New `mascot_species_*` key in `values/strings.xml` and `values-en/strings.xml`.
-5. Update the inventory hero subtitle copy if you mention the count.
+1. New enum entry in `MascotSpecies` with `id`, `displayNameRes`, `accentTint`, `tier` (new species are PRO — see the Free/Pro split rule).
+2. Four webp sprites in `res/drawable-nodpi/` (`mascot_<id>_egg|cracking|hatchling|adult.webp`) + a new branch in `MascotSpecies.spriteRes`.
+3. New `mascot_species_*` key in all six `strings.xml` files.
+4. The inventory constellation (`InventoryScreen.kt`) has hand-placed anchors for 4/5 satellites — add anchors for the new count.
+5. Update copy that hard-codes the count ("all 5 species" in `inventory_hero_subtitle_complete`, `howitworks_section_graduation_body`) in every locale.
 
 ### Known limits (architectural — do not "fix")
 
 - Android sandboxing means the Reels/Shorts entry button cannot be hidden without root + Xposed. The app reacts *after* the user enters the surface, so a brief flash is expected.
 - Only works inside native apps configured in `accessibility_config.xml`. Browsers are out of reach.
-- The mascot system uses runtime-drawn primitives — no PNG assets. Adding species costs ~50–100 LOC of Canvas drawing each.
+- Mascot art is pre-rendered webp sprites (4 per species). Adding a species means producing new art, not code; stars/aura are drawn in code so re-graduation needs no extra art.

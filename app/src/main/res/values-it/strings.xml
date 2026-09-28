@@ -91,7 +91,7 @@
     <string name="howitworks_section_grows_title">La tua mascotte cresce</string>
     <string name="howitworks_section_grows_body">La mascotte si evolve con te:\n  · Giorno 0  →  Uovo\n  · Giorno 3  →  Si schiude\n  · Giorno 8  →  Cucciolo\n  · Giorno 21 →  Adulto</string>
     <string name="howitworks_section_graduation_title">Diploma al giorno 21</string>
-    <string name="howitworks_section_graduation_body">Quando arrivi al giorno 21, la tua mascotte si diploma: viene salvata nel tuo inventario e compare un nuovo uovo di un’altra specie. Ci sono 5 specie in tutto (Classica, Drago, Tartaruga, Lupo, Gufo). Il cambio avviene solo al diploma — se interrompi la serie prima, mantieni la stessa specie.</string>
+    <string name="howitworks_section_graduation_body">Quando arrivi al giorno 21, la tua mascotte si diploma: viene salvata nel tuo inventario e compare un nuovo uovo di un’altra specie. Ci sono 5 specie in tutto (Classica, Drago, Tartaruga, Lupo, Gufo). Il cambio avviene solo al diploma — se interrompi la serie prima, mantieni la stessa specie. Quando la collezione è completa, scegli quale specie far salire: ogni nuovo diploma le dà una stella, fino a ★5.</string>
     <string name="howitworks_section_inventory_title">Il Bestiario</string>
     <string name="howitworks_section_inventory_body">L’icona della zampa 🐾 nella barra in basso apre la tua collezione. Vedrai le mascotte diplomate, quelle che ti mancano e da quanti giorni quella attiva è con te.</string>
     <string name="howitworks_section_important_title">Importante</string>
@@ -185,7 +185,7 @@
     <string name="inventory_hero_label">Specie</string>
     <string name="inventory_hero_value">%1$d / %2$d</string>
     <string name="inventory_hero_subtitle_progress">Arriva al giorno 21 con la serie attiva per far diplomare una mascotte.</string>
-    <string name="inventory_hero_subtitle_complete">Hai collezionato tutte e 5 le specie. Le nuove possono ripetersi.</string>
+    <string name="inventory_hero_subtitle_complete">Hai collezionato tutte e 5 le specie. Diplomale di nuovo per guadagnare stelle, fino a ★5.</string>
     <string name="inventory_empty_title">Nessuna mascotte diplomata per ora</string>
     <string name="inventory_empty_body">Il tuo primo diploma arriva al giorno 21 di una serie attiva.</string>
     <string name="inventory_active_now">Attiva ora</string>
@@ -197,8 +197,6 @@
     <string name="inventory_slot_pro_caption">Sblocca con Pro</string>
     <string name="cd_inventory_slot_locked_pro">%1$s: specie bloccata. Tocca per sbloccare con Pro.</string>
     <string name="cd_inventory_slot_locked_pro_generic">Mascotte bloccata. Tocca per sbloccare con Pro.</string>
-    <string name="inventory_repeats_singular">Hai anche diplomato 1 mascotte doppia.</string>
-    <string name="inventory_repeats_plural">Hai anche diplomato %1$d mascotte doppie.</string>
 
     <!-- ==================== Onboarding ==================== -->
     <string name="onboarding_p1_title">Basta!</string>
@@ -439,4 +437,16 @@
     <string name="health_protection_off_body">Basta! non sta più bloccando Reels e Shorts. Tocca per riattivarla.</string>
     <string name="health_breakage_title">Basta! funziona ancora?</string>
     <string name="health_breakage_body">Non blocchiamo nulla da un po’ anche se continui a usare queste app. Un aggiornamento potrebbe aver rotto il rilevamento — apri Basta! per controllare o segnalarlo.</string>
+
+    <!-- Mascot stars (re-graduating a collected species) -->
+    <string name="graduation_title_levelup">La tua mascotte %1$s sale a ★%2$d!</string>
+    <string name="graduation_title_max">La tua mascotte %1$s ha raggiunto il livello massimo!</string>
+    <string name="graduation_choose_prompt">Collezione completa! Chi vuoi far salire di livello?</string>
+    <string name="graduation_choose_continue">Fai schiudere %1$s →</string>
+    <string name="cd_mascot_stars">%1$d stelle su %2$d</string>
+    <plurals name="inventory_detail_graduations" tools:ignore="ImpliedQuantity">
+        <item quantity="one">Diplomata %d volta</item>
+        <item quantity="many">Diplomata %d volte</item>
+        <item quantity="other">Diplomata %d volte</item>
+    </plurals>
 </resources>

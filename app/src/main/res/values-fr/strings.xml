@@ -91,7 +91,7 @@
     <string name="howitworks_section_grows_title">Ta mascotte grandit</string>
     <string name="howitworks_section_grows_body">La mascotte évolue avec toi :\n  · Jour 0  →  Œuf\n  · Jour 3  →  Fêlé\n  · Jour 8  →  Petit\n  · Jour 21 →  Adulte</string>
     <string name="howitworks_section_graduation_title">Diplôme au jour 21</string>
-    <string name="howitworks_section_graduation_body">Quand tu atteins le jour 21, ta mascotte obtient son diplôme : elle est rangée dans ton inventaire et un nouvel œuf d’une autre espèce apparaît. Il y a 5 espèces au total (Classique, Dragon, Tortue, Loup, Hibou). La remise à zéro n’a lieu qu’au diplôme — si tu romps la série avant, tu gardes la même espèce.</string>
+    <string name="howitworks_section_graduation_body">Quand tu atteins le jour 21, ta mascotte obtient son diplôme : elle est rangée dans ton inventaire et un nouvel œuf d’une autre espèce apparaît. Il y a 5 espèces au total (Classique, Dragon, Tortue, Loup, Hibou). La remise à zéro n’a lieu qu’au diplôme — si tu romps la série avant, tu gardes la même espèce. Une fois la collection complète, tu choisis quelle espèce faire monter : chaque nouveau diplôme lui donne une étoile, jusqu’à ★5.</string>
     <string name="howitworks_section_inventory_title">Le Bestiaire</string>
     <string name="howitworks_section_inventory_body">L’icône de patte 🐾 dans la barre du bas ouvre ta collection. Tu y verras les mascottes diplômées, celles qu’il te manque et depuis combien de jours l’actuelle est avec toi.</string>
     <string name="howitworks_section_important_title">Important</string>
@@ -185,7 +185,7 @@
     <string name="inventory_hero_label">Espèces</string>
     <string name="inventory_hero_value">%1$d / %2$d</string>
     <string name="inventory_hero_subtitle_progress">Atteins le jour 21 avec une série active pour qu’une mascotte obtienne son diplôme.</string>
-    <string name="inventory_hero_subtitle_complete">Tu as collectionné les 5 espèces. Les nouvelles peuvent se répéter.</string>
+    <string name="inventory_hero_subtitle_complete">Tu as collectionné les 5 espèces. Fais-les diplômer à nouveau pour gagner des étoiles, jusqu’à ★5.</string>
     <string name="inventory_empty_title">Aucune mascotte diplômée pour l’instant</string>
     <string name="inventory_empty_body">Ton premier diplôme arrive au jour 21 d’une série active.</string>
     <string name="inventory_active_now">Actuellement</string>
@@ -197,8 +197,6 @@
     <string name="inventory_slot_pro_caption">Débloquer avec Pro</string>
     <string name="cd_inventory_slot_locked_pro">%1$s : verrouillé. Touche pour débloquer avec Pro.</string>
     <string name="cd_inventory_slot_locked_pro_generic">Mascotte verrouillée. Touche pour débloquer avec Pro.</string>
-    <string name="inventory_repeats_singular">Tu as aussi diplômé 1 mascotte en double.</string>
-    <string name="inventory_repeats_plural">Tu as aussi diplômé %1$d mascottes en double.</string>
 
     <!-- ==================== Onboarding ==================== -->
     <string name="onboarding_p1_title">Basta!</string>
@@ -439,4 +437,16 @@
     <string name="health_protection_off_body">Basta! ne bloque plus les Reels et les Shorts. Touche pour la réactiver.</string>
     <string name="health_breakage_title">Basta! fonctionne-t-elle encore ?</string>
     <string name="health_breakage_body">Nous n’avons rien bloqué depuis un moment alors que tu continues d’utiliser ces apps. Une mise à jour a peut-être cassé la détection — ouvre Basta! pour vérifier ou le signaler.</string>
+
+    <!-- Mascot stars (re-graduating a collected species) -->
+    <string name="graduation_title_levelup">Ta mascotte %1$s passe à ★%2$d !</string>
+    <string name="graduation_title_max">Ta mascotte %1$s atteint le niveau maximum !</string>
+    <string name="graduation_choose_prompt">Collection complète ! Laquelle veux-tu faire monter de niveau ?</string>
+    <string name="graduation_choose_continue">Faire éclore %1$s →</string>
+    <string name="cd_mascot_stars">%1$d étoiles sur %2$d</string>
+    <plurals name="inventory_detail_graduations" tools:ignore="ImpliedQuantity">
+        <item quantity="one">Diplômée %d fois</item>
+        <item quantity="many">Diplômée %d fois</item>
+        <item quantity="other">Diplômée %d fois</item>
+    </plurals>
 </resources>

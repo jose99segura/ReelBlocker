@@ -2,6 +2,10 @@ package app.reelblocker
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,6 +31,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -59,16 +67,28 @@ import java.util.concurrent.TimeUnit
 fun GraduationCelebrationScreen(
     graduatedSpecies: MascotSpecies,
     daysReached: Int,
-    onContinue: () -> Unit
+    /** Estrellas de [graduatedSpecies] contando esta graduación (1 = primera vez). */
+    newStars: Int,
+    /** Especies elegibles como siguiente huevo, o null si manda la ruleta. */
+    levelUpChoices: List<MascotSpecies>?,
+    /** Estrellas por especie contando esta graduación, para el selector. */
+    starsAfter: Map<MascotSpecies, Int>,
+    onContinue: (chosenNext: MascotSpecies?) -> Unit
 ) {
     val ctx = LocalContext.current
     val haptic = LocalHapticFeedback.current
     val accent = graduatedSpecies.accentTint
     val scope = rememberCoroutineScope()
     var sharing by remember { mutableStateOf(false) }
+    var chosen by remember(levelUpChoices) {
+        mutableStateOf(
+            levelUpChoices?.let { Collection.defaultLevelUpPick(it, starsAfter, graduatedSpecies) }
+        )
+    }
+    val mascotSize = if (levelUpChoices != null) 150.dp else 220.dp
 
     // Back físico = mismo efecto que tap "Continuar" — confirma la celebración.
-    BackHandler { onContinue() }
+    BackHandler { onContinue(chosen) }
 
     val parties = remember(accent) {
         listOf(
@@ -129,22 +149,30 @@ fun GraduationCelebrationScreen(
             ) {
                 Box(
                     modifier = Modifier
-                        .size(220.dp),
+                        .size(mascotSize),
                     contentAlignment = Alignment.Center
                 ) {
                     MascotCanvas(
                         level = MascotLevel.ADULT,
                         species = graduatedSpecies,
                         animate = true,
-                        modifier = Modifier.size(220.dp)
+                        modifier = Modifier
+                            .size(mascotSize)
+                            .starAura(newStars, accent)
                     )
                 }
-                Spacer(Modifier.height(24.dp))
+                Spacer(Modifier.height(12.dp))
+                StarRow(stars = newStars, accent = accent, starSize = 22.dp)
+                Spacer(Modifier.height(16.dp))
+                val speciesName = stringResource(graduatedSpecies.displayNameRes)
                 Text(
-                    text = stringResource(
-                        R.string.graduation_title,
-                        stringResource(graduatedSpecies.displayNameRes)
-                    ),
+                    text = when {
+                        newStars == Collection.MAX_STARS ->
+                            stringResource(R.string.graduation_title_max, speciesName)
+                        newStars in 2 until Collection.MAX_STARS ->
+                            stringResource(R.string.graduation_title_levelup, speciesName, newStars)
+                        else -> stringResource(R.string.graduation_title, speciesName)
+                    },
                     fontSize = 32.sp,
                     lineHeight = 38.sp,
                     fontWeight = FontWeight.SemiBold,
@@ -160,11 +188,26 @@ fun GraduationCelebrationScreen(
                 )
                 Spacer(Modifier.height(6.dp))
                 Text(
-                    text = stringResource(R.string.graduation_body_secondary),
+                    text = if (levelUpChoices != null)
+                        stringResource(R.string.graduation_choose_prompt)
+                    else
+                        stringResource(R.string.graduation_body_secondary),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center
                 )
+                if (levelUpChoices != null) {
+                    Spacer(Modifier.height(14.dp))
+                    LevelUpChooser(
+                        choices = levelUpChoices,
+                        stars = starsAfter,
+                        selected = chosen,
+                        onSelect = {
+                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            chosen = it
+                        }
+                    )
+                }
             }
 
             // Botones
@@ -228,7 +271,7 @@ fun GraduationCelebrationScreen(
                 Button(
                     onClick = {
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        onContinue()
+                        onContinue(chosen)
                     },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -236,8 +279,12 @@ fun GraduationCelebrationScreen(
                     shape = RoundedCornerShape(14.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = accent)
                 ) {
+                    val next = chosen
                     Text(
-                        text = stringResource(R.string.graduation_celebration_continue),
+                        text = if (next != null)
+                            stringResource(R.string.graduation_choose_continue, stringResource(next.displayNameRes))
+                        else
+                            stringResource(R.string.graduation_celebration_continue),
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 16.sp,
                         color = Color.White
@@ -256,3 +303,58 @@ fun GraduationCelebrationScreen(
     }
 }
 
+/**
+ * Selector del siguiente huevo cuando el pool del usuario está completo: cada
+ * especie con sus estrellas actuales; la elegida se resalta con su acento.
+ * Las que ya están a ★5 siguen siendo elegibles.
+ */
+@Composable
+private fun LevelUpChooser(
+    choices: List<MascotSpecies>,
+    stars: Map<MascotSpecies, Int>,
+    selected: MascotSpecies?,
+    onSelect: (MascotSpecies) -> Unit
+) {
+    Row(
+        modifier = Modifier.horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        choices.forEach { species ->
+            val isSelected = species == selected
+            val speciesStars = stars[species] ?: 0
+            val name = stringResource(species.displayNameRes)
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(
+                        if (isSelected) species.accentTint.copy(alpha = 0.18f)
+                        else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+                    )
+                    .border(
+                        width = 2.dp,
+                        color = if (isSelected) species.accentTint else Color.Transparent,
+                        shape = RoundedCornerShape(16.dp)
+                    )
+                    .selectable(
+                        selected = isSelected,
+                        role = Role.RadioButton,
+                        onClick = { onSelect(species) }
+                    )
+                    .semantics { contentDescription = name }
+                    .padding(horizontal = 6.dp, vertical = 8.dp)
+            ) {
+                MascotCanvas(
+                    level = MascotLevel.ADULT,
+                    species = species,
+                    animate = false,
+                    modifier = Modifier
+                        .size(48.dp)
+                        .starAura(speciesStars, species.accentTint)
+                )
+                Spacer(Modifier.height(4.dp))
+                StarRow(stars = speciesStars, accent = species.accentTint, starSize = 9.dp)
+            }
+        }
+    }
+}

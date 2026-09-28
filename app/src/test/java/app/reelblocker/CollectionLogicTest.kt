@@ -172,4 +172,71 @@ class CollectionLogicTest {
         // Si la activa es DRAGON (ciclo virgen), satélite virgen no aporta.
         assertFalse(MascotSpecies.DRAGON in firstByMember)
     }
+
+    // ============================================================
+    //   Estrellas y selector de subida de nivel
+    // ============================================================
+
+    @Test
+    fun estrellas_cuentan_graduaciones_por_especie() {
+        val entries = listOf(
+            Collection.CollectedMascot(MascotSpecies.CLASICA, "2026-01-01", 21),
+            Collection.CollectedMascot(MascotSpecies.DRAGON, "2026-02-01", 21),
+            Collection.CollectedMascot(MascotSpecies.CLASICA, "2026-03-01", 21)
+        )
+        val stars = Collection.starsFrom(entries)
+        assertEquals(2, stars[MascotSpecies.CLASICA])
+        assertEquals(1, stars[MascotSpecies.DRAGON])
+        assertEquals(null, stars[MascotSpecies.LOBO])
+    }
+
+    @Test
+    fun selector_no_aparece_mientras_quedan_especies_por_descubrir() {
+        assertEquals(
+            null,
+            Collection.levelUpChoices(setOf(MascotSpecies.CLASICA), MascotSpecies.CLASICA, isPro = false)
+        )
+        assertEquals(
+            null,
+            Collection.levelUpChoices(
+                setOf(MascotSpecies.CLASICA, MascotSpecies.DRAGON),
+                MascotSpecies.DRAGON,
+                isPro = true
+            )
+        )
+    }
+
+    @Test
+    fun free_con_pool_free_completo_elige_solo_entre_free() {
+        val choices = Collection.levelUpChoices(
+            setOf(MascotSpecies.CLASICA),
+            justArchived = MascotSpecies.DRAGON,
+            isPro = false
+        )
+        assertEquals(MascotSpecies.freeSpecies(), choices)
+    }
+
+    @Test
+    fun pro_con_todo_coleccionado_elige_entre_todas() {
+        val all = MascotSpecies.entries.toSet()
+        val choices = Collection.levelUpChoices(all, MascotSpecies.BUHO, isPro = true)
+        assertEquals(MascotSpecies.entries.toList(), choices)
+    }
+
+    @Test
+    fun preseleccion_es_la_de_menos_estrellas_evitando_la_recien_graduada() {
+        val choices = MascotSpecies.freeSpecies()
+        // Empate a 1: no repetir la recién graduada.
+        val tie = mapOf(MascotSpecies.CLASICA to 1, MascotSpecies.DRAGON to 1)
+        assertNotEquals(
+            MascotSpecies.DRAGON,
+            Collection.defaultLevelUpPick(choices, tie, justArchived = MascotSpecies.DRAGON)
+        )
+        // Menos estrellas manda aunque sea la recién graduada.
+        val uneven = mapOf(MascotSpecies.CLASICA to 3, MascotSpecies.DRAGON to 1)
+        assertEquals(
+            MascotSpecies.DRAGON,
+            Collection.defaultLevelUpPick(choices, uneven, justArchived = MascotSpecies.DRAGON)
+        )
+    }
 }

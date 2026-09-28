@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Debug-only overlay: distinguishes the dev build from the Play install in
+     the launcher and in Settings > Accessibility. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <application
+        android:label="Basta! Dev"
+        tools:replace="android:label">
+
+        <service
+            android:name=".BlockerService"
+            android:label="Basta! Dev"
+            tools:replace="android:label" />
+    </application>
+</manifest>

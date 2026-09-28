@@ -6,7 +6,6 @@ import android.os.SystemClock
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
-import android.widget.Toast
 
 /**
  * Servicio principal. Recibe eventos de Instagram y YouTube, decide si estamos
@@ -113,6 +112,7 @@ class BlockerService : AccessibilityService() {
     }
 
     private var lastActionTime = 0L
+    private val bubble by lazy { BlockBubble(this) }
     private var lastReelsPackage: String? = null
     private var lastReelsExitTime = 0L
     private var displayWidth = 0
@@ -549,7 +549,7 @@ class BlockerService : AccessibilityService() {
         if (ok) {
             Stats.increment(this, pkg)
             HealthCheck.recordBlock(this)
-            Toast.makeText(this, R.string.toast_blocked, Toast.LENGTH_SHORT).show()
+            bubble.show()
         }
     }
 
@@ -570,7 +570,7 @@ class BlockerService : AccessibilityService() {
         if (ok) {
             Stats.increment(this, pkg)
             HealthCheck.recordBlock(this)
-            Toast.makeText(this, R.string.toast_blocked, Toast.LENGTH_SHORT).show()
+            bubble.show()
         }
     }
 
@@ -632,6 +632,7 @@ class BlockerService : AccessibilityService() {
             .putBoolean(KEY_SERVICE_CONNECTED, false)
             .putLong(KEY_SERVICE_DISCONNECTED_MS, SystemClock.elapsedRealtime())
             .apply()
+        bubble.dismiss()
         HealthCheck.notifyProtectionOff(this)
         return super.onUnbind(intent)
     }

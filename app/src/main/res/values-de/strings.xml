@@ -6,6 +6,8 @@
     <string name="service_label">Basta! — Reel Blocker</string>
     <string name="service_description">Assistenz-Tool für Menschen mit ADHS, Angstzuständen oder Schwierigkeiten mit der Selbstkontrolle bei süchtig machenden Kurzvideos. Erkennt, wenn du Instagram Reels oder YouTube Shorts öffnest, und hilft dir, diesen Bereich wieder zu verlassen. Liest nur Bildschirmkennungen, niemals Nachrichteninhalte. Alles bleibt auf deinem Gerät.</string>
     <string name="toast_blocked">Basta!</string>
+    <!-- Block bubble: %1$s = toast_blocked, %2$d = blocks today -->
+    <string name="block_bubble_text">%1$s · %2$d heute</string>
 
     <!-- ==================== Bottom navigation ==================== -->
     <string name="nav_home">Start</string>

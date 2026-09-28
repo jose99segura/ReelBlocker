@@ -6,6 +6,8 @@
     <string name="service_label">Basta! — Reel Blocker</string>
     <string name="service_description">Outil d’assistance pour les personnes atteintes de TDAH, d’anxiété ou ayant des difficultés de maîtrise de soi face aux vidéos courtes addictives. Détecte quand tu entres dans Instagram Reels ou YouTube Shorts et t’aide à sortir de cette section. Lit uniquement les identifiants de l’écran, jamais le contenu des messages. Tout reste sur ton appareil.</string>
     <string name="toast_blocked">Basta!</string>
+    <!-- Block bubble: %1$s = toast_blocked, %2$d = blocks today -->
+    <string name="block_bubble_text">%1$s · %2$d aujourd’hui</string>
 
     <!-- ==================== Bottom navigation ==================== -->
     <string name="nav_home">Accueil</string>
@@ -345,7 +347,7 @@
     <string name="cd_paywall_close">Fermer</string>
 
     <string name="paywall_founder_banner_title">Édition Founder</string>
-    <string name="paywall_founder_banner_body">Le prix passe à %1$s après le %2$s</string>
+    <string name="paywall_founder_banner_body">Le prix passe à %1$s à partir du %2$s</string>
     <string name="settings_app_status_blocking">Bloque les Reels</string>
     <string name="settings_app_status_disabled">Désactivé</string>
     <string name="settings_app_status_show_advanced">Options avancées</string>

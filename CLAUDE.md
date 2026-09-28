@@ -16,7 +16,7 @@ The flag must be defended in Play Console review with matching listing copy. The
 
 ## Monetization model (decided)
 
-- **One-time IAP only**, no subscription. `Premium.FOUNDER_PRICE = "4,99 €"` during the Founder window, `Premium.POST_FOUNDER_PRICE = "6,99 €"` after — `Premium.fallbackPrice()` returns the right one based on `FOUNDER_CUTOFF_MS`. The paywall renders headline, a Founder anchor banner (only during the window — "Price rises to 6,99 € after [date]"), comparison table, privacy promise, and a sticky CTA showing the dynamic Play Billing price (`Premium.priceLabel` with `fallbackPrice()` fallback). No tier selection, no trial.
+- **One-time IAP only**, no subscription. `Premium.FOUNDER_PRICE = "4,99 €"` during the Founder window, `Premium.POST_FOUNDER_PRICE = "8,99 €"` after — `Premium.fallbackPrice()` returns the right one based on `FOUNDER_CUTOFF_MS`. The paywall renders headline, a Founder anchor banner (only during the window — "Price rises to 8,99 € from [date]"), comparison table, privacy promise, and a sticky CTA showing the dynamic Play Billing price (`Premium.priceLabel` with `fallbackPrice()` fallback). No tier selection, no trial.
 - **No ads, ever.** eCPM in ES/LATAM doesn't justify the brand cost; contradicts the manifesto.
 - **Cosmetic IAPs are the planned second monetization layer** (extra mascot species packs at ~2,99€ each, themed: mythological, space, etc.). Not yet built.
 - **Regional pricing** via Play Console is on the roadmap (LATAM lower, Nordics/UK higher) — Play handles auto-conversion but per-country overrides extract more EU value without hurting LATAM conversion.
@@ -29,7 +29,7 @@ The flag must be defended in Play Console review with matching listing copy. The
 
 ### Founder Edition (launch lever)
 
-Any Pro purchase made before `Premium.FOUNDER_CUTOFF_MS` (currently 2027-03-01 00:00 UTC — bump if launch slips) flags the user as a Founder permanently. Settings shows "Miembro Founder" / "Founder member" with a stars icon and "Edición Founder · Pro desde [date]" subtitle instead of the standard "Pro desde [date]". `Premium.purchaseDateMs(ctx)` and `Premium.isFounder(ctx)` are the canonical getters; both backed by `reelblocker_prefs` and stamped exactly once inside `grantPro` on the first successful purchase grant (restores and re-queries don't overwrite).
+Any Pro purchase made before `Premium.FOUNDER_CUTOFF_MS` (currently 2027-01-01 00:00 UTC — bump if launch slips) flags the user as a Founder permanently. Settings shows "Miembro Founder" / "Founder member" with a stars icon and "Edición Founder · Pro desde [date]" subtitle instead of the standard "Pro desde [date]". `Premium.purchaseDateMs(ctx)` and `Premium.isFounder(ctx)` are the canonical getters; both backed by `reelblocker_prefs` and stamped exactly once inside `grantPro` on the first successful purchase grant (restores and re-queries don't overwrite).
 
 The Founder mechanic is the headline call-to-action for the launch marketing push: scarcity is honest (a public, fixed date — not a fake countdown), it rewards early supporters without locking them into anything renewable, and it gives the first social-media wave of users an artifact ("Founder member" badge) to screenshot and share. See memory `project_launch_marketing` for the full launch playbook.
 

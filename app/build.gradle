@@ -47,6 +47,11 @@ android {
     }
 
     buildTypes {
+        debug {
+            // Instala junto a la versión de Play (firma distinta) sin tocar
+            // sus datos. Etiquetas "Dev" en src/debug/AndroidManifest.xml.
+            applicationIdSuffix ".debug"
+        }
         release {
             minifyEnabled true
             shrinkResources true

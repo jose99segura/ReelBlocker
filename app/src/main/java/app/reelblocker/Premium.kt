@@ -63,14 +63,14 @@ object Premium {
      * "Founder · Pro since X" en lugar de "Pro since X"). Crea urgencia
      * legítima al lanzamiento sin truco — la fecha es pública y fija.
      *
-     * 1_790_812_799_000L = 2026-09-30 23:59:59 UTC (Founder hasta septiembre).
-     * Ajustar este valor antes de release si el lanzamiento se mueve.
+     * 1_798_761_600_000L = 2027-01-01 00:00:00 UTC (the price rises from
+     * this instant on). Adjust before release if the launch moves.
      * Sin servidor, esto es lo más honesto que se puede hacer.
      *
      * Verificación rápida del valor:
-     *   [DateTimeOffset]::FromUnixTimeMilliseconds(1790812799000).UtcDateTime
+     *   [DateTimeOffset]::FromUnixTimeMilliseconds(1798761600000).UtcDateTime
      */
-    const val FOUNDER_CUTOFF_MS = 1_790_812_799_000L
+    const val FOUNDER_CUTOFF_MS = 1_798_761_600_000L
 
     /** Estado vivo para Compose. */
     var isProLive by mutableStateOf(false)

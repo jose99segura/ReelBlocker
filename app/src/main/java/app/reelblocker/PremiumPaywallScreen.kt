@@ -402,14 +402,16 @@ private fun StickyCta(
 
 /**
  * Banner de ancla mostrado en el paywall solo durante la ventana Founder.
- * Comunica que el precio actual es promocional ("sube a 8,99€ tras septiembre 2026")
+ * Comunica que el precio actual es promocional ("sube a 8,99€ a partir del 1 ene 2027")
  * sin trucos: la fecha de cutoff es pública y fija en [Premium.FOUNDER_CUTOFF_MS].
  */
 @Composable
 private fun FounderAnchorBanner() {
     val cutoffDate = remember {
+        // Formatted in UTC so the date reads the same everywhere; in the
+        // device zone, western timezones would see the previous day.
         java.time.Instant.ofEpochMilli(Premium.FOUNDER_CUTOFF_MS)
-            .atZone(java.time.ZoneId.systemDefault())
+            .atZone(java.time.ZoneOffset.UTC)
             .toLocalDate()
             .format(
                 java.time.format.DateTimeFormatter

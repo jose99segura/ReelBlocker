@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import org.json.JSONObject
 import java.time.LocalDate
+import java.time.LocalTime
 
 /**
  * Contador persistente con historial diario. Se guarda como JSON en
@@ -18,6 +19,9 @@ object Stats {
     // Contador acumulado que NUNCA se purga (a diferencia del historial de
     // 30 días). Respalda la métrica Pro "bloqueos de por vida".
     private const val KEY_LIFETIME_TOTAL = "lifetime_blocks"
+    // Histograma de por vida por hora del día (24 enteros separados por comas).
+    // Respalda la métrica Pro "hora punta"; no se purga.
+    private const val KEY_HOURLY = "hourly_blocks"
     private const val MAX_HISTORY_DAYS = 30L
 
     fun isOnboardingDone(ctx: Context): Boolean =
@@ -216,9 +220,12 @@ object Stats {
         // crece monotónicamente, ajeno a la purga del historial.
         val prior = if (p.contains(KEY_LIFETIME_TOTAL)) p.getLong(KEY_LIFETIME_TOTAL, 0)
                     else sumTotals(history) - 1   // history ya incluye el +1 de hoy
+        val hourly = readHourly(p)
+        hourly[LocalTime.now().hour]++
         p.edit()
             .putString(KEY_HISTORY, history.toString())
             .putLong(KEY_LIFETIME_TOTAL, prior + 1)
+            .putString(KEY_HOURLY, hourly.joinToString(","))
             .apply()
 
         // XP de perfil: cada bloqueo suma, con tope diario (ver Profile).
@@ -265,6 +272,19 @@ object Stats {
         val seed = sumTotals(loadHistory(p))
         p.edit().putLong(KEY_LIFETIME_TOTAL, seed).apply()
         return seed
+    }
+
+    /**
+     * Bloqueos acumulados por hora del día (índice 0..23, hora local). Solo
+     * cuenta desde que existe el registro horario: no se reconstruye del
+     * historial diario, que no guarda la hora.
+     */
+    fun hourlyBlocks(ctx: Context): IntArray = readHourly(prefs(ctx))
+
+    private fun readHourly(p: SharedPreferences): IntArray {
+        val parts = p.getString(KEY_HOURLY, null)?.split(',')
+        if (parts == null || parts.size != 24) return IntArray(24)
+        return IntArray(24) { parts[it].toIntOrNull() ?: 0 }
     }
 
     /**

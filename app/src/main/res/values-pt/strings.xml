@@ -33,7 +33,19 @@
     <string name="profile_level_dialog_title">Nível %1$d</string>
     <string name="profile_xp_progress">%1$d / %2$d XP</string>
     <string name="profile_xp_to_next">%1$d XP para o Nível %2$d</string>
-    <string name="profile_level_dialog_body">Ganhe XP a cada dia protegido, a cada Reel ou Short bloqueado e a cada formatura de mascote. Seu nível nunca diminui — nem se a sequência se romper.</string>
+    <string name="profile_level_dialog_body">Ganhe XP a cada dia protegido, por cada Reel ou Short bloqueado (até 10 por dia) e a cada formatura de mascote — mais por cada ★ que ela já tiver. A cada 5 níveis você sobe de patente. Seu nível nunca diminui, nem se a sequência se romper.</string>
+    <string name="profile_rank_rookie">Novato</string>
+    <string name="profile_rank_apprentice">Aprendiz</string>
+    <string name="profile_rank_guardian">Guardião</string>
+    <string name="profile_rank_veteran">Veterano</string>
+    <string name="profile_rank_master">Mestre</string>
+    <string name="profile_rank_sage">Sábio</string>
+    <string name="profile_rank_legend">Lenda</string>
+    <string name="profile_next_rank">Próxima patente: %1$s no nível %2$d</string>
+    <string name="profile_level_up_snackbar">Nível %1$d alcançado!</string>
+    <string name="profile_rank_up_label">NOVA PATENTE</string>
+    <string name="profile_rank_up_body">Você chegou ao nível %1$d. Cada dia protegido te trouxe até aqui.</string>
+    <string name="profile_rank_up_action">Continuar</string>
 
     <string name="home_action_accessibility_title">Ative o serviço de acessibilidade</string>
     <string name="home_action_accessibility_body">Sem isso, o Basta! não consegue detectar os Reels. Toque e ative o Basta! na lista.</string>

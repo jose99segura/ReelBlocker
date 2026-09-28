@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.TrendingUp
+import androidx.compose.material.icons.filled.EmojiEvents
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
@@ -34,6 +36,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
@@ -114,6 +117,14 @@ private fun ProfileLevelSheet(
             verticalArrangement = Arrangement.spacedBy(8.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            val rank = Profile.rankForLevel(state.level)
+            Text(
+                text = stringResource(rank.titleRes).uppercase(),
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary,
+                letterSpacing = 3.sp
+            )
             Text(
                 text = stringResource(R.string.profile_level_dialog_title, state.level),
                 style = MaterialTheme.typography.headlineSmall,
@@ -145,6 +156,18 @@ private fun ProfileLevelSheet(
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+            rank.next?.let { next ->
+                Text(
+                    text = stringResource(
+                        R.string.profile_next_rank,
+                        stringResource(next.titleRes),
+                        next.minLevel
+                    ),
+                    style = MaterialTheme.typography.bodySmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
             Text(
                 text = stringResource(R.string.profile_level_dialog_body),
                 style = MaterialTheme.typography.bodySmall,
@@ -159,6 +182,84 @@ private fun ProfileLevelSheet(
                 }
             ) {
                 Text(stringResource(R.string.action_dismiss))
+            }
+        }
+    }
+}
+
+/**
+ * Celebración de subida de rango (cada [Profile.LEVELS_PER_RANK] niveles). Las
+ * subidas normales solo muestran un snackbar; esta es la grande, con el título
+ * nuevo como protagonista.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun RankUpSheet(
+    levelUp: Profile.LevelUp,
+    onDismiss: () -> Unit
+) {
+    val scope = rememberCoroutineScope()
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
+                .padding(bottom = 48.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Icon(
+                imageVector = Icons.Filled.EmojiEvents,
+                contentDescription = null,
+                modifier = Modifier.size(56.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
+            Spacer(Modifier.height(4.dp))
+            Text(
+                text = stringResource(R.string.profile_rank_up_label),
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary,
+                letterSpacing = 3.sp
+            )
+            Text(
+                text = stringResource(levelUp.rank.titleRes),
+                style = MaterialTheme.typography.displaySmall,
+                fontWeight = FontWeight.Black,
+                textAlign = TextAlign.Center
+            )
+            Text(
+                text = stringResource(R.string.profile_rank_up_body, levelUp.toLevel),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center
+            )
+            levelUp.rank.next?.let { next ->
+                Text(
+                    text = stringResource(
+                        R.string.profile_next_rank,
+                        stringResource(next.titleRes),
+                        next.minLevel
+                    ),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center
+                )
+            }
+            Spacer(Modifier.height(16.dp))
+            Button(
+                onClick = {
+                    scope.launch { sheetState.hide() }.invokeOnCompletion {
+                        if (!sheetState.isVisible) onDismiss()
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(stringResource(R.string.profile_rank_up_action))
             }
         }
     }

@@ -161,7 +161,10 @@ object Collection {
         editor.apply()
 
         // XP de perfil: la graduación es el hito gordo de progresión permanente.
-        Profile.addGraduationXp(ctx)
+        val starsAfter = (0 until arr.length()).count {
+            arr.getJSONObject(it).optString("species") == species.id
+        }
+        Profile.addGraduationXp(ctx, starsAfter)
         Log.d(TAG, "consumePendingGraduation: archivada=${species.id} próxima=${next.id}")
         return species
     }

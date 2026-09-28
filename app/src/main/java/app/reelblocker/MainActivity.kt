@@ -64,6 +64,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -213,6 +215,10 @@ private fun AppRoot(onResetOnboarding: () -> Unit) {
     var homeRefresh by remember { mutableIntStateOf(0) }
     // Estado de "desactivación externa" para el diálogo post-facto.
     var externalDisableInfo by remember { mutableStateOf<ExternalDisableInfo?>(null) }
+    // Subida de nivel de perfil pendiente de celebrar. Se evalúa en ON_RESUME y
+    // tras consumir una graduación, nunca a la vez que la ceremonia del día 21.
+    var levelUp by remember { mutableStateOf<Profile.LevelUp?>(null) }
+    val snackbarHostState = remember { SnackbarHostState() }
 
     // ── Lógica de racha / protección (UNIVERSAL, no depende del tab activo) ──
     DisposableEffect(lifecycleOwner) {
@@ -235,6 +241,7 @@ private fun AppRoot(onResetOnboarding: () -> Unit) {
                 }
                 Streak.setProtectingSeen(ctx, nowProtecting)
                 pendingGraduation = Collection.pendingGraduation(ctx)
+                if (pendingGraduation == null) levelUp = Profile.pendingLevelUp(ctx)
                 StreakWidget.refresh(ctx)
             }
         }
@@ -251,12 +258,22 @@ private fun AppRoot(onResetOnboarding: () -> Unit) {
         }
     }
 
+    // Subidas normales → snackbar discreto; las de rango → RankUpSheet (abajo).
+    LaunchedEffect(levelUp) {
+        val lu = levelUp ?: return@LaunchedEffect
+        if (lu.isRankUp) return@LaunchedEffect
+        Profile.markLevelSeen(ctx, lu.toLevel)
+        snackbarHostState.showSnackbar(ctx.getString(R.string.profile_level_up_snackbar, lu.toLevel))
+        levelUp = null
+    }
+
     BackHandler(enabled = currentScreen != Screen.Home && !showPaywall) {
         currentScreen = Screen.Home
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
+            snackbarHost = { SnackbarHost(snackbarHostState) },
             bottomBar = {
                 BottomNavBar(
                     current = currentScreen,
@@ -327,6 +344,8 @@ private fun AppRoot(onResetOnboarding: () -> Unit) {
                 onContinue = { chosenNext ->
                     Collection.consumePendingGraduation(ctx, daysReached = actualDays, chosenNext = chosenNext)
                     pendingGraduation = null
+                    // La graduación suma XP gordo: suele cruzar un nivel.
+                    levelUp = Profile.pendingLevelUp(ctx)
                     // Forzar relectura del Home en sitio: el huevo nuevo entra
                     // animado y la racha baja a 0 sin esperar a un ON_RESUME.
                     homeRefresh++
@@ -342,6 +361,17 @@ private fun AppRoot(onResetOnboarding: () -> Unit) {
                             showPaywall = true
                         }
                     }
+                }
+            )
+        }
+
+        // Subida de rango: espera a que no haya ceremonia ni paywall delante.
+        levelUp?.takeIf { it.isRankUp && pendingGraduation == null && !showPaywall }?.let { lu ->
+            RankUpSheet(
+                levelUp = lu,
+                onDismiss = {
+                    Profile.markLevelSeen(ctx, lu.toLevel)
+                    levelUp = null
                 }
             )
         }

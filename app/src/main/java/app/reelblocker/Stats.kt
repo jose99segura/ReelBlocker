@@ -221,8 +221,8 @@ object Stats {
             .putLong(KEY_LIFETIME_TOTAL, prior + 1)
             .apply()
 
-        // XP de perfil: cada bloqueo suma (capa de progresión permanente).
-        Profile.addBlockXp(ctx)
+        // XP de perfil: cada bloqueo suma, con tope diario (ver Profile).
+        Profile.addBlockXp(ctx, blocksToday = entry.optInt("t"))
     }
 
     /** Contadores del dia de hoy. */

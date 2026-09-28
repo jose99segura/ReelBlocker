@@ -33,7 +33,19 @@
     <string name="profile_level_dialog_title">Level %1$d</string>
     <string name="profile_xp_progress">%1$d / %2$d XP</string>
     <string name="profile_xp_to_next">%1$d XP to Level %2$d</string>
-    <string name="profile_level_dialog_body">Earn XP every day you stay protected, every Reel or Short blocked, and each time a mascot graduates. Your level never goes down — not even if your streak breaks.</string>
+    <string name="profile_level_dialog_body">Earn XP every day you stay protected, for Reels or Shorts blocked (up to 10 a day) and each time a mascot graduates — more for every ★ it already has. Every 5 levels you earn a new rank. Your level never goes down, not even if your streak breaks.</string>
+    <string name="profile_rank_rookie">Rookie</string>
+    <string name="profile_rank_apprentice">Apprentice</string>
+    <string name="profile_rank_guardian">Guardian</string>
+    <string name="profile_rank_veteran">Veteran</string>
+    <string name="profile_rank_master">Master</string>
+    <string name="profile_rank_sage">Sage</string>
+    <string name="profile_rank_legend">Legend</string>
+    <string name="profile_next_rank">Next rank: %1$s at Level %2$d</string>
+    <string name="profile_level_up_snackbar">Level %1$d reached!</string>
+    <string name="profile_rank_up_label">NEW RANK</string>
+    <string name="profile_rank_up_body">You reached Level %1$d. Every protected day brought you here.</string>
+    <string name="profile_rank_up_action">Keep going</string>
 
     <string name="home_action_accessibility_title">Turn on the accessibility service</string>
     <string name="home_action_accessibility_body">Without this, Basta! can\'t detect Reels. Tap and enable Basta! in the list.</string>

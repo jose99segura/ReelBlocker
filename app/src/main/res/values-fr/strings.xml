@@ -33,7 +33,19 @@
     <string name="profile_level_dialog_title">Niveau %1$d</string>
     <string name="profile_xp_progress">%1$d / %2$d XP</string>
     <string name="profile_xp_to_next">%1$d XP avant le niveau %2$d</string>
-    <string name="profile_level_dialog_body">Gagne de l’XP chaque jour où tu restes protégé, pour chaque Reel ou Short bloqué et chaque fois qu’une mascotte obtient son diplôme. Ton niveau ne baisse jamais — même si ta série est rompue.</string>
+    <string name="profile_level_dialog_body">Gagne de l’XP chaque jour où tu restes protégé, pour chaque Reel ou Short bloqué (jusqu’à 10 par jour) et chaque fois qu’une mascotte obtient son diplôme — davantage pour chaque ★ qu’elle a déjà. Tous les 5 niveaux, tu montes en rang. Ton niveau ne baisse jamais, même si ta série est rompue.</string>
+    <string name="profile_rank_rookie">Novice</string>
+    <string name="profile_rank_apprentice">Apprenti</string>
+    <string name="profile_rank_guardian">Gardien</string>
+    <string name="profile_rank_veteran">Vétéran</string>
+    <string name="profile_rank_master">Maître</string>
+    <string name="profile_rank_sage">Sage</string>
+    <string name="profile_rank_legend">Légende</string>
+    <string name="profile_next_rank">Rang suivant : %1$s au niveau %2$d</string>
+    <string name="profile_level_up_snackbar">Niveau %1$d atteint !</string>
+    <string name="profile_rank_up_label">NOUVEAU RANG</string>
+    <string name="profile_rank_up_body">Tu as atteint le niveau %1$d. Chaque jour protégé t’a mené jusqu’ici.</string>
+    <string name="profile_rank_up_action">Continuer</string>
 
     <string name="home_action_accessibility_title">Active le service d’accessibilité</string>
     <string name="home_action_accessibility_body">Sans lui, Basta! ne peut pas détecter les Reels. Touche ici et active Basta! dans la liste.</string>

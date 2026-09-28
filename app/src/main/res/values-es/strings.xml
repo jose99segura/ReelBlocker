@@ -34,7 +34,19 @@
     <string name="profile_level_dialog_title">Nivel %1$d</string>
     <string name="profile_xp_progress">%1$d / %2$d XP</string>
     <string name="profile_xp_to_next">%1$d XP para el Nivel %2$d</string>
-    <string name="profile_level_dialog_body">Ganas XP cada día que sigues protegido, cada Reel o Short bloqueado y cada vez que una mascota se gradúa. Tu nivel nunca baja, ni aunque rompas la racha.</string>
+    <string name="profile_level_dialog_body">Ganas XP cada día que sigues protegido, por cada Reel o Short bloqueado (hasta 10 al día) y cada vez que una mascota se gradúa — más cuantas más ★ tenga ya. Cada 5 niveles subes de rango. Tu nivel nunca baja, ni aunque rompas la racha.</string>
+    <string name="profile_rank_rookie">Novato</string>
+    <string name="profile_rank_apprentice">Aprendiz</string>
+    <string name="profile_rank_guardian">Guardián</string>
+    <string name="profile_rank_veteran">Veterano</string>
+    <string name="profile_rank_master">Maestro</string>
+    <string name="profile_rank_sage">Sabio</string>
+    <string name="profile_rank_legend">Leyenda</string>
+    <string name="profile_next_rank">Siguiente rango: %1$s en el Nivel %2$d</string>
+    <string name="profile_level_up_snackbar">¡Nivel %1$d alcanzado!</string>
+    <string name="profile_rank_up_label">NUEVO RANGO</string>
+    <string name="profile_rank_up_body">Has llegado al Nivel %1$d. Cada día protegido te ha traído hasta aquí.</string>
+    <string name="profile_rank_up_action">Seguir así</string>
 
     <!-- Action-required cards in home -->
     <string name="home_action_accessibility_title">Activa el servicio de accesibilidad</string>

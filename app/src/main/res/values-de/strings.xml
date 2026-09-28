@@ -33,7 +33,19 @@
     <string name="profile_level_dialog_title">Level %1$d</string>
     <string name="profile_xp_progress">%1$d / %2$d XP</string>
     <string name="profile_xp_to_next">%1$d XP bis Level %2$d</string>
-    <string name="profile_level_dialog_body">Du sammelst XP für jeden Tag, an dem du geschützt bleibst, für jedes blockierte Reel oder Short und jedes Mal, wenn ein Maskottchen seinen Abschluss macht. Dein Level sinkt nie — nicht mal, wenn deine Serie reißt.</string>
+    <string name="profile_level_dialog_body">Du sammelst XP für jeden Tag, an dem du geschützt bleibst, für blockierte Reels oder Shorts (bis zu 10 pro Tag) und jedes Mal, wenn ein Maskottchen seinen Abschluss macht — mehr für jeden ★, den es schon hat. Alle 5 Level steigst du im Rang auf. Dein Level sinkt nie, nicht mal, wenn deine Serie reißt.</string>
+    <string name="profile_rank_rookie">Neuling</string>
+    <string name="profile_rank_apprentice">Lehrling</string>
+    <string name="profile_rank_guardian">Wächter</string>
+    <string name="profile_rank_veteran">Veteran</string>
+    <string name="profile_rank_master">Meister</string>
+    <string name="profile_rank_sage">Weiser</string>
+    <string name="profile_rank_legend">Legende</string>
+    <string name="profile_next_rank">Nächster Rang: %1$s ab Level %2$d</string>
+    <string name="profile_level_up_snackbar">Level %1$d erreicht!</string>
+    <string name="profile_rank_up_label">NEUER RANG</string>
+    <string name="profile_rank_up_body">Du hast Level %1$d erreicht. Jeder geschützte Tag hat dich hierher gebracht.</string>
+    <string name="profile_rank_up_action">Weiter so</string>
 
     <string name="home_action_accessibility_title">Bedienungshilfe aktivieren</string>
     <string name="home_action_accessibility_body">Ohne sie kann Basta! keine Reels erkennen. Tippe hier und aktiviere Basta! in der Liste.</string>

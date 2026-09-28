@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    * { margin: 0; padding: 0; }
+    body { background: #000; width: 1024px; height: 500px; overflow: hidden; }
+    canvas { display: block; }
+  </style>
+</head>
+<body>
+<canvas id="c" width="1024" height="500"></canvas>
+<script>
+const cv = document.getElementById('c');
+const g = cv.getContext('2d');
+const W = 1024, H = 500;
+
+// ── Background ──────────────────────────────────────────────────────────────
+const bg = g.createLinearGradient(0, 0, W, H);
+bg.addColorStop(0, '#0b0617');
+bg.addColorStop(1, '#190d2f');
+g.fillStyle = bg;
+g.fillRect(0, 0, W, H);
+
+// Ambient glow center-right
+const amb = g.createRadialGradient(680, 240, 30, 680, 240, 360);
+amb.addColorStop(0, 'rgba(120, 40, 200, 0.14)');
+amb.addColorStop(1, 'rgba(0,0,0,0)');
+g.fillStyle = amb;
+g.fillRect(0, 0, W, H);
+
+// ── Left brand ──────────────────────────────────────────────────────────────
+g.save();
+g.font = 'bold 54px "Segoe UI", system-ui, sans-serif';
+g.fillStyle = '#ffffff';
+g.fillText('Basta!', 46, 108);
+
+// Purple accent dot
+const bw = g.measureText('Basta!').width;
+g.fillStyle = '#a855f7';
+g.beginPath(); g.arc(46 + bw + 11, 90, 7, 0, Math.PI * 2); g.fill();
+
+g.font = '500 19px "Segoe UI", system-ui';
+g.fillStyle = 'rgba(255,255,255,0.72)';
+g.fillText('Tu mascota evoluciona', 46, 148);
+g.fillText('contigo cada día.', 46, 172);
+
+g.font = '14px "Segoe UI", system-ui';
+g.fillStyle = 'rgba(255,255,255,0.42)';
+g.fillText('Mantén la racha activa.', 46, 218);
+g.fillText('Llega al día 21 y graduala.', 46, 240);
+g.fillText('Colecciona las 5 especies.', 46, 262);
+
+// Vertical separator
+g.strokeStyle = 'rgba(168, 85, 247, 0.22)';
+g.lineWidth = 1;
+g.beginPath(); g.moveTo(265, 48); g.lineTo(265, 452); g.stroke();
+g.restore();
+
+// ── Timeline baseline ───────────────────────────────────────────────────────
+const lineY = 390;
+g.save();
+g.strokeStyle = 'rgba(168, 85, 247, 0.3)';
+g.lineWidth = 1.5;
+g.setLineDash([5, 6]);
+g.beginPath(); g.moveTo(318, lineY); g.lineTo(990, lineY); g.stroke();
+g.setLineDash([]);
+g.restore();
+
+// ── Helpers ─────────────────────────────────────────────────────────────────
+function eggPath(g, cx, cy, w, h) {
+  g.beginPath();
+  g.moveTo(cx, cy - h);
+  g.bezierCurveTo(cx + w * 0.62, cy - h * 0.78, cx + w, cy - h * 0.08, cx + w, cy + h * 0.38);
+  g.bezierCurveTo(cx + w, cy + h, cx - w, cy + h, cx - w, cy + h * 0.38);
+  g.bezierCurveTo(cx - w, cy - h * 0.08, cx - w * 0.62, cy - h * 0.78, cx, cy - h);
+  g.closePath();
+}
+
+// ── Stage definitions ───────────────────────────────────────────────────────
+const CY = 238; // vertical center of illustrations
+const stages = [
+  { x: 362, day: 'DÍA 0',  label: 'Huevo',    type: 'egg'      },
+  { x: 542, day: 'DÍA 3',  label: 'Grietas',  type: 'cracking' },
+  { x: 722, day: 'DÍA 8',  label: 'Eclosión', type: 'hatching' },
+  { x: 912, day: 'DÍA 21', label: 'Adulto',   type: 'adult'    },
+];
+
+// ── Draw each stage ─────────────────────────────────────────────────────────
+stages.forEach((s, i) => {
+  const { x, day, label, type } = s;
+  const isAdult = type === 'adult';
+  const EW = 44, EH = 58;
+
+  // -- Timeline dot
+  g.save();
+  if (isAdult) {
+    const dg = g.createRadialGradient(x, lineY, 0, x, lineY, 8);
+    dg.addColorStop(0, '#d8b4fe'); dg.addColorStop(1, '#7c3aed');
+    g.fillStyle = dg;
+    g.beginPath(); g.arc(x, lineY, 7, 0, Math.PI * 2); g.fill();
+  } else {
+    g.fillStyle = 'rgba(168, 85, 247, 0.55)';
+    g.beginPath(); g.arc(x, lineY, 4, 0, Math.PI * 2); g.fill();
+  }
+  g.restore();
+
+  // -- Day label above line
+  g.save();
+  g.textAlign = 'center';
+  if (isAdult) {
+    const lg = g.createLinearGradient(x - 42, 0, x + 42, 0);
+    lg.addColorStop(0, '#7c3aed'); lg.addColorStop(1, '#a855f7');
+    g.fillStyle = lg;
+    g.beginPath(); g.roundRect(x - 40, lineY - 30, 80, 22, 11); g.fill();
+    g.font = 'bold 11px "Segoe UI", system-ui';
+    g.fillStyle = '#fff';
+    g.fillText(day, x, lineY - 14);
+  } else {
+    g.font = 'bold 11px "Segoe UI", system-ui';
+    g.fillStyle = 'rgba(180, 100, 255, 0.9)';
+    g.fillText(day, x, lineY - 12);
+  }
+
+  // -- Label below line
+  g.font = (isAdult ? '600' : '500') + ' 13px "Segoe UI", system-ui';
+  g.fillStyle = isAdult ? '#c084fc' : 'rgba(255,255,255,0.52)';
+  g.fillText(label, x, lineY + 24);
+  g.restore();
+
+  // -- Arrow between stages
+  if (i < stages.length - 1) {
+    const nx = stages[i + 1].x;
+    const ax = (x + nx) / 2;
+    g.save();
+    g.font = '22px "Segoe UI"';
+    g.fillStyle = 'rgba(168, 85, 247, 0.38)';
+    g.textAlign = 'center';
+    g.fillText('→', ax, CY + 8);
+    g.restore();
+  }
+
+  // ── Illustrations ──────────────────────────────────────────────────────────
+  g.save();
+
+  // ---- EGG ---------------------------------------------------------------
+  if (type === 'egg') {
+    // soft halo
+    const hl = g.createRadialGradient(x, CY, 5, x, CY, 72);
+    hl.addColorStop(0, 'rgba(220,195,155,0.07)'); hl.addColorStop(1, 'rgba(0,0,0,0)');
+    g.fillStyle = hl; g.fillRect(x - 90, CY - 90, 180, 180);
+
+    // egg fill
+    const eg = g.createRadialGradient(x - EW * .22, CY - EH * .32, 4, x, CY, EW * 1.6);
+    eg.addColorStop(0, '#f7eddb'); eg.addColorStop(0.55, '#e6d3b4'); eg.addColorStop(1, '#c8a07a');
+    g.fillStyle = eg;
+    eggPath(g, x, CY, EW, EH); g.fill();
+
+    // specks
+    g.fillStyle = 'rgba(160,120,70,0.22)';
+    [[x+12, CY-22,2],[x-18,CY+15,1.5],[x+5,CY+30,1.8],[x-8,CY-40,1.2]].forEach(([sx,sy,r]) => {
+      g.beginPath(); g.arc(sx,sy,r,0,Math.PI*2); g.fill();
+    });
+
+    // shine
+    g.fillStyle = 'rgba(255,255,255,0.28)';
+    g.beginPath(); g.ellipse(x - EW*.18, CY - EH*.42, EW*.2, EH*.14, -0.3, 0, Math.PI * 2); g.fill();
+
+    // tiny stars
+    [[x+58,CY-22,3],[x-62,CY+12,2],[x+44,CY+38,2]].forEach(([sx,sy,sr]) => {
+      g.fillStyle = 'rgba(200,165,255,0.35)';
+      g.beginPath(); g.arc(sx,sy,sr,0,Math.PI*2); g.fill();
+    });
+  }
+
+  // ---- CRACKING ----------------------------------------------------------
+  else if (type === 'cracking') {
+    // inner glow aura
+    const ig = g.createRadialGradient(x, CY - 8, 4, x, CY - 8, 68);
+    ig.addColorStop(0, 'rgba(190, 100, 255, 0.28)'); ig.addColorStop(1, 'rgba(0,0,0,0)');
+    g.fillStyle = ig; g.fillRect(x - 90, CY - 90, 180, 180);
+
+    // egg fill (slightly warm)
+    const eg2 = g.createRadialGradient(x - EW*.2, CY - EH*.3, 4, x, CY, EW * 1.5);
+    eg2.addColorStop(0, '#f2e5cc'); eg2.addColorStop(1, '#c09668');
+    g.fillStyle = eg2;
+    eggPath(g, x, CY, EW, EH); g.fill();
+
+    // purple glow seeping through cracks (clip to egg)
+    g.save();
+    eggPath(g, x, CY, EW, EH); g.clip();
+    const cg = g.createRadialGradient(x, CY - 6, 2, x, CY - 6, 34);
+    cg.addColorStop(0, 'rgba(210, 110, 255, 0.92)'); cg.addColorStop(1, 'rgba(0,0,0,0)');
+    g.fillStyle = cg; g.fillRect(x - 55, CY - 55, 110, 110);
+    g.restore();
+
+    // crack lines
+    g.strokeStyle = 'rgba(60, 22, 14, 0.72)';
+    g.lineWidth = 1.6; g.lineCap = 'round';
+    g.beginPath();
+    g.moveTo(x - EW + 4, CY - 6);
+    g.lineTo(x - 12, CY - 9); g.lineTo(x + 5, CY - 20);
+    g.lineTo(x + 16, CY - 13); g.lineTo(x + EW - 3, CY - 7);
+    g.stroke();
+    g.beginPath(); g.moveTo(x + 5, CY - 20); g.lineTo(x - 4, CY - 44); g.stroke();
+    g.beginPath(); g.moveTo(x - 12, CY - 9); g.lineTo(x - 22, CY - 28); g.stroke();
+    g.beginPath(); g.moveTo(x + 16, CY - 13); g.lineTo(x + 24, CY - 32); g.stroke();
+
+    // vibration sparks
+    [[x+60,CY-32],[x-62,CY+8],[x+48,CY+32],[x-52,CY-26]].forEach(([px,py]) => {
+      g.strokeStyle = 'rgba(190, 100, 255, 0.55)';
+      g.lineWidth = 1.5;
+      g.beginPath(); g.moveTo(px-5,py); g.lineTo(px+5,py); g.stroke();
+      g.beginPath(); g.moveTo(px,py-5); g.lineTo(px,py+5); g.stroke();
+    });
+  }
+
+  // ---- HATCHING ----------------------------------------------------------
+  else if (type === 'hatching') {
+    // glow
+    const ha = g.createRadialGradient(x, CY, 12, x, CY, 88);
+    ha.addColorStop(0, 'rgba(150, 80, 255, 0.22)'); ha.addColorStop(1, 'rgba(0,0,0,0)');
+    g.fillStyle = ha; g.fillRect(x - 110, CY - 110, 220, 220);
+
+    // bottom egg half (clipped)
+    g.save();
+    g.beginPath(); g.rect(x - 60, CY + 4, 120, 120); g.clip();
+    const eg3 = g.createRadialGradient(x, CY, 5, x, CY, 62);
+    eg3.addColorStop(0, '#ede0c8'); eg3.addColorStop(1, '#c4a070');
+    g.fillStyle = eg3;
+    eggPath(g, x, CY, EW * 1.12, EH * 1.08); g.fill();
+    g.restore();
+
+    // jagged broken edge
+    g.strokeStyle = '#9c7a50'; g.lineWidth = 2; g.lineCap = 'round'; g.lineJoin = 'round';
+    g.beginPath();
+    g.moveTo(x - EW * 1.08, CY + 6);
+    g.lineTo(x - EW * .72, CY - 10); g.lineTo(x - EW * .38, CY + 4);
+    g.lineTo(x - EW * .08, CY - 14); g.lineTo(x + EW * .2, CY - 4);
+    g.lineTo(x + EW * .52, CY - 16); g.lineTo(x + EW * .8, CY - 2);
+    g.lineTo(x + EW * 1.08, CY + 6);
+    g.stroke();
+
+    // creature emerging — head/upper body
+    const hy = CY - 22;
+    const bodyG = g.createRadialGradient(x - 14, hy - 8, 6, x + 8, hy + 14, 36);
+    bodyG.addColorStop(0, '#b470ff'); bodyG.addColorStop(1, '#6d28d9');
+    g.fillStyle = bodyG;
+    g.beginPath(); g.ellipse(x, hy, 27, 31, 0, 0, Math.PI * 2); g.fill();
+
+    // small wings peeking
+    g.fillStyle = 'rgba(88, 28, 180, 0.8)';
+    g.beginPath(); g.moveTo(x-27,hy+4); g.bezierCurveTo(x-60,hy-14,x-62,hy+22,x-38,hy+38);
+    g.bezierCurveTo(x-30,hy+30,x-24,hy+20,x-20,hy+12); g.closePath(); g.fill();
+    g.beginPath(); g.moveTo(x+24,hy+6); g.bezierCurveTo(x+58,hy-10,x+58,hy+24,x+35,hy+38);
+    g.bezierCurveTo(x+28,hy+30,x+22,hy+20,x+18,hy+12); g.closePath(); g.fill();
+
+    // ear nubs
+    g.fillStyle = '#5b21b6';
+    g.beginPath(); g.moveTo(x-18,hy-24); g.lineTo(x-26,hy-46); g.lineTo(x-8,hy-26); g.closePath(); g.fill();
+    g.beginPath(); g.moveTo(x+10,hy-24); g.lineTo(x+18,hy-46); g.lineTo(x+2,hy-26); g.closePath(); g.fill();
+
+    // eyes (surprised, wide)
+    g.fillStyle = '#fff';
+    g.beginPath(); g.ellipse(x-11,hy-6,9,11,0,0,Math.PI*2); g.fill();
+    g.beginPath(); g.ellipse(x+9,hy-6,9,11,0,0,Math.PI*2); g.fill();
+    g.fillStyle = '#3b0764';
+    g.beginPath(); g.ellipse(x-10,hy-4,5,7,0,0,Math.PI*2); g.fill();
+    g.beginPath(); g.ellipse(x+10,hy-4,5,7,0,0,Math.PI*2); g.fill();
+    g.fillStyle = '#fff';
+    g.beginPath(); g.arc(x-8,hy-7,2,0,Math.PI*2); g.fill();
+    g.beginPath(); g.arc(x+12,hy-7,2,0,Math.PI*2); g.fill();
+
+    // shell fragments flying
+    g.save(); g.translate(x+56,CY-28); g.rotate(0.52);
+    const sf1 = g.createRadialGradient(0,0,2,0,0,18);
+    sf1.addColorStop(0,'#ede0c8'); sf1.addColorStop(1,'#c4a070');
+    g.fillStyle = sf1;
+    g.beginPath(); g.moveTo(-12,-7); g.lineTo(6,-14); g.lineTo(17,-2); g.lineTo(9,12); g.lineTo(-9,7); g.closePath(); g.fill();
+    g.restore();
+    g.save(); g.translate(x-56,CY-18); g.rotate(-0.38);
+    g.fillStyle = '#ded0b8';
+    g.beginPath(); g.moveTo(-10,-4); g.lineTo(4,-12); g.lineTo(14,1); g.lineTo(6,10); g.lineTo(-8,6); g.closePath(); g.fill();
+    g.restore();
+  }
+
+  // ---- ADULT -------------------------------------------------------------
+  else if (type === 'adult') {
+    // big aura
+    const aura = g.createRadialGradient(x, CY + 12, 12, x, CY + 12, 130);
+    aura.addColorStop(0, 'rgba(168, 85, 247, 0.28)');
+    aura.addColorStop(0.5, 'rgba(109, 40, 217, 0.1)');
+    aura.addColorStop(1, 'rgba(0,0,0,0)');
+    g.fillStyle = aura; g.fillRect(x - 140, CY - 140, 280, 280);
+
+    // shadow
+    const shad = g.createRadialGradient(x, CY + 72, 5, x, CY + 72, 46);
+    shad.addColorStop(0, 'rgba(0,0,0,0.38)'); shad.addColorStop(1, 'rgba(0,0,0,0)');
+    g.fillStyle = shad;
+    g.beginPath(); g.ellipse(x, CY + 80, 42, 14, 0, 0, Math.PI * 2); g.fill();
+
+    const bG = g.createRadialGradient(x - 16, CY - 8, 8, x + 12, CY + 22, 72);
+    bG.addColorStop(0, '#b86bff'); bG.addColorStop(0.5, '#7c3aed'); bG.addColorStop(1, '#4c1d95');
+
+    // wings (behind body)
+    g.fillStyle = 'rgba(80, 24, 168, 0.88)';
+    g.beginPath(); g.moveTo(x-36,CY+8); g.bezierCurveTo(x-96,CY-28,x-104,CY+32,x-62,CY+64);
+    g.bezierCurveTo(x-42,CY+56,x-32,CY+40,x-26,CY+24); g.closePath(); g.fill();
+    g.beginPath(); g.moveTo(x+32,CY+10); g.bezierCurveTo(x+92,CY-22,x+96,CY+36,x+58,CY+64);
+    g.bezierCurveTo(x+40,CY+56,x+30,CY+40,x+24,CY+24); g.closePath(); g.fill();
+
+    // tail
+    g.fillStyle = '#6d28d9';
+    g.beginPath(); g.moveTo(x+32,CY+58); g.bezierCurveTo(x+64,CY+74,x+84,CY+62,x+72,CY+46);
+    g.bezierCurveTo(x+66,CY+38,x+56,CY+52,x+46,CY+56); g.closePath(); g.fill();
+
+    // torso
+    g.fillStyle = bG;
+    g.beginPath(); g.ellipse(x, CY+28, 36, 44, 0, 0, Math.PI * 2); g.fill();
+
+    // belly
+    g.fillStyle = 'rgba(225, 185, 255, 0.42)';
+    g.beginPath(); g.ellipse(x+2, CY+24, 20, 30, 0, 0, Math.PI * 2); g.fill();
+
+    // head
+    g.fillStyle = bG;
+    g.beginPath(); g.ellipse(x-4, CY-36, 33, 31, -0.08, 0, Math.PI * 2); g.fill();
+
+    // horns
+    g.fillStyle = '#4c1d95';
+    g.beginPath(); g.moveTo(x-20,CY-64); g.lineTo(x-34,CY-98); g.lineTo(x-8,CY-67); g.closePath(); g.fill();
+    g.beginPath(); g.moveTo(x+10,CY-64); g.lineTo(x+22,CY-98); g.lineTo(x+0,CY-66); g.closePath(); g.fill();
+    // horn shine
+    g.fillStyle = 'rgba(180,120,255,0.3)';
+    g.beginPath(); g.moveTo(x-21,CY-66); g.lineTo(x-28,CY-90); g.lineTo(x-14,CY-68); g.closePath(); g.fill();
+    g.beginPath(); g.moveTo(x+11,CY-66); g.lineTo(x+18,CY-90); g.lineTo(x+5,CY-68); g.closePath(); g.fill();
+
+    // eyes
+    g.fillStyle = '#fff';
+    g.beginPath(); g.ellipse(x-14,CY-39,10,11,-0.12,0,Math.PI*2); g.fill();
+    g.beginPath(); g.ellipse(x+8,CY-39,10,11,0.12,0,Math.PI*2); g.fill();
+    g.fillStyle = '#2e1065';
+    g.beginPath(); g.ellipse(x-12,CY-37,6,8,-0.08,0,Math.PI*2); g.fill();
+    g.beginPath(); g.ellipse(x+10,CY-37,6,8,0.08,0,Math.PI*2); g.fill();
+    g.fillStyle = '#fff';
+    g.beginPath(); g.arc(x-9,CY-42,2.4,0,Math.PI*2); g.fill();
+    g.beginPath(); g.arc(x+13,CY-42,2.4,0,Math.PI*2); g.fill();
+
+    // snout
+    g.fillStyle = 'rgba(140,60,230,0.55)';
+    g.beginPath(); g.ellipse(x-2,CY-22,12,8,0,0,Math.PI*2); g.fill();
+    g.fillStyle = '#4c1d95';
+    g.beginPath(); g.ellipse(x-7,CY-23,3,2,-0.2,0,Math.PI*2); g.fill();
+    g.beginPath(); g.ellipse(x+2,CY-23,3,2,0.2,0,Math.PI*2); g.fill();
+
+    // legs
+    g.fillStyle = '#6d28d9';
+    g.beginPath(); g.ellipse(x-20,CY+74,10,7,-0.2,0,Math.PI*2); g.fill();
+    g.beginPath(); g.ellipse(x+20,CY+74,10,7,0.2,0,Math.PI*2); g.fill();
+    // toe claws
+    g.strokeStyle = '#4c1d95'; g.lineWidth = 1.5; g.lineCap = 'round';
+    [[-28,CY+79],[-21,CY+80],[-14,CY+79],[14,CY+79],[21,CY+80],[28,CY+79]].forEach(([dx,dy]) => {
+      g.beginPath(); g.moveTo(x+dx,dy); g.lineTo(x+dx,dy+6); g.stroke();
+    });
+
+    // sparkles
+    [[x+80,CY-62,4],[x-78,CY-38,3],[x+68,CY+32,3]].forEach(([sx,sy,sr]) => {
+      g.save(); g.translate(sx,sy); g.fillStyle = 'rgba(210,160,255,0.72)';
+      for (let j=0;j<4;j++) {
+        g.save(); g.rotate(j*Math.PI/2);
+        g.fillRect(-1,-sr,2,sr*2); g.restore();
+      }
+      g.fillStyle = 'rgba(255,220,255,0.5)';
+      g.beginPath(); g.arc(0,0,sr*0.35,0,Math.PI*2); g.fill();
+      g.restore();
+    });
+
+    // "¡GRADUADO!" badge
+    g.save();
+    const bdg = g.createLinearGradient(x-44,CY-120,x+44,CY-98);
+    bdg.addColorStop(0,'#fbbf24'); bdg.addColorStop(1,'#f59e0b');
+    g.fillStyle = bdg;
+    g.shadowColor = 'rgba(251,191,36,0.5)'; g.shadowBlur = 8;
+    g.beginPath(); g.roundRect(x-42,CY-122,84,24,12); g.fill();
+    g.shadowBlur = 0;
+    g.font = 'bold 10.5px "Segoe UI", system-ui';
+    g.fillStyle = '#1c1917'; g.textAlign = 'center';
+    g.fillText('★  GRADUADO  ★', x, CY-105);
+    g.restore();
+  }
+
+  g.restore();
+});
+
+// ── Subtle footer vignette ──────────────────────────────────────────────────
+const vg = g.createLinearGradient(0, 420, 0, 500);
+vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(8,3,20,0.55)');
+g.fillStyle = vg; g.fillRect(0, 420, W, 80);
+</script>
+</body>
+</html>

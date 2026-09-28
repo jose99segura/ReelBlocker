@@ -30,6 +30,8 @@ Pendiente: capturas en francés (ahora heredan las inglesas).
 
 ## Ficha en español (es-ES)
 
+> Reels de Facebook (Pro) publicados en las 11 fichas el 28-09-2026, junto con la 2.0.6.
+
 Optimizada para ASO el 11-09-2026. Los tres campos se indexan en la búsqueda
 de Play; el título es el de más peso. Cuentan los caracteres exactos: el
 título va justo en el límite.
@@ -52,7 +54,7 @@ se teclea la búsqueda ("bloquear reels").
 Bloquea Reels de Instagram, Shorts de YouTube y TikTok. Adiós al scroll.
 ```
 
-### Descripción larga (3971/4000)
+### Descripción larga (3978/4000)
 
 ```
 El scroll de vídeos cortos está diseñado para engancharte. Basta! es una herramienta de accesibilidad pensada para personas con TDAH, ansiedad o dificultades de autocontrol frente al vídeo corto adictivo.
@@ -79,7 +81,7 @@ GRATIS, SIN LÍMITE DE TIEMPO
 • Dos especies coleccionables
 • Estadísticas: bloqueos de hoy, historial de 7 días y récord histórico
 • Copia de seguridad automática en Google Drive
-• Seis idiomas, tema claro y oscuro
+• En seis idiomas, con tema claro y oscuro
 
 PRO — PAGO ÚNICO, SIN SUSCRIPCIÓN
 • Tres especies coleccionables más (cinco en total)
@@ -136,7 +138,7 @@ Blocks Instagram Reels, YouTube Shorts and TikTok. Built for ADHD focus.
 Mantiene "ADHD" porque la versión anterior ya lo llevaba y es una señal de
 cumplimiento para la revisión de Play, no solo una keyword.
 
-### Descripción larga (3810/4000)
+### Descripción larga (3853/4000)
 
 ```
 Short-video feeds are engineered to keep you scrolling. Basta! is an accessibility tool built for people with ADHD, anxiety or self-control difficulties around addictive short-form video.
@@ -163,7 +165,7 @@ FREE, WITH NO TIME LIMIT
 • Two collectible species
 • Stats: today's blocks, a 7-day history and your all-time record
 • Automatic backup to Google Drive
-• Six languages, light and dark themes
+• English, Spanish, French, German, Italian and Portuguese, light and dark themes
 
 PRO — ONE-TIME PURCHASE, NO SUBSCRIPTION
 • Three more collectible species (five in total)

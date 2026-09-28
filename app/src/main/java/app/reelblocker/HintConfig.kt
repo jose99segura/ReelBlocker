@@ -31,7 +31,7 @@ import java.net.URL
  *   "instagram_reels":   ["clips_viewer", "clips_swipe_refresh"],
  *   "instagram_stories": ["reel_viewer", "story_viewer"],
  *   "youtube_shorts":    ["reel_watch_player", ...],
- *   "facebook_reels":    ["reels_viewer", ...],
+ *   "facebook_reels":    ["reel", ...],          (content-description, no ids)
  *   "tiktok_feed":       ["video_player_progress", ...]
  * }
  */
@@ -70,11 +70,15 @@ object HintConfig {
         "reel_player_page_container",
         "reel_recycler"
     )
-    // Suelo vacío a propósito: Facebook usa Litho y aún no hay resource-ids
-    // confirmados del visor de Reels. Sin hints, FB no bloquea (cero falsos
-    // positivos). Bakear aquí los ids capturados en dispositivo, o empujarlos
-    // por el JSON remoto bajo la clave "facebook_reels".
-    val DEFAULT_FACEBOOK_REELS = emptyList<String>()
+    // OJO: a diferencia del resto, en Facebook NO son resource-ids (vienen
+    // ofuscados como "(name removed)") sino fragmentos de content-description.
+    // El visor de Reels (desde la pestaña o abierto desde el feed) expone un
+    // contenedor a pantalla completa con descripción "Detalles de la pestaña
+    // Reels" / "Detalles del reel"; "reel" es marca y no se traduce. El servicio
+    // exige además visible + casi pantalla completa, y descarta la etiqueta
+    // pelada "Reel" de las tarjetas del feed. Capturado en dispositivo
+    // (com.facebook.katana, 2026-09-28).
+    val DEFAULT_FACEBOOK_REELS = listOf("reel")
     // Firma del reproductor inmersivo vertical de TikTok (feed "Para ti" /
     // "Siguiendo" y el visor de vídeo). Estos ids semánticos aparecen SOLO con
     // un vídeo reproduciéndose a pantalla completa; NO en perfil, DMs, búsqueda

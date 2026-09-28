@@ -656,7 +656,10 @@ private fun AppRow(
     val variant = remember(refreshKey, pkg) { resolveInstalledVariant(ctx, pkg) }
     val installed = variant != null
     val icon = remember(refreshKey, variant) { variant?.let { loadAppIcon(ctx, it) } }
-    val enabled = remember(refreshKey, pkg) { Stats.isAppEnabled(ctx, pkg) }
+    // Apps Pro-only (Facebook) para un usuario Free: se muestran bloqueadas con
+    // candado y el switch abre el paywall en vez de guardar nada.
+    val locked = pkg in Stats.PRO_ONLY_APPS && !isPro
+    val enabled = remember(refreshKey, pkg, isPro) { Stats.effectiveAppEnabled(ctx, pkg) }
     val isInstagram = pkg == Stats.PKG_INSTAGRAM
     // Toda app instalada y activada puede desplegar opciones avanzadas (al menos
     // el bloqueo total); Instagram añade además DM/Stories.
@@ -672,22 +675,40 @@ private fun AppRow(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .then(if (canExpand) Modifier.clickable { expanded = !expanded } else Modifier)
+                .then(
+                    when {
+                        locked && installed -> Modifier.clickable { onOpenPaywall() }
+                        canExpand -> Modifier.clickable { expanded = !expanded }
+                        else -> Modifier
+                    }
+                )
                 .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             AppIcon(icon = icon, fallbackLetter = label.first().toString(), enabled = installed)
             Spacer(Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = label,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = if (installed) MaterialTheme.colorScheme.onSurface
-                            else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = label,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = if (installed) MaterialTheme.colorScheme.onSurface
+                                else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                    )
+                    if (locked) {
+                        Spacer(Modifier.width(6.dp))
+                        Icon(
+                            imageVector = Icons.Outlined.Lock,
+                            contentDescription = stringResource(R.string.ig_suboption_pro_cd),
+                            modifier = Modifier.size(14.dp),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
                 Text(
                     text = when {
                         !installed -> stringResource(R.string.settings_app_status_not_installed)
+                        locked -> stringResource(R.string.settings_app_status_pro_only, label)
                         canExpand && expanded -> stringResource(R.string.settings_app_status_hide_advanced)
                         canExpand -> stringResource(R.string.settings_app_status_show_advanced)
                         else -> if (enabled) stringResource(R.string.settings_app_status_blocking)
@@ -701,7 +722,9 @@ private fun AppRow(
                 checked = enabled && installed,
                 enabled = installed,
                 onCheckedChange = { newValue ->
-                    if (newValue) {
+                    if (locked) {
+                        onOpenPaywall()
+                    } else if (newValue) {
                         // Activar es directo, no requiere advertencia.
                         Stats.setAppEnabled(ctx, pkg, true)
                         onChanged()

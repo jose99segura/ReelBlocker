@@ -231,8 +231,12 @@ object Streak {
      */
     fun shouldBeProtecting(ctx: Context): Boolean {
         if (!isAccessibilityEnabled(ctx)) return false
+        // Las apps Pro-only (Facebook) solo cuentan si el usuario es Pro: un
+        // usuario Free con Facebook instalado no puede activarlo, así que no
+        // debe impedirle proteger ni romperle la racha.
         val installed = Stats.BLOCKABLE_APPS.filter { (pkg, _) ->
-            Stats.packageFamily(pkg).any { isAppInstalled(ctx, it) }
+            Stats.isAppAvailable(ctx, pkg) &&
+                Stats.packageFamily(pkg).any { isAppInstalled(ctx, it) }
         }
         if (installed.isEmpty()) return false
         return installed.all { (pkg, _) -> Stats.isAppEnabled(ctx, pkg) }

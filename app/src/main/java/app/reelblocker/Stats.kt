@@ -8,7 +8,7 @@ import java.time.LocalTime
 
 /**
  * Contador persistente con historial diario. Se guarda como JSON en
- * SharedPreferences: { "yyyy-MM-dd": { "t": total, "ig": instagram, "yt": youtube, "tt": tiktok }, ... }
+ * SharedPreferences: { "yyyy-MM-dd": { "t": total, "ig": instagram, "yt": youtube, "tt": tiktok, "fb": facebook }, ... }
  *
  * Los dias mas antiguos que MAX_HISTORY_DAYS se purgan al escribir.
  */
@@ -95,19 +95,35 @@ object Stats {
     const val SECONDS_PER_BLOCK = 30L
 
     /** Apps que el usuario puede activar o desactivar desde la UI. */
-    // Facebook NO se lista: está pausado (sin señal de detección fiable, ver
-    // BlockerService) y un toggle que no hace nada confunde. La infraestructura
-    // de FB (discovery, split de stats) se conserva por si se retoma.
     val BLOCKABLE_APPS = listOf(
         PKG_INSTAGRAM to "Instagram",
         PKG_YOUTUBE to "YouTube",
-        PKG_TIKTOK to "TikTok"
+        PKG_TIKTOK to "TikTok",
+        PKG_FACEBOOK to "Facebook"
     )
+
+    /**
+     * Apps cuyo bloqueo es una función Pro. El núcleo gratuito (IG/YT/TikTok)
+     * nunca va detrás del paywall; Facebook se añadió después como expansión.
+     * Para un usuario Free estas apps no bloquean ni cuentan para la racha.
+     */
+    val PRO_ONLY_APPS = setOf(PKG_FACEBOOK)
+
+    /** True si [pkg] está disponible para este usuario (no Pro-only, o es Pro). */
+    fun isAppAvailable(ctx: Context, pkg: String): Boolean =
+        pkg !in PRO_ONLY_APPS || Premium.isPro(ctx)
 
     private fun appEnabledKey(pkg: String) = "app_enabled_$pkg"
 
     fun isAppEnabled(ctx: Context, pkg: String): Boolean =
         prefs(ctx).getBoolean(appEnabledKey(pkg), true)
+
+    /**
+     * Valor EFECTIVO del toggle por app: el switch ON y, si la app es Pro-only,
+     * ser Pro. El servicio y la racha consultan este, no la pref pelada.
+     */
+    fun effectiveAppEnabled(ctx: Context, pkg: String): Boolean =
+        isAppAvailable(ctx, pkg) && isAppEnabled(ctx, pkg)
 
     fun setAppEnabled(ctx: Context, pkg: String, enabled: Boolean) {
         prefs(ctx).edit().putBoolean(appEnabledKey(pkg), enabled).apply()
@@ -163,8 +179,14 @@ object Stats {
     fun effectiveWholeAppBlocked(ctx: Context, pkg: String): Boolean =
         Premium.isPro(ctx) && isWholeAppBlocked(ctx, pkg)
 
-    data class Counts(val total: Int, val instagram: Int, val youtube: Int, val tiktok: Int = 0) {
-        companion object { val ZERO = Counts(0, 0, 0, 0) }
+    data class Counts(
+        val total: Int,
+        val instagram: Int,
+        val youtube: Int,
+        val tiktok: Int = 0,
+        val facebook: Int = 0
+    ) {
+        companion object { val ZERO = Counts(0, 0, 0, 0, 0) }
     }
 
     data class DayCounts(val date: LocalDate, val counts: Counts)
@@ -197,7 +219,8 @@ object Stats {
         total = optInt("t"),
         instagram = optInt("ig"),
         youtube = optInt("yt"),
-        tiktok = optInt("tt")
+        tiktok = optInt("tt"),
+        facebook = optInt("fb")
     )
 
     fun increment(ctx: Context, pkg: String) {

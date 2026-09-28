@@ -4,7 +4,7 @@
     <string name="app_name">Basta!</string>
     <string name="app_tagline">El scroll te roba la vida.</string>
     <string name="service_label">Basta! — Reel Blocker</string>
-    <string name="service_description">Herramienta de asistencia para personas con TDAH, ansiedad o dificultades de autocontrol ante el vídeo corto adictivo. Detecta cuando entras en Reels de Instagram o Shorts de YouTube y te asiste para salir de esa sección. Solo lee identificadores de pantalla, nunca el contenido de mensajes. Todo se queda en tu dispositivo.</string>
+    <string name="service_description">Herramienta de asistencia para personas con TDAH, ansiedad o dificultades de autocontrol ante el vídeo corto adictivo. Detecta cuando entras en Reels de Instagram, Shorts de YouTube, el feed de TikTok o Reels de Facebook y te asiste para salir de esa sección. Solo lee identificadores y etiquetas de pantalla, nunca el contenido de mensajes. Todo se queda en tu dispositivo.</string>
     <string name="toast_blocked">¡Basta!</string>
     <!-- Block bubble: %1$s = toast_blocked, %2$d = blocks today -->
     <string name="block_bubble_text">%1$s · %2$d hoy</string>
@@ -163,6 +163,7 @@
     <string name="stats_distribution_instagram">Instagram</string>
     <string name="stats_distribution_youtube">YouTube</string>
     <string name="stats_distribution_tiktok">TikTok</string>
+    <string name="stats_distribution_facebook">Facebook</string>
     <string name="stats_section_weekly">Últimos 7 días</string>
     <string name="stats_no_history">Aún no hay historial. Vuelve mañana — los datos se acumulan.</string>
     <string name="stats_chart_today">Hoy</string>
@@ -218,7 +219,7 @@
     <string name="stats_locked_trends_title">Descubre hacia dónde vas</string>
     <string name="stats_locked_trends_body">Compara semanas, detecta tus días pico y sigue tu progreso durante 30 días.</string>
     <string name="stats_locked_apps_title">Descubre qué app te atrapa</string>
-    <string name="stats_locked_apps_body">Cuota, tendencia y actividad de 30 días de Instagram, YouTube y TikTok.</string>
+    <string name="stats_locked_apps_body">Cuota, tendencia y actividad de 30 días de Instagram, YouTube, TikTok y Facebook.</string>
     <string name="stats_locked_habits_title">Encuentra tus momentos débiles</string>
     <string name="stats_locked_habits_body">Descubre la hora y el día en que más aprieta la tentación, y adelántate.</string>
     <string name="stats_locked_point_history">Historial de 30 días con tendencias</string>
@@ -258,7 +259,7 @@
     <string name="onboarding_p3_title">Activa el servicio</string>
     <string name="onboarding_p3_body">Android lo necesita para detectar cuándo abres Reels o Shorts.</string>
     <string name="onboarding_p3_trust_title">Qué hace Basta! y qué no</string>
-    <string name="onboarding_p3_trust_1">Solo actúa en Instagram, YouTube y TikTok e ignora el resto de apps.</string>
+    <string name="onboarding_p3_trust_1">Solo actúa en Instagram, YouTube, TikTok y Facebook e ignora el resto de apps.</string>
     <string name="onboarding_p3_trust_2">No lee tus mensajes, tus contraseñas ni lo que escribes.</string>
     <string name="onboarding_p3_trust_3">Nada de lo que ve sale de tu móvil.</string>
     <string name="onboarding_p3_warning_note">Android mostrará un aviso genérico sobre controlar tu dispositivo. Es el mismo texto para cualquier app de accesibilidad.</string>
@@ -383,6 +384,7 @@
     <string name="ppw_compare_stories">Bloquear Stories de Instagram</string>
     <string name="ppw_compare_stats">Estadísticas avanzadas</string>
     <string name="ppw_compare_widget">Widget en pantalla de inicio</string>
+    <string name="ppw_compare_facebook">Bloquear Reels de Facebook</string>
     <string name="ppw_compare_block_whole">Bloquear apps enteras</string>
     <string name="widget_label">Basta! — racha y mascota</string>
     <string name="widget_locked_title">Widget Pro</string>
@@ -413,6 +415,7 @@
     <string name="settings_app_status_disabled">Desactivado</string>
     <string name="settings_app_status_show_advanced">Opciones avanzadas</string>
     <string name="settings_app_status_hide_advanced">Ocultar opciones avanzadas</string>
+    <string name="settings_app_status_pro_only">Pro · Bloquea los Reels de %1$s</string>
 
     <string name="ig_suboption_dm_title">Permitir Reels desde DM</string>
     <string name="ig_suboption_dm_description">Los Reels enviados por amigos en mensajes directos no se bloquean.</string>

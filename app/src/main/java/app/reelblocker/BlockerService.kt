@@ -74,6 +74,10 @@ class BlockerService : AccessibilityService() {
         private const val MIN_INTERVAL_MS = 600L
         private const val POST_EXIT_GRACE_MS = 1500L
         private const val FULLSCREEN_FRACTION = 0.6
+        // Facebook: el visor de Reels ocupa todo el ancho y ~84-91% del alto;
+        // las tarjetas del feed quedan muy por debajo en ancho o alto.
+        private const val FB_MIN_WIDTH_FRACTION = 0.9
+        private const val FB_MIN_HEIGHT_FRACTION = 0.75
         // Tras consumir un bypass DM, ignorar matches durante este intervalo
         // para no contar dos veces el mismo reel por eventos de contenido
         // que llegan en rafaga al abrir el visor.
@@ -173,8 +177,8 @@ class BlockerService : AccessibilityService() {
         // día) pero no disparamos back durante la pausa.
         if (Breaks.isOnBreak(this)) return
 
-        // Gate por preferencias del usuario.
-        if (!Stats.isAppEnabled(this, pkg)) {
+        // Gate por preferencias del usuario (y por Pro en apps Pro-only: FB).
+        if (!Stats.effectiveAppEnabled(this, pkg)) {
             logv { "Bloqueo desactivado por el usuario en $pkg" }
             return
         }
@@ -228,15 +232,16 @@ class BlockerService : AccessibilityService() {
             return
         }
 
-        // Facebook EN PAUSA: no hay señal de deteccion fiable (resource-ids
-        // ofuscados como "(name removed)", una sola Activity FbMainTabActivity
-        // para todo, y el arbol del visor inmersivo viene contaminado con el
-        // chrome del feed de inicio). En debug seguimos volcando para investigar;
-        // mientras facebookReels este vacia NO recorremos el arbol (ahorro en
-        // release). Si algun dia se publica una señal, FB se reactiva solo.
+        // Facebook (Pro): los resource-ids vienen ofuscados y todo vive en
+        // FbMainTabActivity, asi que se detecta por content-description del
+        // contenedor del visor de Reels, exigiendo visible + casi pantalla
+        // completa (el arbol completo arrastra el feed oculto detras; sin el
+        // filtro de visibilidad eso daba falsos positivos).
         if (pkg == PKG_FACEBOOK) {
             dumpFacebookTree(event, root)  // no-op en release (guard interno)
-            if (HintConfig.facebookReels(this).isEmpty()) return
+            val fbMatch = findFacebookReelViewer(root, HintConfig.facebookReels(this))
+            if (fbMatch != null) handleReelsDetected(pkg, fbMatch) else handleReelsAbsent(pkg)
+            return
         }
 
         // TikTok: la app entera es feed, pero el reproductor inmersivo vertical
@@ -278,7 +283,6 @@ class BlockerService : AccessibilityService() {
                 list
             }
             PKG_YOUTUBE -> HintConfig.youtubeShorts(this)
-            PKG_FACEBOOK -> HintConfig.facebookReels(this)
             else -> return
         }
 
@@ -496,6 +500,50 @@ class BlockerService : AccessibilityService() {
                 }
             }
 
+            for (i in 0 until node.childCount) {
+                node.getChild(i)?.let { queue.add(it) }
+            }
+        }
+        return null
+    }
+
+    /**
+     * Variante para Facebook: primer nodo VISIBLE cuya content-description
+     * contiene una pista y que ocupa casi toda la pantalla. Distingue:
+     *  - visor de Reels (pestaña o abierto desde el feed): contenedor
+     *    "Detalles de la pestaña Reels" / "Detalles del reel", ~0,84-0,91 del
+     *    alto → bloquea;
+     *  - Reel incrustado en el feed: etiqueta pelada "Reel" → se descarta
+     *    siempre (un 9:16 a todo el ancho puede llegar a ocupar casi la
+     *    pantalla al hacer scroll, asi que el tamaño solo no basta);
+     *  - carrusel "Reels" del feed ("Ver reel de ..."): tarjetas estrechas.
+     * Devuelve la descripcion (recortada) para el log, o null.
+     */
+    private fun findFacebookReelViewer(
+        root: AccessibilityNodeInfo,
+        hints: List<String>
+    ): String? {
+        if (hints.isEmpty()) return null
+        val minWidth = (displayWidth * FB_MIN_WIDTH_FRACTION).toInt()
+        val minHeight = (displayHeight * FB_MIN_HEIGHT_FRACTION).toInt()
+        val bounds = Rect()
+        val queue = ArrayDeque<AccessibilityNodeInfo>()
+        queue.add(root)
+        var visited = 0
+        while (queue.isNotEmpty() && visited < 2000) {
+            val node = queue.removeFirst()
+            visited++
+            val cd = node.contentDescription?.toString()?.trim()
+            if (cd != null &&
+                hints.any { cd.contains(it, ignoreCase = true) } &&
+                hints.none { cd.equals(it, ignoreCase = true) } &&
+                node.isVisibleToUser) {
+                node.getBoundsInScreen(bounds)
+                if (bounds.width() >= minWidth && bounds.height() >= minHeight) {
+                    return "cd:" + cd.take(40)
+                }
+                logv { "FB match '${cd.take(40)}' descartado por tamano ${bounds.width()}x${bounds.height()}" }
+            }
             for (i in 0 until node.childCount) {
                 node.getChild(i)?.let { queue.add(it) }
             }

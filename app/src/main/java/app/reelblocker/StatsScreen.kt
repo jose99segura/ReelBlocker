@@ -536,7 +536,12 @@ private class AppBreakdown(
 
 @Composable
 private fun AppsTab(data: StatsData) {
-    val apps = listOf(
+    val facebook = AppBreakdown(
+        stringResource(R.string.stats_distribution_facebook),
+        appAccent(Stats.PKG_FACEBOOK),
+        data.history30.map { it.counts.facebook }
+    )
+    val apps = (listOf(
         AppBreakdown(
             stringResource(R.string.stats_distribution_instagram),
             appAccent(Stats.PKG_INSTAGRAM),
@@ -552,7 +557,8 @@ private fun AppsTab(data: StatsData) {
             appAccent(Stats.PKG_TIKTOK),
             data.history30.map { it.counts.tiktok }
         )
-    ).sortedByDescending { it.total }
+    // Facebook es Pro-only: sin bloqueos no se lista (fila vacía que confunde).
+    ) + listOfNotNull(facebook.takeIf { it.total > 0 })).sortedByDescending { it.total }
     val grand = apps.sumOf { it.total }
 
     StatCard {
@@ -1155,6 +1161,16 @@ private fun DistributionStrip(counts: Stats.Counts) {
             accent = appAccent(Stats.PKG_TIKTOK),
             modifier = Modifier.weight(1f)
         )
+        // Facebook (Pro-only): columna solo si ese día hubo bloqueos.
+        if (counts.facebook > 0) {
+            VerticalDivider()
+            DistributionItem(
+                label = stringResource(R.string.stats_distribution_facebook),
+                value = counts.facebook,
+                accent = appAccent(Stats.PKG_FACEBOOK),
+                modifier = Modifier.weight(1f)
+            )
+        }
     }
 }
 
@@ -1386,6 +1402,7 @@ private fun appAccent(pkg: String): Color {
     return when (pkg) {
         Stats.PKG_INSTAGRAM -> Color(0xFFE1306C).let { if (dark) it.lighten(0.30f) else it }
         Stats.PKG_YOUTUBE -> Color(0xFFFF0000).let { if (dark) it.lighten(0.30f) else it }
+        Stats.PKG_FACEBOOK -> Color(0xFF1877F2).let { if (dark) it.lighten(0.30f) else it }
         // Cian de TikTok: muy claro de base, se oscurece en light para contraste.
         else -> Color(0xFF25F4EE).let { if (dark) it else it.darken(0.35f) }
     }

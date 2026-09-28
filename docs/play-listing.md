@@ -545,6 +545,93 @@ Basta! Retome sua atenção.
 
 ---
 
+## Notas de la versión 2.0.6 (versionCode 206)
+
+Máx. 500 caracteres por idioma. Pegar en Play Console → versión → "Notas de
+la versión", una etiqueta por idioma.
+
+```
+<es-ES>
+• Nuevo en Pro: bloquea también los Reels de Facebook.
+• El Diario ahora tiene pestañas. Con Pro: tendencias, reparto por app y tus horas y días de más riesgo.
+• Rangos de perfil cada 5 niveles, con celebración al subir de nivel.
+• Activar el permiso de accesibilidad es más fácil, con pasos guiados.
+• Mejoras y correcciones.
+</es-ES>
+<es-419>
+• Nuevo en Pro: bloquea también los Reels de Facebook.
+• El Diario ahora tiene pestañas. Con Pro: tendencias, reparto por app y tus horas y días de más riesgo.
+• Rangos de perfil cada 5 niveles, con celebración al subir de nivel.
+• Activar el permiso de accesibilidad es más fácil, con pasos guiados.
+• Mejoras y correcciones.
+</es-419>
+<es-US>
+• Nuevo en Pro: bloquea también los Reels de Facebook.
+• El Diario ahora tiene pestañas. Con Pro: tendencias, reparto por app y tus horas y días de más riesgo.
+• Rangos de perfil cada 5 niveles, con celebración al subir de nivel.
+• Activar el permiso de accesibilidad es más fácil, con pasos guiados.
+• Mejoras y correcciones.
+</es-US>
+<en-US>
+• New in Pro: block Facebook Reels too.
+• The Journal now has tabs. With Pro: trends, per-app breakdown and your riskiest hours and days.
+• Profile ranks every 5 levels, with a celebration when you level up.
+• Easier accessibility setup, with guided steps.
+• Improvements and fixes.
+</en-US>
+<en-GB>
+• New in Pro: block Facebook Reels too.
+• The Journal now has tabs. With Pro: trends, per-app breakdown and your riskiest hours and days.
+• Profile ranks every 5 levels, with a celebration when you level up.
+• Easier accessibility setup, with guided steps.
+• Improvements and fixes.
+</en-GB>
+<fr-FR>
+• Nouveau dans Pro : bloque aussi les Reels Facebook.
+• Le Journal a maintenant des onglets. Avec Pro : tendances, répartition par app et tes heures et jours les plus à risque.
+• Rangs de profil tous les 5 niveaux, avec une célébration à chaque niveau gagné.
+• Activer l’accessibilité est plus simple, avec des étapes guidées.
+• Améliorations et corrections.
+</fr-FR>
+<fr-CA>
+• Nouveau dans Pro : bloque aussi les Reels Facebook.
+• Le Journal a maintenant des onglets. Avec Pro : tendances, répartition par app et tes heures et jours les plus à risque.
+• Rangs de profil tous les 5 niveaux, avec une célébration à chaque niveau gagné.
+• Activer l’accessibilité est plus simple, avec des étapes guidées.
+• Améliorations et corrections.
+</fr-CA>
+<de-DE>
+• Neu in Pro: blockiert jetzt auch Facebook-Reels.
+• Das Tagebuch hat jetzt Tabs. Mit Pro: Trends, Anteil pro App und deine riskantesten Stunden und Tage.
+• Profilränge alle 5 Level, mit einer kleinen Feier beim Aufstieg.
+• Die Bedienungshilfe lässt sich jetzt leichter aktivieren, mit geführten Schritten.
+• Verbesserungen und Fehlerbehebungen.
+</de-DE>
+<it-IT>
+• Novità Pro: blocca anche i Reels di Facebook.
+• Il Diario ora ha delle schede. Con Pro: tendenze, ripartizione per app e le tue ore e i tuoi giorni più a rischio.
+• Gradi del profilo ogni 5 livelli, con una festa quando sali di livello.
+• Attivare l’accessibilità è più semplice, con passaggi guidati.
+• Miglioramenti e correzioni.
+</it-IT>
+<pt-BR>
+• Novo no Pro: bloqueia também os Reels do Facebook.
+• O Diário agora tem abas. Com o Pro: tendências, divisão por app e seus horários e dias de maior risco.
+• Patentes de perfil a cada 5 níveis, com comemoração ao subir de nível.
+• Ativar a acessibilidade ficou mais fácil, com passos guiados.
+• Melhorias e correções.
+</pt-BR>
+<pt-PT>
+• Novo no Pro: bloqueia também os Reels do Facebook.
+• O Diário agora tem separadores. Com o Pro: tendências, divisão por app e os teus horários e dias de maior risco.
+• Patentes de perfil a cada 5 níveis, com celebração ao subires de nível.
+• Ativar a acessibilidade ficou mais fácil, com passos guiados.
+• Melhorias e correções.
+</pt-PT>
+```
+
+---
+
 ## Notas de la versión 2.0.5 (versionCode 205)
 
 Máx. 500 caracteres por idioma. Pegar en Play Console → versión → "Notas de

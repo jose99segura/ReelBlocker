@@ -547,86 +547,98 @@ Basta! Retome sua atenção.
 
 ## Notas de la versión 2.0.6 (versionCode 206)
 
-Máx. 500 caracteres por idioma. Pegar en Play Console → versión → "Notas de
-la versión", una etiqueta por idioma.
+Sustituye a la 2.0.5, que seguía en revisión al enviarla (no llegó a
+publicarse), así que incluye también sus novedades. Máx. 500 caracteres por
+idioma.
 
 ```
 <es-ES>
 • Nuevo en Pro: bloquea también los Reels de Facebook.
-• El Diario ahora tiene pestañas. Con Pro: tendencias, reparto por app y tus horas y días de más riesgo.
-• Rangos de perfil cada 5 niveles, con celebración al subir de nivel.
-• Activar el permiso de accesibilidad es más fácil, con pasos guiados.
-• Mejoras y correcciones.
+• Estrellas: con la colección completa, eliges qué criatura volver a criar y cada graduación le suma una estrella, hasta ★5.
+• Al bloquear un Reel o un Short, un aviso discreto muestra tu mascota y los bloqueos de hoy.
+• El Diario tiene pestañas. Con Pro: tendencias, reparto por app y tus horas de más riesgo.
+• Rangos de perfil cada 5 niveles.
+• Activar la accesibilidad es más fácil, con pasos guiados.
 </es-ES>
 <es-419>
 • Nuevo en Pro: bloquea también los Reels de Facebook.
-• El Diario ahora tiene pestañas. Con Pro: tendencias, reparto por app y tus horas y días de más riesgo.
-• Rangos de perfil cada 5 niveles, con celebración al subir de nivel.
-• Activar el permiso de accesibilidad es más fácil, con pasos guiados.
-• Mejoras y correcciones.
+• Estrellas: con la colección completa, eliges qué criatura volver a criar y cada graduación le suma una estrella, hasta ★5.
+• Al bloquear un Reel o un Short, un aviso discreto muestra tu mascota y los bloqueos de hoy.
+• El Diario tiene pestañas. Con Pro: tendencias, reparto por app y tus horas de más riesgo.
+• Rangos de perfil cada 5 niveles.
+• Activar la accesibilidad es más fácil, con pasos guiados.
 </es-419>
 <es-US>
 • Nuevo en Pro: bloquea también los Reels de Facebook.
-• El Diario ahora tiene pestañas. Con Pro: tendencias, reparto por app y tus horas y días de más riesgo.
-• Rangos de perfil cada 5 niveles, con celebración al subir de nivel.
-• Activar el permiso de accesibilidad es más fácil, con pasos guiados.
-• Mejoras y correcciones.
+• Estrellas: con la colección completa, eliges qué criatura volver a criar y cada graduación le suma una estrella, hasta ★5.
+• Al bloquear un Reel o un Short, un aviso discreto muestra tu mascota y los bloqueos de hoy.
+• El Diario tiene pestañas. Con Pro: tendencias, reparto por app y tus horas de más riesgo.
+• Rangos de perfil cada 5 niveles.
+• Activar la accesibilidad es más fácil, con pasos guiados.
 </es-US>
 <en-US>
 • New in Pro: block Facebook Reels too.
-• The Journal now has tabs. With Pro: trends, per-app breakdown and your riskiest hours and days.
-• Profile ranks every 5 levels, with a celebration when you level up.
+• Stars: once your collection is complete, choose which creature to raise again — every graduation earns it a star, up to ★5.
+• When a Reel or Short is blocked, a discreet pill shows your mascot and today's blocks.
+• The Journal has tabs. With Pro: trends, per-app breakdown and your riskiest hours.
+• Profile ranks every 5 levels.
 • Easier accessibility setup, with guided steps.
-• Improvements and fixes.
 </en-US>
 <en-GB>
 • New in Pro: block Facebook Reels too.
-• The Journal now has tabs. With Pro: trends, per-app breakdown and your riskiest hours and days.
-• Profile ranks every 5 levels, with a celebration when you level up.
+• Stars: once your collection is complete, choose which creature to raise again — every graduation earns it a star, up to ★5.
+• When a Reel or Short is blocked, a discreet pill shows your mascot and today's blocks.
+• The Journal has tabs. With Pro: trends, per-app breakdown and your riskiest hours.
+• Profile ranks every 5 levels.
 • Easier accessibility setup, with guided steps.
-• Improvements and fixes.
 </en-GB>
 <fr-FR>
 • Nouveau dans Pro : bloque aussi les Reels Facebook.
-• Le Journal a maintenant des onglets. Avec Pro : tendances, répartition par app et tes heures et jours les plus à risque.
-• Rangs de profil tous les 5 niveaux, avec une célébration à chaque niveau gagné.
+• Étoiles : collection complète, choisis quelle créature élever à nouveau — chaque diplôme lui donne une étoile, jusqu’à ★5.
+• Quand un Reel ou un Short est bloqué, un badge discret affiche ta mascotte et les blocages du jour.
+• Le Journal a des onglets. Avec Pro : tendances, répartition par app et tes heures à risque.
+• Rangs de profil tous les 5 niveaux.
 • Activer l’accessibilité est plus simple, avec des étapes guidées.
-• Améliorations et corrections.
 </fr-FR>
 <fr-CA>
 • Nouveau dans Pro : bloque aussi les Reels Facebook.
-• Le Journal a maintenant des onglets. Avec Pro : tendances, répartition par app et tes heures et jours les plus à risque.
-• Rangs de profil tous les 5 niveaux, avec une célébration à chaque niveau gagné.
+• Étoiles : collection complète, choisis quelle créature élever à nouveau — chaque diplôme lui donne une étoile, jusqu’à ★5.
+• Quand un Reel ou un Short est bloqué, un badge discret affiche ta mascotte et les blocages du jour.
+• Le Journal a des onglets. Avec Pro : tendances, répartition par app et tes heures à risque.
+• Rangs de profil tous les 5 niveaux.
 • Activer l’accessibilité est plus simple, avec des étapes guidées.
-• Améliorations et corrections.
 </fr-CA>
 <de-DE>
-• Neu in Pro: blockiert jetzt auch Facebook-Reels.
-• Das Tagebuch hat jetzt Tabs. Mit Pro: Trends, Anteil pro App und deine riskantesten Stunden und Tage.
-• Profilränge alle 5 Level, mit einer kleinen Feier beim Aufstieg.
-• Die Bedienungshilfe lässt sich jetzt leichter aktivieren, mit geführten Schritten.
-• Verbesserungen und Fehlerbehebungen.
+• Neu in Pro: blockiert auch Facebook-Reels.
+• Sterne: Ist die Sammlung komplett, wählst du, welches Wesen du erneut großziehst – jeder Abschluss bringt einen Stern, bis ★5.
+• Wird ein Reel oder Short blockiert, zeigt ein dezenter Hinweis dein Maskottchen und die heutigen Blockierungen.
+• Das Tagebuch hat Tabs. Mit Pro: Trends, Anteil pro App und deine riskantesten Stunden.
+• Profilränge alle 5 Level.
+• Bedienungshilfe leichter aktivieren, mit geführten Schritten.
 </de-DE>
 <it-IT>
 • Novità Pro: blocca anche i Reels di Facebook.
-• Il Diario ora ha delle schede. Con Pro: tendenze, ripartizione per app e le tue ore e i tuoi giorni più a rischio.
-• Gradi del profilo ogni 5 livelli, con una festa quando sali di livello.
+• Stelle: a collezione completa, scegli quale creatura crescere di nuovo — ogni diploma le dà una stella, fino a ★5.
+• Quando un Reel o uno Short viene bloccato, un avviso discreto mostra la tua mascotte e i blocchi di oggi.
+• Il Diario ha delle schede. Con Pro: tendenze, ripartizione per app e le tue ore più a rischio.
+• Gradi del profilo ogni 5 livelli.
 • Attivare l’accessibilità è più semplice, con passaggi guidati.
-• Miglioramenti e correzioni.
 </it-IT>
 <pt-BR>
 • Novo no Pro: bloqueia também os Reels do Facebook.
-• O Diário agora tem abas. Com o Pro: tendências, divisão por app e seus horários e dias de maior risco.
-• Patentes de perfil a cada 5 níveis, com comemoração ao subir de nível.
+• Estrelas: com a coleção completa, você escolhe qual criatura criar de novo — cada formatura dá uma estrela a ela, até ★5.
+• Ao bloquear um Reel ou Short, um aviso discreto mostra sua mascote e os bloqueios de hoje.
+• O Diário tem abas. Com o Pro: tendências, divisão por app e seus horários de maior risco.
+• Patentes de perfil a cada 5 níveis.
 • Ativar a acessibilidade ficou mais fácil, com passos guiados.
-• Melhorias e correções.
 </pt-BR>
 <pt-PT>
 • Novo no Pro: bloqueia também os Reels do Facebook.
-• O Diário agora tem separadores. Com o Pro: tendências, divisão por app e os teus horários e dias de maior risco.
-• Patentes de perfil a cada 5 níveis, com celebração ao subires de nível.
+• Estrelas: com a coleção completa, escolhes que criatura criar de novo — cada formatura dá-lhe uma estrela, até ★5.
+• Ao bloquear um Reel ou Short, um aviso discreto mostra a tua mascote e os bloqueios de hoje.
+• O Diário tem separadores. Com o Pro: tendências, divisão por app e os teus horários de maior risco.
+• Patentes de perfil a cada 5 níveis.
 • Ativar a acessibilidade ficou mais fácil, com passos guiados.
-• Melhorias e correções.
 </pt-PT>
 ```
 
